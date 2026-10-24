@@ -19,25 +19,22 @@
   <meta name="author" content="LimpidSlirm">
   <meta name="keywords" content="">
   
-    <meta name="description" content="工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。 这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。 关于我我是Limpid，厦门大学自动化系在读。 穿行于算法与电路之间，在无序的世界里追求秩序感。">
+    <meta name="description" content="Multisim 神了。打开之后提示无法打开 Master Database。 数据库文件Multisim 的数据库文件在： 1%ProgramData%\National Instruments\Circuit Design Suite\  检查发现这个玩意是没有损坏的，但是它打不开。删除 config 然后重新注册 dao360.dll 实测有概率打得开。 解决方法12345678910111">
 <meta property="og:type" content="article">
-<meta property="og:title" content="在字节与潮汐之间">
-<meta property="og:url" content="https://limpidslirm.github.io/2026/10/24/%E5%9C%A8%E5%AD%97%E8%8A%82%E4%B8%8E%E6%BD%AE%E6%B1%90%E4%B9%8B%E9%97%B4/index.html">
+<meta property="og:title" content="关于 Multisim">
+<meta property="og:url" content="https://limpidslirm.github.io/2026/10/24/Multisim/index.html">
 <meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
-<meta property="og:description" content="工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。 这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。 关于我我是Limpid，厦门大学自动化系在读。 穿行于算法与电路之间，在无序的世界里追求秩序感。">
+<meta property="og:description" content="Multisim 神了。打开之后提示无法打开 Master Database。 数据库文件Multisim 的数据库文件在： 1%ProgramData%\National Instruments\Circuit Design Suite\  检查发现这个玩意是没有损坏的，但是它打不开。删除 config 然后重新注册 dao360.dll 实测有概率打得开。 解决方法12345678910111">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://limpidslirm.github.io/img/random/background-01.png">
-<meta property="article:published_time" content="2026-10-24T09:30:00.000Z">
-<meta property="article:modified_time" content="2026-10-24T09:40:26.654Z">
+<meta property="article:published_time" content="2026-10-24T09:40:00.000Z">
+<meta property="article:modified_time" content="2026-10-24T09:53:40.494Z">
 <meta property="article:author" content="LimpidSlirm">
-<meta property="article:tag" content="序言">
-<meta property="article:tag" content="随笔">
+<meta property="article:tag" content="Multisim">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://limpidslirm.github.io/img/random/background-01.png">
   
   
   
-  <title>在字节与潮汐之间 - LimpidSlirm&#39;s Blog</title>
+  <title>关于 Multisim - LimpidSlirm&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -306,7 +303,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="在字节与潮汐之间"></span>
+            <span id="subtitle" data-typed-text="关于 Multisim"></span>
           
         </div>
 
@@ -317,7 +314,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-10-24 17:30" pubdate>
+        <time datetime="2026-10-24 17:40" pubdate>
           October 24, 2026 pm
         </time>
       </span>
@@ -329,7 +326,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          312 words
+          2.6k words
         
       </span>
     
@@ -340,7 +337,7 @@
         
         
         
-          3 mins
+          22 mins
         
       </span>
     
@@ -392,20 +389,17 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">在字节与潮汐之间</h1>
+            <h1 id="seo-header">关于 Multisim</h1>
             
             
               <div class="markdown-body">
                 
-                <p>工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。</p>
-<p>这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。</p>
-<h3 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h3><p>我是<strong>Limpid</strong>，厦门大学自动化系在读。</p>
-<p>穿行于算法与电路之间，在无序的世界里追求秩序感。</p>
-<p>对文字、逻辑与故事保有长久的敬畏。喜欢在海风里扬帆或仰望星空，以及那些在严谨工程之外肆意生长的灵感。</p>
-<h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>“长路漫漫，且行且看。”</p>
-<p>若你偶然途经此地，读到某段文字或某行代码恰好引发了共鸣，那么这个站点的存在便有了意义。</p>
-<p>欢迎来到这里。</p>
+                <p>Multisim 神了。打开之后提示无法打开 Master Database。</p>
+<h3 id="数据库文件"><a href="#数据库文件" class="headerlink" title="数据库文件"></a>数据库文件</h3><p>Multisim 的数据库文件在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">%ProgramData%\National Instruments\Circuit Design Suite\<br></code></pre></td></tr></table></figure>
 
+<p>检查发现这个玩意是没有损坏的，但是它打不开。删除 <code>config</code> 然后重新注册 <code>dao360.dll</code> 实测有概率打得开。</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><code class="hljs bat">@<span class="hljs-built_in">echo</span> off<br><span class="hljs-built_in">setlocal</span> enabledelayedexpansion<br><br>:: <span class="hljs-number">1</span>. Request Administrator Privileges<br>&gt;<span class="hljs-built_in">nul</span> <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span> &quot;<span class="hljs-variable">%SYSTEMROOT%</span>\system32\<span class="hljs-built_in">cacls</span>.exe&quot; &quot;<span class="hljs-variable">%SYSTEMROOT%</span>\system32\config\system&quot;<br><span class="hljs-keyword">if</span> &#x27;<span class="hljs-variable">%errorlevel%</span>&#x27; <span class="hljs-keyword">NEQ</span> &#x27;<span class="hljs-number">0</span>&#x27; (<br>    <span class="hljs-built_in">echo</span> <span class="hljs-built_in">Set</span> UAC = CreateObject^(&quot;Shell.Application&quot;^) &gt; &quot;<span class="hljs-variable">%temp%</span>\getadmin.vbs&quot;<br>    <span class="hljs-built_in">echo</span> UAC.ShellExecute &quot;%~s0&quot;, &quot;&quot;, &quot;&quot;, &quot;runas&quot;, <span class="hljs-number">1</span> &gt;&gt; &quot;<span class="hljs-variable">%temp%</span>\getadmin.vbs&quot;<br>    &quot;<span class="hljs-variable">%temp%</span>\getadmin.vbs&quot;<br>    <span class="hljs-keyword">exit</span> /B<br>)<br><span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%temp%</span>\getadmin.vbs&quot; <span class="hljs-built_in">del</span> &quot;<span class="hljs-variable">%temp%</span>\getadmin.vbs&quot;<br><span class="hljs-built_in">cd</span> /d &quot;%~dp0&quot;<br><br><span class="hljs-built_in">echo</span> [<span class="hljs-number">1</span>/<span class="hljs-number">4</span>] Killing running processes and stopping services...<br><span class="hljs-built_in">taskkill</span> /F /IM multisim.exe &gt;<span class="hljs-built_in">nul</span> <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span><br><span class="hljs-built_in">taskkill</span> /F /IM ultiboard.exe &gt;<span class="hljs-built_in">nul</span> <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span><br><span class="hljs-built_in">net</span> stop &quot;National Instruments Device Service&quot; &gt;<span class="hljs-built_in">nul</span> <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span><br>timeout /t <span class="hljs-number">1</span> /nobreak &gt;<span class="hljs-built_in">nul</span><br><br><span class="hljs-built_in">echo</span> [<span class="hljs-number">2</span>/<span class="hljs-number">4</span>] Clearing user configuration cache...<br><span class="hljs-built_in">set</span> &quot;<span class="hljs-built_in">VER</span>=<span class="hljs-number">14</span>.<span class="hljs-number">3</span>&quot;<br><span class="hljs-built_in">set</span> &quot;USER_CONF=<span class="hljs-variable">%AppData%</span>\National Instruments\Circuit Design Suite\<span class="hljs-variable">%VER%</span>\config&quot;<br><span class="hljs-built_in">set</span> &quot;LOCAL_DATA=<span class="hljs-variable">%LocalAppData%</span>\National Instruments\Circuit Design Suite\<span class="hljs-variable">%VER%</span>&quot;<br><br><span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%USER_CONF%</span>&quot; <span class="hljs-built_in">rd</span> /s /q &quot;<span class="hljs-variable">%USER_CONF%</span>&quot;<br><span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%LOCAL_DATA%</span>&quot; <span class="hljs-built_in">rd</span> /s /q &quot;<span class="hljs-variable">%LOCAL_DATA%</span>&quot;<br><br><span class="hljs-built_in">echo</span> [<span class="hljs-number">3</span>/<span class="hljs-number">4</span>] Resetting database file permissions and attributes...<br><span class="hljs-built_in">set</span> &quot;DB_PATH=<span class="hljs-variable">%ProgramData%</span>\National Instruments\Circuit Design Suite\<span class="hljs-variable">%VER%</span>\database&quot;<br><span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%DB_PATH%</span>&quot; (<br>    <span class="hljs-built_in">attrib</span> -r -s -h &quot;<span class="hljs-variable">%DB_PATH%</span>\*.*&quot; /s /d &gt;<span class="hljs-built_in">nul</span> <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span><br>)<br><br><span class="hljs-built_in">echo</span> [<span class="hljs-number">4</span>/<span class="hljs-number">4</span>] Re-registering COM database engines (DAO / Jet)...<br>:: Register <span class="hljs-number">32</span>-bit DAO engine<br><span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%CommonProgramFiles(x86)%</span>\Microsoft Shared\DAO\dao360.dll&quot; (<br>    regsvr32 /s &quot;<span class="hljs-variable">%CommonProgramFiles(x86)%</span>\Microsoft Shared\DAO\dao360.dll&quot;<br>) <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%CommonProgramFiles%</span>\Microsoft Shared\DAO\dao360.dll&quot; (<br>    regsvr32 /s &quot;<span class="hljs-variable">%CommonProgramFiles%</span>\Microsoft Shared\DAO\dao360.dll&quot;<br>)<br><br>:: Register Jet DLLs<br><span class="hljs-keyword">if</span> <span class="hljs-keyword">exist</span> &quot;<span class="hljs-variable">%SystemRoot%</span>\SysWOW64\msjet40.dll&quot; (<br>    regsvr32 /s &quot;<span class="hljs-variable">%SystemRoot%</span>\SysWOW64\msjet40.dll&quot;<br>    regsvr32 /s &quot;<span class="hljs-variable">%SystemRoot%</span>\SysWOW64\msjtes40.dll&quot;<br>) <span class="hljs-keyword">else</span> (<br>    regsvr32 /s &quot;<span class="hljs-variable">%SystemRoot%</span>\System32\msjet40.dll&quot;<br>    regsvr32 /s &quot;<span class="hljs-variable">%SystemRoot%</span>\System32\msjtes40.dll&quot;<br>)<br><br><span class="hljs-built_in">echo</span>.<br><span class="hljs-built_in">echo</span> ========================================<br><span class="hljs-built_in">echo</span> Fix completed! Please try launching Multisim.<br><span class="hljs-built_in">echo</span> <span class="hljs-keyword">If</span> it still fails, check whether CPCompDev.prz <span class="hljs-keyword">in</span> the database folder is <span class="hljs-number">0</span> KB.<br><span class="hljs-built_in">echo</span> ========================================<br><span class="hljs-built_in">pause</span><br></code></pre></td></tr></table></figure>
                 
               </div>
             
@@ -417,9 +411,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E9%9A%8F%E7%AC%94/" class="print-no-link">#随笔</a>
-      
-        <a href="/tags/%E5%BA%8F%E8%A8%80/" class="print-no-link">#序言</a>
+        <a href="/tags/Multisim/" class="print-no-link">#Multisim</a>
       
     </div>
   
@@ -431,8 +423,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>在字节与潮汐之间</div>
-      <div>https://limpidslirm.github.io/2026/10/24/在字节与潮汐之间/</div>
+      <div>关于 Multisim</div>
+      <div>https://limpidslirm.github.io/2026/10/24/Multisim/</div>
     </div>
     <div class="license-meta">
       
@@ -476,15 +468,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/10/24/%E5%85%B3%E4%BA%8Emultisim/" title="关于 Multisim">
+                      <a href="/2026/10/24/ESP32-1/" title="ESP32 - Day 1">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">关于 Multisim</span>
+                        <span class="hidden-mobile">ESP32 - Day 1</span>
                         <span class="visible-mobile">Previous</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2026/10/24/begin/" title="在字节与潮汐之间">
+                        <span class="hidden-mobile">在字节与潮汐之间</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
