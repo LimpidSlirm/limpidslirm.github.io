@@ -8,8 +8,8 @@
 <head>
   <meta charset="UTF-8">
 
-  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
-  <link rel="icon" href="/img/fluid.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
@@ -19,25 +19,41 @@
   <meta name="author" content="LimpidSlirm">
   <meta name="keywords" content="">
   
-    <meta name="description" content="工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。 这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。 关于我我是Limpid，厦门大学自动化系在读。 穿行于算法与电路之间，在无序的世界里追求秩序感。">
+    <meta name="description" content="这是复变函数课程的学习笔记。                                                              下载 PDF 下载 LaTeX 源文件">
 <meta property="og:type" content="article">
-<meta property="og:title" content="在字节与潮汐之间">
-<meta property="og:url" content="https://limpidslirm.github.io/begin/index.html">
+<meta property="og:title" content="复变函数">
+<meta property="og:url" content="https://limpidslirm.github.io/Complex-Analysis/index.html">
 <meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
-<meta property="og:description" content="工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。 这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。 关于我我是Limpid，厦门大学自动化系在读。 穿行于算法与电路之间，在无序的世界里追求秩序感。">
+<meta property="og:description" content="这是复变函数课程的学习笔记。                                                              下载 PDF 下载 LaTeX 源文件">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://limpidslirm.github.io/img/random/background-01.png">
-<meta property="article:published_time" content="2026-10-24T09:30:00.000Z">
-<meta property="article:modified_time" content="2026-10-24T09:40:26.654Z">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-01.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-02.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-03.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-04.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-05.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-06.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-07.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-08.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-09.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-10.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-11.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-12.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-13.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-14.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-15.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-16.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-17.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-18.png">
+<meta property="og:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-19.png">
+<meta property="article:published_time" content="2026-10-10T17:27:00.000Z">
+<meta property="article:modified_time" content="2026-10-25T03:29:33.774Z">
 <meta property="article:author" content="LimpidSlirm">
-<meta property="article:tag" content="序言">
-<meta property="article:tag" content="随笔">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://limpidslirm.github.io/img/random/background-01.png">
+<meta name="twitter:image" content="https://limpidslirm.github.io/notes/Complex-Analysis/page-01.png">
   
   
   
-  <title>在字节与潮汐之间 - LimpidSlirm&#39;s Blog</title>
+  <title>复变函数 - LimpidSlirm&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -143,7 +159,19 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/about/" target="_self">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
                 <i class="iconfont icon-user-fill"></i>
                 <span>About</span>
               </a>
@@ -209,7 +237,21 @@
           
           
             <div class="col-4 mobile-grid-cell">
-              <a href="/about/" target="_self">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
                 <div class="mobile-grid-item">
                   <i class="iconfont icon-user-fill"></i>
                   <span>About</span>
@@ -254,7 +296,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="在字节与潮汐之间"></span>
+            <span id="subtitle" data-typed-text="复变函数"></span>
           
         </div>
 
@@ -265,8 +307,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-10-24 17:30" pubdate>
-          October 24, 2026 pm
+        <time datetime="2026-10-11 01:27" pubdate>
+          October 11, 2026 am
         </time>
       </span>
     
@@ -277,7 +319,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          312 words
+          29 words
         
       </span>
     
@@ -288,7 +330,7 @@
         
         
         
-          3 mins
+          1 mins
         
       </span>
     
@@ -340,19 +382,38 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">在字节与潮汐之间</h1>
+            <h1 id="seo-header">复变函数</h1>
             
             
               <div class="markdown-body">
                 
-                <p>工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。</p>
-<p>这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。</p>
-<h3 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h3><p>我是<strong>Limpid</strong>，厦门大学自动化系在读。</p>
-<p>穿行于算法与电路之间，在无序的世界里追求秩序感。</p>
-<p>对文字、逻辑与故事保有长久的敬畏。喜欢在海风里扬帆或仰望星空，以及那些在严谨工程之外肆意生长的灵感。</p>
-<h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>“长路漫漫，且行且看。”</p>
-<p>若你偶然途经此地，读到某段文字或某行代码恰好引发了共鸣，那么这个站点的存在便有了意义。</p>
-<p>欢迎来到这里。</p>
+                <p>这是复变函数课程的学习笔记。</p>
+<div style="display: grid; gap: 1rem; justify-items: center;">
+  <img src="/notes/Complex-Analysis/page-01.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 1" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-02.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 2" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-03.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 3" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-04.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 4" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-05.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 5" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-06.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 6" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-07.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 7" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-08.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 8" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-09.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 9" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-10.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 10" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-11.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 11" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-12.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 12" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-13.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 13" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-14.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 14" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-15.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 15" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-16.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 16" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-17.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 17" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-18.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 18" loading="lazy" style="max-width: 100%; height: auto;">
+  <img src="/notes/Complex-Analysis/page-19.png" srcset="/img/loading.gif" lazyload alt="Complex Analysis, page 19" loading="lazy" style="max-width: 100%; height: auto;">
+</div>
+
+<ul>
+<li><a href="/notes/Complex-Analysis.pdf">下载 PDF</a></li>
+<li><a href="/notes/Complex-Analysis.tex">下载 LaTeX 源文件</a></li>
+</ul>
 
                 
               </div>
@@ -361,15 +422,27 @@
             <div>
               <div class="post-metas my-3">
   
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
   
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/%E9%9A%8F%E7%AC%94/" class="print-no-link">#随笔</a>
-      
-        <a href="/tags/%E5%BA%8F%E8%A8%80/" class="print-no-link">#序言</a>
-      
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Study-Notes/" class="category-chain-item">Study Notes</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
     </div>
+  
   
 </div>
 
@@ -379,8 +452,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>在字节与潮汐之间</div>
-      <div>https://limpidslirm.github.io/begin/</div>
+      <div>复变函数</div>
+      <div>https://limpidslirm.github.io/Complex-Analysis/</div>
     </div>
     <div class="license-meta">
       
@@ -392,7 +465,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>Posted on</div>
-          <div>October 24, 2026</div>
+          <div>October 11, 2026</div>
         </div>
       
       
@@ -419,23 +492,6 @@
 
 
 
-              
-                <div class="post-prevnext my-3">
-                  <article class="post-prev col-6">
-                    
-                    
-                      <a href="/Multisim/" title="关于 Multisim">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">关于 Multisim</span>
-                        <span class="visible-mobile">Previous</span>
-                      </a>
-                    
-                  </article>
-                  <article class="post-next col-6">
-                    
-                    
-                  </article>
-                </div>
               
             </div>
 
