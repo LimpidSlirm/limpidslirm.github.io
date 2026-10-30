@@ -27,7 +27,7 @@
 <meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 面向已连接的音频、键盘与鼠标设备的 Windows 硬件状态查看器。  Windows hardware status viewer for connected audio, keyboard, and mou">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-30T10:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-30T14:17:52.846Z">
+<meta property="article:modified_time" content="2026-10-30T14:22:02.551Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Desktop App">
 <meta property="article:tag" content="Dev Log">
@@ -306,7 +306,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          29k words
+          33k words
         
       </span>
     
@@ -317,7 +317,7 @@
         
         
         
-          239 mins
+          275 mins
         
       </span>
     
@@ -1206,6 +1206,172 @@
 <p>因此「跟原键盘一样只读」这条路对新键盘并不存在，这次是项目里第一次真正向 HID 设备写入数据。后续若要继续找电量字段，需要构造非零命令字节，属于未知协议逆向，风险明显高于此前所有只读步骤。</p>
 <blockquote>
 <p>So the “read-only like the original keyboard” path simply does not exist for the new keyboard, and this was the project’s first real HID write. Continuing to look for a battery field would require constructing non-zero command bytes, which is unknown-protocol reverse engineering and clearly riskier than every earlier read-only step.</p>
+</blockquote>
+<h2 id="23-键盘2-电量字段的确认-Confirming-the-second-keyboard’s-battery-field"><a href="#23-键盘2-电量字段的确认-Confirming-the-second-keyboard’s-battery-field" class="headerlink" title="23. 键盘2 电量字段的确认 | Confirming the second keyboard’s battery field"></a>23. 键盘2 电量字段的确认 | Confirming the second keyboard’s battery field</h2><p>被动监听 <code>0xFF60</code> 后发现该接口持续推送 33 字节报文（约每秒 3 条）。首轮统计 378 条样本：除 <code>byte[1]</code> 外所有字节都在变化，<code>byte[1]</code> 恒为 <code>0x55</code>。按 BCD 解码 <code>0x55</code> 正是 55，与键盘当时显示的电量吻合，于是初步判定为电量字段。</p>
+<blockquote>
+<p>Passive listening on <code>0xFF60</code> showed it pushes 33-byte reports continuously, about three per second. The first pass over 378 samples found every byte moving except <code>byte[1]</code>, which stayed <code>0x55</code>. Decoded as BCD that is exactly 55, matching the level the keyboard showed at the time, so it was taken as the battery field.</p>
+</blockquote>
+<p>该假设随后被证伪：电量从 55 涨到 56 后重新采样，<code>byte[1]</code> 仍然是 <code>0x55</code>。固定帧头不会随电量变化，因此 BCD 解读错误，代码立即撤除，界面不再显示错误的 55%。</p>
+<blockquote>
+<p>That guess was then disproven: after the charge rose from 55 to 56, a fresh sample still reported <code>byte[1] = 0x55</code>. A fixed frame marker does not track the charge, so the BCD reading was wrong, the code was removed at once, and the UI stopped showing the wrong 55%.</p>
+</blockquote>
+<p>按报文类型分组重新统计后，真正跟随电量的是类型 <code>0x10</code> 报文的 <code>byte[26]</code>：</p>
+<blockquote>
+<p>Grouping the reports by type located the byte that actually tracks the charge: <code>byte[26]</code> of the type-<code>0x10</code> report.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>采样时刻</th>
+<th>键盘显示电量</th>
+<th><code>byte[26]</code> 取值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>21:56</td>
+<td>55%</td>
+<td>52、56（均值 54.2）</td>
+</tr>
+<tr>
+<td>22:05</td>
+<td>56%</td>
+<td>51、55、57、59（均值 55.7）</td>
+</tr>
+<tr>
+<td>22:10 充电中</td>
+<td>—</td>
+<td>51 → 54（单调上升）</td>
+</tr>
+<tr>
+<td>22:07 复测</td>
+<td>—</td>
+<td>58</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Sampled at</th>
+<th>Level on the keyboard</th>
+<th><code>byte[26]</code> values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>21:56</td>
+<td>55%</td>
+<td>52, 56 (mean 54.2)</td>
+</tr>
+<tr>
+<td>22:05</td>
+<td>56%</td>
+<td>51, 55, 57, 59 (mean 55.7)</td>
+</tr>
+<tr>
+<td>22:10 while charging</td>
+<td>—</td>
+<td>51 to 54 (rising)</td>
+</tr>
+<tr>
+<td>22:07 re-check</td>
+<td>—</td>
+<td>58</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>两个均值与真实值的偏差分别只有 0.8 和 0.3，且充电期间单调上升，因此确定为电量字段。</p>
+<blockquote>
+<p>The two means sit within 0.8 and 0.3 of the true level and the value rises monotonically while charging, so it is the battery field.</p>
+</blockquote>
+<p>最后由官方软件交叉确认：该键盘为狼蛛 AULA MINI 60 HE PRO，官方网页驱动 <code>hub.aulacn.com</code> 显示的数值同样在 <code>53 / 54 / 59</code> 之间跳动，与本程序观测到的 <code>51~59</code> 区间完全一致。这说明抖动来自硬件电量计本身，而不是偏移错误。</p>
+<blockquote>
+<p>Official software finally cross-confirmed it: the keyboard is an AULA MINI 60 HE PRO, and the vendor web driver at <code>hub.aulacn.com</code> oscillates between 53, 54 and 59, matching the 51-59 band this reader observes. The jitter therefore comes from the device gauge rather than a wrong offset.</p>
+</blockquote>
+<p>由于原始字段抖动约 ±4，程序取最近 5 次读数的中位数，界面显示比官方网页驱动更稳定；读数同时落盘缓存，因为这条流在键盘空闲时会静默数分钟。</p>
+<blockquote>
+<p>Because the raw field jitters by roughly ±4, the reader takes the median of the last five samples, which is steadier than the vendor web driver, and the value is cached on disk because the stream goes quiet for minutes while the keyboard is idle.</p>
+</blockquote>
+<p>顺带确认了一个 Python 侧的陷阱：<code>pywinusb</code> 的回调依赖 Windows 消息循环，而 Qt 事件循环占用主线程后回调不会触发。同一段代码在纯脚本里能收到报文，放进 Qt 应用却一条都收不到，改用独立线程中的阻塞 <code>kernel32.ReadFile</code> 后恢复正常。</p>
+<blockquote>
+<p>A Python-side trap was confirmed along the way: <code>pywinusb</code> callbacks depend on the Windows message loop, and once the Qt event loop owns the main thread those callbacks never fire. The same code receives reports in a plain script but nothing inside the Qt app; switching to a blocking <code>kernel32.ReadFile</code> on a dedicated thread fixed it.</p>
+</blockquote>
+<h2 id="24-键盘1-能否复用该方案-Can-that-approach-work-for-the-first-keyboard"><a href="#24-键盘1-能否复用该方案-Can-that-approach-work-for-the-first-keyboard" class="headerlink" title="24. 键盘1 能否复用该方案 | Can that approach work for the first keyboard"></a>24. 键盘1 能否复用该方案 | Can that approach work for the first keyboard</h2><p>结论是不能直接复用。<code>3554:FA09</code> 的厂商接口 <code>0xFF02/0x02</code> 监听 40 秒收到 0 条报文，说明它只支持请求-响应，而用 Report ID 0 写入会被驱动以 <code>err 87</code>（<code>ERROR_INVALID_PARAMETER</code>）拒绝。两块键盘的能力正好相反：</p>
+<blockquote>
+<p>The short answer is no, not directly. Listening on the vendor interface <code>0xFF02/0x02</code> of <code>3554:FA09</code> for 40 seconds produced zero reports, so it only speaks request-response, and writing with Report ID 0 is rejected by the driver with <code>err 87</code> (<code>ERROR_INVALID_PARAMETER</code>). The two keyboards are opposites:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>键盘1 <code>3554:FA09</code></th>
+<th>键盘2 <code>0C45:FEFE</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Feature Report</td>
+<td>有，可主动拉取</td>
+<td>无</td>
+</tr>
+<tr>
+<td>主动广播</td>
+<td>完全没有</td>
+<td>持续推送</td>
+</tr>
+<tr>
+<td>写入</td>
+<td>Report ID 0 被拒绝</td>
+<td>接受但无有效响应</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Keyboard 1 <code>3554:FA09</code></th>
+<th>Keyboard 2 <code>0C45:FEFE</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Feature Report</td>
+<td>present, can be pulled</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Broadcast</td>
+<td>none at all</td>
+<td>continuous</td>
+</tr>
+<tr>
+<td>Write</td>
+<td>Report ID 0 rejected</td>
+<td>accepted but no useful reply</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>可以借用的是对照实验的方法论：键盘2 的字段是靠「电量 55 → 56 前后两次采集对比」确认的。<code>3554:FA09</code> 当前三个候选值都是 100（满电），满电时所有候选一致，无论采样多少次都无法区分。</p>
+<blockquote>
+<p>What does transfer is the comparison method: the second keyboard’s field was identified by comparing captures taken before and after the charge moved from 55 to 56. Every candidate on <code>3554:FA09</code> currently reads 100 because the keyboard is full, and at full charge all candidates agree, so no amount of sampling can separate them.</p>
+</blockquote>
+<p>为此新增 <code>app/feature_log.py</code>，每分钟把 Feature Report 6 追加到 CSV，仅在数值变化时打印：</p>
+<blockquote>
+<p>So <code>app/feature_log.py</code> was added: it appends Feature Report 6 to a CSV every minute and only prints when a value changes.</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs powershell">python <span class="hljs-literal">-m</span> app.feature_log                 <span class="hljs-comment"># 每 60 秒采样，Ctrl+C 结束</span><br>python <span class="hljs-literal">-m</span> app.feature_log <span class="hljs-literal">--interval</span> <span class="hljs-number">30</span>   <span class="hljs-comment"># 调整间隔</span><br>python <span class="hljs-literal">-m</span> app.feature_log <span class="hljs-literal">--count</span> <span class="hljs-number">10</span>      <span class="hljs-comment"># 只采 10 次</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs powershell">python <span class="hljs-literal">-m</span> app.feature_log                 <span class="hljs-comment"># sample every 60s, Ctrl+C to stop</span><br>python <span class="hljs-literal">-m</span> app.feature_log <span class="hljs-literal">--interval</span> <span class="hljs-number">30</span>   <span class="hljs-comment"># change the interval</span><br>python <span class="hljs-literal">-m</span> app.feature_log <span class="hljs-literal">--count</span> <span class="hljs-number">10</span>      <span class="hljs-comment"># stop after 10 samples</span><br></code></pre></td></tr></table></figure></blockquote>
+<p>首条记录：</p>
+<blockquote>
+<p>The first row:</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs csv">timestamp,byte0,byte1,byte2,byte3,byte4,byte5,byte6,byte7<br>2026-10-30 22:20:18,6,0,2,100,100,100,53,21<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs csv">timestamp,byte0,byte1,byte2,byte3,byte4,byte5,byte6,byte7<br>2026-10-30 22:20:18,6,0,2,100,100,100,53,21<br></code></pre></td></tr></table></figure></blockquote>
+<p>待电量明显下降后对比各行即可定位字段。需要注意反向可能：如果只有 <code>byte6</code>（当前 53）发生变化，说明真正的电量是 53，而当前「候选 100%」的判断本身需要修正。</p>
+<blockquote>
+<p>Once the charge has dropped noticeably, comparing the rows identifies the field. The reverse case also matters: if only <code>byte6</code> (currently 53) moves, then the real battery is 53 and the current “candidate 100%” assumption needs revisiting.</p>
 </blockquote>
 
                 
