@@ -27,7 +27,7 @@
 <meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 面向已连接的音频、键盘与鼠标设备的 Windows 硬件状态查看器。  Windows hardware status viewer for connected audio, keyboard, and mou">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-30T10:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-30T11:31:29.294Z">
+<meta property="article:modified_time" content="2026-10-30T14:17:52.846Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Desktop App">
 <meta property="article:tag" content="Dev Log">
@@ -306,7 +306,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          26k words
+          29k words
         
       </span>
     
@@ -317,7 +317,7 @@
         
         
         
-          213 mins
+          239 mins
         
       </span>
     
@@ -1014,6 +1014,198 @@
 <p>本文件是本地开发日志，已加入 <code>.gitignore</code>，不进入版本库，也不推送到 GitHub。</p>
 <blockquote>
 <p>This file is a local development log. It is listed in <code>.gitignore</code>, stays out of the repository, and is never pushed to GitHub.</p>
+</blockquote>
+<h2 id="22-新键盘-0C45-FEFE-的主动探测-Active-probe-of-the-new-keyboard"><a href="#22-新键盘-0C45-FEFE-的主动探测-Active-probe-of-the-new-keyboard" class="headerlink" title="22. 新键盘 0C45:FEFE 的主动探测 | Active probe of the new keyboard"></a>22. 新键盘 <code>0C45:FEFE</code> 的主动探测 | Active probe of the new keyboard</h2><p>接入新键盘后，<code>0C45:FEFE</code> 暴露出 9 个 HID 接口，其中两个是厂商自定义接口：</p>
+<blockquote>
+<p>After the new keyboard was connected, <code>0C45:FEFE</code> exposed nine HID interfaces, two of which are vendor-defined:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>Usage</th>
+<th>报告长度</th>
+<th>推测</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mi_03</code></td>
+<td><code>0xFF60/0x61</code></td>
+<td>in 33 &#x2F; out 33</td>
+<td>QMK &#x2F; VIA 标准 raw HID</td>
+</tr>
+<tr>
+<td><code>mi_04</code></td>
+<td><code>0xFF59/0x61</code></td>
+<td>in 65 &#x2F; out 65</td>
+<td>厂商私有协议</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Usage</th>
+<th>Report size</th>
+<th>Guess</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mi_03</code></td>
+<td><code>0xFF60/0x61</code></td>
+<td>in 33 &#x2F; out 33</td>
+<td>QMK &#x2F; VIA raw HID</td>
+</tr>
+<tr>
+<td><code>mi_04</code></td>
+<td><code>0xFF59/0x61</code></td>
+<td>in 65 &#x2F; out 65</td>
+<td>vendor-specific protocol</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>先做只读探测：9 个接口的 <code>FeatureReportByteLength</code> 全部为 0，因此原键盘那种「读 Feature Report」的办法在这里不成立；对两个厂商接口各被动监听 8 秒，也都是 0 条。也就是说这块键盘不会主动广播任何状态，必须主动写入 Output Report 才能拿到回复。</p>
+<blockquote>
+<p>A read-only probe came first: all nine interfaces report <code>FeatureReportByteLength = 0</code>, so the Feature Report read used for the earlier keyboard is not available here. Passive listening for eight seconds on each vendor interface also returned zero reports: this keyboard never broadcasts state on its own, so only an Output Report write can elicit a reply.</p>
+</blockquote>
+<h3 id="VIA-标准查询：无响应-Standard-VIA-query-no-reply"><a href="#VIA-标准查询：无响应-Standard-VIA-query-no-reply" class="headerlink" title="VIA 标准查询：无响应 | Standard VIA query: no reply"></a>VIA 标准查询：无响应 | Standard VIA query: no reply</h3><p>向 <code>0xFF60/0x61</code> 依次发送四条标准 VIA 命令（33 字节，首字节为 Report ID <code>0x00</code>）：</p>
+<blockquote>
+<p>Four standard VIA commands were sent to <code>0xFF60/0x61</code> (33 bytes, first byte Report ID <code>0x00</code>):</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>01</code></td>
+<td>查询协议版本</td>
+<td>超时无回复</td>
+</tr>
+<tr>
+<td><code>02 04</code></td>
+<td>查询固件版本</td>
+<td>超时无回复</td>
+</tr>
+<tr>
+<td><code>02 01</code></td>
+<td>查询运行时间</td>
+<td>超时无回复</td>
+</tr>
+<tr>
+<td><code>02 02</code></td>
+<td>查询布局选项</td>
+<td>超时无回复</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Meaning</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>01</code></td>
+<td>Protocol version</td>
+<td>timeout</td>
+</tr>
+<tr>
+<td><code>02 04</code></td>
+<td>Firmware version</td>
+<td>timeout</td>
+</tr>
+<tr>
+<td><code>02 01</code></td>
+<td>Uptime</td>
+<td>timeout</td>
+</tr>
+<tr>
+<td><code>02 02</code></td>
+<td>Layout options</td>
+<td>timeout</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>结论：这块键盘不是标准 QMK&#x2F;VIA 固件，<code>0xFF60</code> 接口即使存在也不走 VIA 协议。</p>
+<blockquote>
+<p>Conclusion: this keyboard is not standard QMK&#x2F;VIA firmware, so the <code>0xFF60</code> interface does not speak the VIA protocol.</p>
+</blockquote>
+<h3 id="0xFF59-厂商接口：有回复-Vendor-interface-it-answers"><a href="#0xFF59-厂商接口：有回复-Vendor-interface-it-answers" class="headerlink" title="0xFF59 厂商接口：有回复 | Vendor interface: it answers"></a><code>0xFF59</code> 厂商接口：有回复 | Vendor interface: it answers</h3><p>为把风险控制到最低，只发送<strong>全 0 的 65 字节包</strong>（不构造任何未知命令字节），<code>mi_04</code> 立即返回：</p>
+<blockquote>
+<p>To keep risk minimal, only an all-zero 65-byte packet was sent, with no unknown command byte. <code>mi_04</code> replied immediately:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">请求: [0] * 65<br>回复: [0, 15, 1, 254, 14, 0, 0, 0, 0, ...]   （共 65 字节，[5] 之后全为 0）<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">request : [0] * 65<br>reply   : [0, 15, 1, 254, 14, 0, 0, 0, 0, ...]   (65 bytes, all zero from [5])<br></code></pre></td></tr></table></figure></blockquote>
+<p>连续发送 4 次，回复<strong>完全一致</strong>，说明这是一个确定性的状态&#x2F;握手响应，而不是噪声：</p>
+<blockquote>
+<p>Four consecutive sends produced an identical reply, so it is a deterministic status or handshake response rather than noise:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">#1: [0, 15, 1, 254, 14, 0, 0, 0]  尾随全零=True<br>#2: [0, 15, 1, 254, 14, 0, 0, 0]  尾随全零=True<br>#3: [0, 15, 1, 254, 14, 0, 0, 0]  尾随全零=True<br>#4: [0, 15, 1, 254, 14, 0, 0, 0]  尾随全零=True<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">#1: [0, 15, 1, 254, 14, 0, 0, 0]  trailing zeros=True<br>#2: [0, 15, 1, 254, 14, 0, 0, 0]  trailing zeros=True<br>#3: [0, 15, 1, 254, 14, 0, 0, 0]  trailing zeros=True<br>#4: [0, 15, 1, 254, 14, 0, 0, 0]  trailing zeros=True<br></code></pre></td></tr></table></figure></blockquote>
+<p>已知字段：<code>[0]</code> 是 Report ID <code>0x00</code>；<code>[1]=15</code>、<code>[2]=1</code>、<code>[3]=254</code>、<code>[4]=14</code> 含义未确认，<code>[5]</code> 之后恒为 0。由于请求是全零，<code>[1]</code> 不可能是命令回显，更像是固定的响应标记或协议头。</p>
+<blockquote>
+<p>Known so far: <code>[0]</code> is Report ID <code>0x00</code>; the meaning of <code>[1]=15</code>, <code>[2]=1</code>, <code>[3]=254</code>, <code>[4]=14</code> is unconfirmed, and everything from <code>[5]</code> stays zero. Because the request was all zeros, <code>[1]</code> cannot be a command echo and looks more like a fixed response marker or protocol header.</p>
+</blockquote>
+<h3 id="与原始键盘的区别-Difference-from-the-original-keyboard"><a href="#与原始键盘的区别-Difference-from-the-original-keyboard" class="headerlink" title="与原始键盘的区别 | Difference from the original keyboard"></a>与原始键盘的区别 | Difference from the original keyboard</h3><table>
+<thead>
+<tr>
+<th>键盘</th>
+<th>VID:PID</th>
+<th>读取方式</th>
+<th>是否发过写命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原键盘</td>
+<td><code>3554:FA09</code></td>
+<td>读取 Feature Report 6（纯只读）</td>
+<td>从未</td>
+</tr>
+<tr>
+<td>新键盘</td>
+<td><code>0C45:FEFE</code></td>
+<td>无 Feature Report，只能写 Output Report 再读回复</td>
+<td>是（探测用）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Keyboard</th>
+<th>VID:PID</th>
+<th>Method</th>
+<th>Writes sent</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Original</td>
+<td><code>3554:FA09</code></td>
+<td>Read Feature Report 6 (read-only)</td>
+<td>never</td>
+</tr>
+<tr>
+<td>New</td>
+<td><code>0C45:FEFE</code></td>
+<td>No Feature Report; must write an Output Report and read the reply</td>
+<td>yes (probing only)</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>因此「跟原键盘一样只读」这条路对新键盘并不存在，这次是项目里第一次真正向 HID 设备写入数据。后续若要继续找电量字段，需要构造非零命令字节，属于未知协议逆向，风险明显高于此前所有只读步骤。</p>
+<blockquote>
+<p>So the “read-only like the original keyboard” path simply does not exist for the new keyboard, and this was the project’s first real HID write. Continuing to look for a battery field would require constructing non-zero command bytes, which is unknown-protocol reverse engineering and clearly riskier than every earlier read-only step.</p>
 </blockquote>
 
                 
