@@ -27,7 +27,7 @@
 <meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 面向已连接的音频、键盘与鼠标设备的 Windows 硬件状态查看器。  Windows hardware status viewer for connected audio, keyboard, and mou">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-30T10:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-30T11:22:49.490Z">
+<meta property="article:modified_time" content="2026-10-30T11:31:29.294Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Desktop App">
 <meta property="article:tag" content="Dev Log">
@@ -306,7 +306,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          22k words
+          26k words
         
       </span>
     
@@ -317,7 +317,7 @@
         
         
         
-          182 mins
+          213 mins
         
       </span>
     
@@ -904,6 +904,112 @@
 <li>Keyboard candidate bytes: the three values at <code>[3..6]</code> of <code>3554:FA09</code> Report 6 are still unverified byte by byte; a discharge comparison is needed</li>
 <li>Cache persistence: decide whether to write to disk, weighing “value available right after restart” against “leaving a state file in the project directory”</li>
 </ol>
+</blockquote>
+<h2 id="21-托盘常驻-Notification-area-tray"><a href="#21-托盘常驻-Notification-area-tray" class="headerlink" title="21. 托盘常驻 | Notification-area tray"></a>21. 托盘常驻 | Notification-area tray</h2><p>程序不再只依赖浮窗，而是常驻任务栏通知区域（默认落在隐藏图标栏）。托盘图标本身显示电量：≥60% 绿色、≥25% 黄色、&lt;25% 红色，无读数时画空心电池，0% 额外画一道斜杠。图标由 <code>QPainter</code> 直接绘制，不引入任何第三方图标或托盘库。</p>
+<blockquote>
+<p>The program no longer depends on the floating window alone: it now lives in the taskbar notification area (usually the hidden-icons tray). The tray icon itself shows charge: green at ≥60%, yellow at ≥25%, red below 25%, a hollow battery when there is no reading, and a slash at 0%. The icon is drawn directly with <code>QPainter</code>, so no third-party icon or tray library is pulled in.</p>
+</blockquote>
+<p>交互设计：</p>
+<blockquote>
+<p>Interaction design:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单击图标</td>
+<td>显示 &#x2F; 隐藏迷你窗</td>
+</tr>
+<tr>
+<td>双击图标</td>
+<td>打开完整界面</td>
+</tr>
+<tr>
+<td>右键菜单</td>
+<td>显示迷你窗 &#x2F; 显示完整界面 &#x2F; 立即刷新 &#x2F; 退出</td>
+</tr>
+<tr>
+<td>悬停</td>
+<td>提示 <code>键盘 100% · 鼠标 87%</code></td>
+</tr>
+<tr>
+<td><code>Esc</code> 或关闭窗口</td>
+<td>收起到托盘，进程继续运行</td>
+</tr>
+<tr>
+<td>菜单「退出」</td>
+<td>真正结束进程</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Single click</td>
+<td>Show &#x2F; hide the mini window</td>
+</tr>
+<tr>
+<td>Double click</td>
+<td>Open the full view</td>
+</tr>
+<tr>
+<td>Context menu</td>
+<td>Show mini &#x2F; show full &#x2F; refresh now &#x2F; quit</td>
+</tr>
+<tr>
+<td>Hover</td>
+<td>Tooltip <code>键盘 100% · 鼠标 87%</code></td>
+</tr>
+<tr>
+<td><code>Esc</code> or closing the window</td>
+<td>Collapse to the tray, process keeps running</td>
+</tr>
+<tr>
+<td>Menu <code>退出</code></td>
+<td>Really terminates the process</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>退出路径会依次注销全局快捷键、停止刷新定时器、等待发现线程结束、隐藏托盘图标，再退出应用；这样不会留下僵尸进程，也不会残留已注册的 hotkey 占用。</p>
+<blockquote>
+<p>The quit path unregisters the global hotkey, stops the refresh timer, waits for the discovery thread, hides the tray icon, and only then exits the application, so no zombie process or stale hotkey registration is left behind.</p>
+</blockquote>
+<p>验证时发现并修掉了一个缺陷：<code>closeEvent</code> 原本在判断「是否真正退出」之前就隐藏托盘图标，导致按 <code>Esc</code> 收起窗口时托盘图标一起消失，热键虽仍生效却没了入口。现在只有真正退出时才隐藏图标。</p>
+<blockquote>
+<p>A defect was found and fixed during verification: <code>closeEvent</code> hid the tray icon before checking whether the app was really quitting, so pressing <code>Esc</code> removed the tray entry even though the hotkey still worked. The icon is now hidden only on a real quit.</p>
+</blockquote>
+<p>实测输出：</p>
+<blockquote>
+<p>Measured output:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs text">system_tray_available: True<br>tray_visible: True<br>menu_actions: [&#x27;显示迷你窗&#x27;, &#x27;显示完整界面&#x27;, &#x27;立即刷新&#x27;, &#x27;退出&#x27;]<br>tooltip_with_data: &#x27;2.4G Hardware Viewer\n键盘 100% · 鼠标 87%&#x27;<br>tooltip_empty: &#x27;2.4G Hardware Viewer\n暂无电量&#x27;<br>hidden_after_esc_style: True<br>tray_still_shown: True<br>tray_hidden_after_quit_close: False<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs text">system_tray_available: True<br>tray_visible: True<br>menu_actions: [&#x27;显示迷你窗&#x27;, &#x27;显示完整界面&#x27;, &#x27;立即刷新&#x27;, &#x27;退出&#x27;]<br>tooltip_with_data: &#x27;2.4G Hardware Viewer\n键盘 100% · 鼠标 87%&#x27;<br>tooltip_empty: &#x27;2.4G Hardware Viewer\n暂无电量&#x27;<br>hidden_after_esc_style: True<br>tray_still_shown: True<br>tray_hidden_after_quit_close: False<br></code></pre></td></tr></table></figure></blockquote>
+<h3 id="后续：已按要求移除-Follow-up-removed-on-request"><a href="#后续：已按要求移除-Follow-up-removed-on-request" class="headerlink" title="后续：已按要求移除 | Follow-up: removed on request"></a>后续：已按要求移除 | Follow-up: removed on request</h3><p>该托盘功能随后被明确移除，<code>app/tray.py</code> 删除，<code>main.py</code> 恢复为「<code>Esc</code> 关闭窗口、不做托盘常驻」，也不再引入 <code>QSystemTrayIcon</code> 与 <code>QMenu</code>。保留的仍是迷你窗、<code>Ctrl + Alt + B</code> 全局快捷键与开机自启。验证：应用中 <code>QSystemTrayIcon</code> 数量为 0，迷你窗 <code>210x60</code>，完整界面正常，关闭后窗口不可见。</p>
+<blockquote>
+<p>The tray feature was subsequently removed by request: <code>app/tray.py</code> was deleted and <code>main.py</code> returned to “<code>Esc</code> closes the window, no tray residency”, with <code>QSystemTrayIcon</code> and <code>QMenu</code> no longer imported. The mini window, the <code>Ctrl + Alt + B</code> global hotkey, and autostart remain. Verified: zero <code>QSystemTrayIcon</code> instances in the app, a <code>210x60</code> mini window, a working full view, and an invisible window after closing.</p>
+</blockquote>
+<p>移除代码后，Win11 任务栏里仍能看见那个托盘图标。排查结论：代码已不再创建图标，残留来自 Windows 11 的托盘缓存——<code>HKCU\Control Panel\NotifyIconSettings</code> 下仍留着一条 <code>ExecutablePath = ...\python.exe</code> 的记录，其 <code>IconSnapshot</code> 是一张 612 字节 PNG。把该图导出查看，正是本项目的空心电池图标，因此确认是旧进程被强制结束时留下的缓存，而不是另一个程序。</p>
+<blockquote>
+<p>After the code was removed, that tray icon was still visible in the Windows 11 taskbar. Investigation: the code no longer creates an icon, and the leftover came from the Windows 11 tray cache — an entry under <code>HKCU\Control Panel\NotifyIconSettings</code> still listed <code>ExecutablePath = ...\python.exe</code>, whose <code>IconSnapshot</code> was a 612-byte PNG. Dumping that image showed this project’s own hollow battery icon, confirming the cache was left behind when the old process was force-killed rather than belonging to another program.</p>
+</blockquote>
+<p>处理方式：删除该注册表项，再重启 <code>explorer.exe</code> 让托盘重建。之后确认 <code>NotifyIconSettings</code> 下已无任何指向 python 的记录，应用进程与迷你窗均正常。</p>
+<blockquote>
+<p>Fix: delete that registry key, then restart <code>explorer.exe</code> so the tray rebuilds. Afterwards no entry under <code>NotifyIconSettings</code> pointed at python, and both the app process and the mini window remained healthy.</p>
+</blockquote>
+<p>教训：注册过 <code>QSystemTrayIcon</code> 的程序即使退出，Win11 仍可能把图标快照留在缓存里，务必在删除托盘功能后额外清理一次缓存。</p>
+<blockquote>
+<p>Lesson: on Windows 11 an app that once registered a <code>QSystemTrayIcon</code> may leave its icon snapshot in that cache even after exit, so removing the tray feature also requires clearing the cache once.</p>
 </blockquote>
 <p>本文件是本地开发日志，已加入 <code>.gitignore</code>，不进入版本库，也不推送到 GitHub。</p>
 <blockquote>
