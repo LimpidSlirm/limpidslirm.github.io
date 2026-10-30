@@ -27,7 +27,7 @@
 <meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 面向已连接的音频、键盘与鼠标设备的 Windows 硬件状态查看器。  Windows hardware status viewer for connected audio, keyboard, and mou">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-30T10:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-30T10:12:25.143Z">
+<meta property="article:modified_time" content="2026-10-30T11:22:49.490Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Desktop App">
 <meta property="article:tag" content="Dev Log">
@@ -306,7 +306,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          14k words
+          22k words
         
       </span>
     
@@ -317,7 +317,7 @@
         
         
         
-          117 mins
+          182 mins
         
       </span>
     
@@ -662,6 +662,252 @@
 <p>Windows 蓝牙设置可以在 HUAWEI FreeBuds SE 2 连接时显示一个合并的 <code>100%</code> 电量指示。该视图只显示一个值，而不是左右耳各自的值。设备通过经典蓝牙音频服务（A2DP、AVRCP 与 HFP）枚举，测试过的 PnP&#x2F;WMI 接口不暴露分左右耳的电量。应用不得把合并值拆成两个臆造的百分比；要支持左右耳，需要找到设备私有的蓝牙电量协议，或其他能暴露双通道的 API。</p>
 <blockquote>
 <p>Windows Bluetooth settings can display a combined <code>100%</code> battery indicator for the HUAWEI FreeBuds SE 2 when it is connected. The settings view shows one value rather than separate left- and right-earbud values. The device is enumerated through classic Bluetooth audio services (A2DP, AVRCP, and HFP), and the tested PnP&#x2F;WMI interfaces do not expose separate earbud batteries. The application must not split the combined value into two invented percentages; left&#x2F;right support requires locating the device-specific Bluetooth battery protocol or another API that exposes both channels.</p>
+</blockquote>
+<h2 id="15-设备归属调查与内置设备过滤-Device-ownership-survey-and-built-in-device-filtering"><a href="#15-设备归属调查与内置设备过滤-Device-ownership-survey-and-built-in-device-filtering" class="headerlink" title="15. 设备归属调查与内置设备过滤 | Device ownership survey and built-in device filtering"></a>15. 设备归属调查与内置设备过滤 | Device ownership survey and built-in device filtering</h2><p>界面上曾同时出现 2 条键盘与 3 条鼠标，逐条核对 HID 集合后确认这不是重复渲染，而是 Windows 把一个物理设备拆成了多个顶层集合：</p>
+<blockquote>
+<p>The UI once showed two keyboards and three mice at the same time. Checking each HID collection showed this was not duplicate rendering: Windows splits one physical device into several top-level collections.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>显示条目</th>
+<th>VID:PID</th>
+<th>真实身份</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>键盘</td>
+<td><code>3554:FA09</code></td>
+<td>2.4G 键盘接收器的键盘集合（<code>MI_00</code>）</td>
+</tr>
+<tr>
+<td>键盘</td>
+<td><code>24AE:1411</code></td>
+<td>雷柏接收器的键盘集合（<code>MI_01</code> <code>COL01</code>&#x2F;<code>COL02</code>）</td>
+</tr>
+<tr>
+<td>鼠标</td>
+<td><code>3554:FA09</code></td>
+<td>同一键盘接收器附带的鼠标集合（<code>MI_01</code> <code>COL05</code>）</td>
+</tr>
+<tr>
+<td>鼠标</td>
+<td><code>24AE:1411</code></td>
+<td>雷柏鼠标本体（<code>MI_00</code>）</td>
+</tr>
+<tr>
+<td>鼠标</td>
+<td>无</td>
+<td>笔记本触摸板 <code>HID\UNIW0001</code>（<code>093A:0255</code>）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Entry</th>
+<th>VID:PID</th>
+<th>Real identity</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Keyboard</td>
+<td><code>3554:FA09</code></td>
+<td>Keyboard collection of the 2.4G keyboard receiver (<code>MI_00</code>)</td>
+</tr>
+<tr>
+<td>Keyboard</td>
+<td><code>24AE:1411</code></td>
+<td>Keyboard collection of the Rapoo receiver (<code>MI_01</code> <code>COL01</code>&#x2F;<code>COL02</code>)</td>
+</tr>
+<tr>
+<td>Mouse</td>
+<td><code>3554:FA09</code></td>
+<td>Mouse collection shipped by the same keyboard receiver (<code>MI_01</code> <code>COL05</code>)</td>
+</tr>
+<tr>
+<td>Mouse</td>
+<td><code>24AE:1411</code></td>
+<td>The Rapoo mouse itself (<code>MI_00</code>)</td>
+</tr>
+<tr>
+<td>Mouse</td>
+<td>none</td>
+<td>Laptop touchpad <code>HID\UNIW0001</code> (<code>093A:0255</code>)</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>原因有三点：一个 2.4G 接收器会注册 4–6 个 HID 集合；显示层只保留音频、键盘、鼠标三类，其余厂商自定义集合被隐藏，但同一接收器仍会同时冒出键盘与鼠标两条；名称来自 Windows 通用驱动，例如 <code>HID Keyboard Device</code>，不含品牌型号，所以两台不同键盘看起来完全一样。</p>
+<blockquote>
+<p>There are three reasons: one 2.4G receiver registers 4–6 HID collections; the display layer keeps only audio, keyboard, and mouse classes, so vendor-defined collections are hidden while the same receiver still produces both a keyboard and a mouse row; and the names come from generic Windows drivers such as <code>HID Keyboard Device</code>, so two different keyboards look identical.</p>
+</blockquote>
+<p>内置触摸板与之前的内置键盘、麦克风阵列一样被过滤，不再参与显示：</p>
+<blockquote>
+<p>The built-in touchpad is now filtered like the built-in keyboard and microphone array, and no longer appears:</p>
+</blockquote>
+<ul>
+<li><code>HID\UNIW...</code> 开头的鼠标类实例</li>
+<li>名称包含 <code>触摸板</code> 或 <code>touchpad</code> 的鼠标类设备</li>
+</ul>
+<blockquote>
+<ul>
+<li>Mouse-class instances whose ID starts with <code>HID\UNIW...</code></li>
+<li>Mouse-class devices whose name contains <code>触摸板</code> or <code>touchpad</code></li>
+</ul>
+</blockquote>
+<h2 id="16-按接收器合并与电量条界面-Receiver-level-merging-and-battery-bars"><a href="#16-按接收器合并与电量条界面-Receiver-level-merging-and-battery-bars" class="headerlink" title="16. 按接收器合并与电量条界面 | Receiver-level merging and battery bars"></a>16. 按接收器合并与电量条界面 | Receiver-level merging and battery bars</h2><p>设备列表改为按 VID:PID 把同一物理设备的多个 HID 集合合并成一行，并用 <code>MI_00</code>（主功能接口）决定该行的类别与名称。合并后的名称按实际角色生成：只有键盘集合时为 <code>无线键盘</code>，只有鼠标集合时为 <code>无线鼠标</code>，两者都有时为 <code>无线键鼠接收器</code>。</p>
+<blockquote>
+<p>The device list now merges every HID collection of one physical device into a single row by VID:PID, and uses <code>MI_00</code> (the main function interface) to decide that row’s category and name. The merged name follows the real role: <code>无线键盘</code> when only a keyboard collection exists, <code>无线鼠标</code> when only a mouse collection exists, and <code>无线键鼠接收器</code> when both exist.</p>
+</blockquote>
+<p><code>DeviceRecord</code> 增加 <code>battery_readings</code> 字段，用于在一行里同时承载键盘与鼠标两个读数：</p>
+<blockquote>
+<p><code>DeviceRecord</code> gained a <code>battery_readings</code> field so one row can carry both keyboard and mouse readings:</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">battery_readings: <span class="hljs-built_in">tuple</span>[<span class="hljs-built_in">tuple</span>[<span class="hljs-built_in">str</span>, <span class="hljs-built_in">int</span>, <span class="hljs-built_in">str</span>], ...] = ()<br><span class="hljs-comment"># (&quot;键盘&quot;, 100, &quot;厂商 HID 报告（候选）&quot;), (&quot;鼠标&quot;, 87, &quot;厂商 HID 报告&quot;)</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">battery_readings: <span class="hljs-built_in">tuple</span>[<span class="hljs-built_in">tuple</span>[<span class="hljs-built_in">str</span>, <span class="hljs-built_in">int</span>, <span class="hljs-built_in">str</span>], ...] = ()<br><span class="hljs-comment"># (&quot;键盘&quot;, 100, &quot;厂商 HID 报告（候选）&quot;), (&quot;鼠标&quot;, 87, &quot;厂商 HID 报告&quot;)</span><br></code></pre></td></tr></table></figure></blockquote>
+<p>去重键原本是 <code>(类别, 名称, 状态)</code>，会把两台不同鼠标合成一行并丢掉其中一台的电量；现在加入 VID:PID，改为 <code>(类别, 名称, 状态, VID:PID)</code>。这是合并过程中实际暴露并修复的缺陷。</p>
+<blockquote>
+<p>The dedupe key used to be <code>(category, name, status)</code>, which merged two different mice into one row and dropped one of the readings. It is now <code>(category, name, status, VID:PID)</code>. This defect was exposed by the merging work and fixed.</p>
+</blockquote>
+<p>界面同时做了这些调整：</p>
+<blockquote>
+<p>The UI was adjusted as well:</p>
+</blockquote>
+<ul>
+<li>有电量的行显示绿色电量条与百分比；电量未知的行显示 <code>电量未公开</code></li>
+<li>点击设备行展开详情，再次点击收起；不点击时不占空间</li>
+<li>移除滚动区域，窗口高度改为按内容自适应，上限为屏幕可用高度</li>
+<li>移除本机电量（不再查询 <code>Win32_Battery</code>）</li>
+<li>文案精简为 <code>7 个设备 · 6 个在线</code>、<code>更新 18:05:12 · 每 5 分钟 · 透明度 92%</code></li>
+</ul>
+<blockquote>
+<ul>
+<li>Rows with a value show a green battery bar and percentage; rows without one show <code>电量未公开</code></li>
+<li>Clicking a row expands details, clicking again collapses them, and nothing is taken up when idle</li>
+<li>The scroll area was removed; the window height now fits the content and caps at the screen’s usable height</li>
+<li>The system battery row was removed and <code>Win32_Battery</code> is no longer queried</li>
+<li>Copy was tightened to <code>7 个设备 · 6 个在线</code> and <code>更新 18:05:12 · 每 5 分钟 · 透明度 92%</code></li>
+</ul>
+</blockquote>
+<h2 id="17-迷你电量窗与全局快捷键-Mini-battery-window-and-global-hotkey"><a href="#17-迷你电量窗与全局快捷键-Mini-battery-window-and-global-hotkey" class="headerlink" title="17. 迷你电量窗与全局快捷键 | Mini battery window and global hotkey"></a>17. 迷你电量窗与全局快捷键 | Mini battery window and global hotkey</h2><p>程序默认以迷你窗启动，尺寸约 210 px 宽，只显示键盘与鼠标的电量条，不再展示设备清单。完整界面保留原有一切功能，可通过两种方式切换：</p>
+<blockquote>
+<p>The program now starts as a mini window about 210 px wide that shows only the keyboard and mouse battery bars, without the device list. The full view keeps every previous feature and can be reached in two ways:</p>
+</blockquote>
+<ul>
+<li>全局快捷键 <code>Ctrl + Alt + B</code>（应用未获得焦点时同样有效）</li>
+<li>双击窗口任意位置</li>
+</ul>
+<blockquote>
+<ul>
+<li>The global hotkey <code>Ctrl + Alt + B</code> (works even when the app is not focused)</li>
+<li>Double-clicking anywhere on the window</li>
+</ul>
+</blockquote>
+<p>快捷键通过 Win32 <code>RegisterHotKey</code> 注册，并由 <code>QAbstractNativeEventFilter</code> 捕获 <code>WM_HOTKEY</code>，实现在 <code>app/hotkey.py</code>：</p>
+<blockquote>
+<p>The hotkey is registered through Win32 <code>RegisterHotKey</code> and captured via <code>QAbstractNativeEventFilter</code> on <code>WM_HOTKEY</code>, implemented in <code>app/hotkey.py</code>:</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">app.installNativeEventFilter(hotkey)<br><span class="hljs-comment"># hotkey = GlobalHotkey(HOTKEY_ID, MOD_CONTROL | MOD_ALT, 0x42, window.toggle_mode)</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">app.installNativeEventFilter(hotkey)<br><span class="hljs-comment"># hotkey = GlobalHotkey(HOTKEY_ID, MOD_CONTROL | MOD_ALT, 0x42, window.toggle_mode)</span><br></code></pre></td></tr></table></figure></blockquote>
+<p>实测确认：迷你窗 <code>210x60</code>、完整界面 <code>500x5xx</code>，快捷键触发一次后 <code>_compact</code> 由 <code>True</code> 变为 <code>False</code>，<code>hotkey_registered: True</code>。</p>
+<blockquote>
+<p>Verified: the mini window measured <code>210x60</code> and the full view <code>500x5xx</code>; one hotkey press flipped <code>_compact</code> from <code>True</code> to <code>False</code>, with <code>hotkey_registered: True</code>.</p>
+</blockquote>
+<h2 id="18-开机自启-Autostart"><a href="#18-开机自启-Autostart" class="headerlink" title="18. 开机自启 | Autostart"></a>18. 开机自启 | Autostart</h2><p>自启项写入当前用户 <code>Run</code> 项，命令使用 <code>pythonw.exe</code>，避免开机弹出控制台窗口：</p>
+<blockquote>
+<p>The startup entry is written to the current-user <code>Run</code> key and uses <code>pythonw.exe</code> so no console window appears at boot:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">HKCU\Software\Microsoft\Windows\CurrentVersion\Run<br>  2.4G-Hardware-Viewer = &quot;&lt;pythonw.exe&gt;&quot; &quot;&lt;项目&gt;\launch.pyw&quot;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">HKCU\Software\Microsoft\Windows\CurrentVersion\Run<br>  2.4G-Hardware-Viewer = &quot;&lt;pythonw.exe&gt;&quot; &quot;&lt;project&gt;\launch.pyw&quot;<br></code></pre></td></tr></table></figure></blockquote>
+<p>入口脚本 <code>launch.pyw</code> 只负责把项目目录加入 <code>sys.path</code> 并调用 <code>app.main.main()</code>；扩展名 <code>.pyw</code> 保证由 <code>pythonw.exe</code> 关联执行。</p>
+<blockquote>
+<p>The <code>launch.pyw</code> entry script only adds the project directory to <code>sys.path</code> and calls <code>app.main.main()</code>; the <code>.pyw</code> extension makes it run under <code>pythonw.exe</code>.</p>
+</blockquote>
+<p>安装与移除：</p>
+<blockquote>
+<p>Install and remove:</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs powershell">python <span class="hljs-literal">-m</span> app.main <span class="hljs-literal">--install-autostart</span><br>python <span class="hljs-literal">-m</span> app.main <span class="hljs-literal">--remove-autostart</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs powershell">python <span class="hljs-literal">-m</span> app.main <span class="hljs-literal">--install-autostart</span><br>python <span class="hljs-literal">-m</span> app.main <span class="hljs-literal">--remove-autostart</span><br></code></pre></td></tr></table></figure></blockquote>
+<p>实测：写入后回读值与生成命令完全一致，移除后查询返回 <code>None</code>，未在系统中残留。</p>
+<blockquote>
+<p>Verified: the value read back after install matched the generated command exactly, and after removal the query returned <code>None</code> with nothing left behind.</p>
+</blockquote>
+<h2 id="19-鼠标电量缓存-Mouse-battery-cache"><a href="#19-鼠标电量缓存-Mouse-battery-cache" class="headerlink" title="19. 鼠标电量缓存 | Mouse battery cache"></a>19. 鼠标电量缓存 | Mouse battery cache</h2><p>鼠标只在状态变化或有动作时广播 Report 7，休眠期间完全静默。原始实现对静默直接返回空，界面会从 <code>87%</code> 掉回“电量未公开”。现在改为在进程内保留最后一次有效读数：</p>
+<blockquote>
+<p>The mouse broadcasts Report 7 only on state changes or activity and stays completely silent while asleep. The original implementation returned nothing on silence, so the UI dropped from <code>87%</code> back to <code>电量未公开</code>. It now keeps the last valid reading in process memory:</p>
+</blockquote>
+<ul>
+<li><code>_MOUSE_CACHE</code> 按 VID:PID 存放读数与单调时钟时间戳，并用锁保护</li>
+<li>收到新报文即刷新缓存，并记录 <code>captured_clock</code>（<code>HH:MM</code>）</li>
+<li>无报文时返回缓存值，<code>cached=True</code>，界面来源标注 <code>厂商 HID 报告 · 缓存 18:42</code></li>
+<li>超过 24 小时未更新则回退为无读数，绝不显示无限期过期的数据</li>
+<li>单次监听拆分为 <code>_listen_mouse_report()</code>，仍然不发送任何报文</li>
+</ul>
+<blockquote>
+<ul>
+<li><code>_MOUSE_CACHE</code> stores the reading plus a monotonic timestamp per VID:PID, guarded by a lock</li>
+<li>A fresh report refreshes the cache and records <code>captured_clock</code> (<code>HH:MM</code>)</li>
+<li>Without a report the cached value is returned with <code>cached=True</code>, and the UI labels the source <code>厂商 HID 报告 · 缓存 18:42</code></li>
+<li>Anything older than 24 hours falls back to no reading; indefinitely stale data is never shown</li>
+<li>The single listen pass was extracted into <code>_listen_mouse_report()</code> and still sends no report</li>
+</ul>
+</blockquote>
+<p>缓存行为用打桩验证，覆盖四种路径：</p>
+<blockquote>
+<p>The cache was verified with stubs across four paths:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">fresh               : 87  cached=False  clock=19:18<br>silent_with_cache   : (87, True, &#x27;19:18&#x27;)<br>expired_returns_none: True<br>no_cache_no_report  : True<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">fresh               : 87  cached=False  clock=19:18<br>silent_with_cache   : (87, True, &#x27;19:18&#x27;)<br>expired_returns_none: True<br>no_cache_no_report  : True<br></code></pre></td></tr></table></figure></blockquote>
+<p>缓存只存在于进程内存。程序重启后仍需一次新的广播才能恢复读数，移动鼠标即可触发；是否改为写本地缓存文件仍在权衡，因为那会在项目目录留下状态文件。</p>
+<blockquote>
+<p>The cache lives only in process memory. After a restart one new broadcast is still required, which a mouse movement triggers; switching to an on-disk cache file is still being weighed because it would leave a state file in the project directory.</p>
+</blockquote>
+<h2 id="20-验证记录与后续-Verification-log-and-next-steps"><a href="#20-验证记录与后续-Verification-log-and-next-steps" class="headerlink" title="20. 验证记录与后续 | Verification log and next steps"></a>20. 验证记录与后续 | Verification log and next steps</h2><p>本轮验证命令与结果：</p>
+<blockquote>
+<p>Commands and results for this round:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">py_compile  app/*.py launch.pyw   -&gt; COMPILE_OK<br>python -m app.main --smoke-test   -&gt; SMOKE_OK<br>git diff --check                  -&gt; 无报错<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">py_compile  app/*.py launch.pyw   -&gt; COMPILE_OK<br>python -m app.main --smoke-test   -&gt; SMOKE_OK<br>git diff --check                  -&gt; no errors<br></code></pre></td></tr></table></figure></blockquote>
+<p>对应提交：</p>
+<blockquote>
+<p>Corresponding commit:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">ef110db feat: add mini battery window, global hotkey and autostart<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">ef110db feat: add mini battery window, global hotkey and autostart<br></code></pre></td></tr></table></figure></blockquote>
+<p>后续可做：</p>
+<blockquote>
+<p>Possible next steps:</p>
+</blockquote>
+<ol>
+<li>左右耳机电量：需要找到设备私有的蓝牙电量协议，或其他能分通道暴露的 API</li>
+<li>键盘候选字节：<code>3554:FA09</code> Report 6 中 <code>[3..6]</code> 三个值尚未逐字节验证，仍需一次放电对照</li>
+<li>电量缓存持久化：决定是否落盘，权衡“重启即有值”与“在项目目录留下状态文件”</li>
+</ol>
+<blockquote>
+<ol>
+<li>Left&#x2F;right earbud battery: requires the device-private Bluetooth battery protocol or another channel-aware API</li>
+<li>Keyboard candidate bytes: the three values at <code>[3..6]</code> of <code>3554:FA09</code> Report 6 are still unverified byte by byte; a discharge comparison is needed</li>
+<li>Cache persistence: decide whether to write to disk, weighing “value available right after restart” against “leaving a state file in the project directory”</li>
+</ol>
+</blockquote>
+<p>本文件是本地开发日志，已加入 <code>.gitignore</code>，不进入版本库，也不推送到 GitHub。</p>
+<blockquote>
+<p>This file is a local development log. It is listed in <code>.gitignore</code>, stays out of the repository, and is never pushed to GitHub.</p>
 </blockquote>
 
                 
