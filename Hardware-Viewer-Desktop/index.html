@@ -27,7 +27,7 @@
 <meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 本日聚焦桌面使用体验：开机自启、桌面快捷方式、窗口位置记忆，以及一个由早前改动引入的关闭缺陷。  This day focused on desktop usability: autostart, a desk">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-31T06:25:00.000Z">
-<meta property="article:modified_time" content="2026-10-31T06:34:56.608Z">
+<meta property="article:modified_time" content="2026-10-31T06:44:26.954Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Desktop App">
 <meta property="article:tag" content="Dev Log">
@@ -306,7 +306,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          6.9k words
+          9.9k words
         
       </span>
     
@@ -317,7 +317,7 @@
         
         
         
-          58 mins
+          83 mins
         
       </span>
     
@@ -513,11 +513,63 @@
 </blockquote>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">隐藏后 visible = False<br>reveal 后 visible = True<br>结果: 窗口被唤出<br></code></pre></td></tr></table></figure>
 
-<h2 id="7-验证记录与后续-Verification-log-and-next-steps"><a href="#7-验证记录与后续-Verification-log-and-next-steps" class="headerlink" title="7. 验证记录与后续 | Verification log and next steps"></a>7. 验证记录与后续 | Verification log and next steps</h2><p>本轮验证：</p>
+<h2 id="7-时不时冒出的命令行窗口-The-console-window-that-kept-flashing"><a href="#7-时不时冒出的命令行窗口-The-console-window-that-kept-flashing" class="headerlink" title="7. 时不时冒出的命令行窗口 | The console window that kept flashing"></a>7. 时不时冒出的命令行窗口 | The console window that kept flashing</h2><p>用户反馈”时不时会有一个命令行弹窗”，还贴了截图：一个标题被截断成 <code>C:\Windows\System32\Windo</code> 的黑色空窗口，闪一下就关。</p>
+<blockquote>
+<p>The user reported a console window that popped up now and then, and attached a screenshot: an empty black window whose title was truncated to <code>C:\Windows\System32\Windo</code>, flashing once and closing.</p>
+</blockquote>
+<p>先定位来源。全项目搜索外部进程调用，只有两处，都在起 <code>powershell.exe</code>：</p>
+<blockquote>
+<p>The source was traced first. Searching the project for external process calls found only two sites, both launching <code>powershell.exe</code>:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">app/device_discovery.py:119   设备查询<br>app/autostart.py:79           创建桌面快捷方式<br></code></pre></td></tr></table></figure>
+
+<p>其中设备查询是<strong>周期</strong>执行的，这解释了”时不时”：</p>
+<blockquote>
+<p>The device query runs on a <strong>timer</strong>, which explains the “now and then”:</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-variable language_">self</span>._refresh_timer = QTimer(<span class="hljs-variable language_">self</span>)<br><span class="hljs-variable language_">self</span>._refresh_timer.timeout.connect(<span class="hljs-variable language_">self</span>.refresh_devices)<br><span class="hljs-variable language_">self</span>._refresh_timer.start(<span class="hljs-number">300000</span>)   <span class="hljs-comment"># 每 5 分钟</span><br></code></pre></td></tr></table></figure>
+
+<p>根因是 Windows 的控制台分配规则：程序由 <code>pythonw.exe</code> 启动，<strong>它自己没有控制台</strong>；此时子进程 <code>powershell.exe</code> 属于控制台子系统却没地方附着，Windows 就给它新建一个可见控制台窗口。跑完 1~2 秒随进程退出而消失，看起来就是”闪一下”。</p>
+<blockquote>
+<p>The cause is how Windows allocates consoles. The app is started by <code>pythonw.exe</code>, which owns <strong>no</strong> console. A child like <code>powershell.exe</code> is a console-subsystem program with nowhere to attach, so Windows allocates it a brand new visible console window. It disappears when the process exits one or two seconds later, which looks like a flash.</p>
+</blockquote>
+<p>修复方式是给两处 <code>subprocess.run</code> 加上 <code>CREATE_NO_WINDOW</code>，并抽成单点常量：</p>
+<blockquote>
+<p>The fix passes <code>CREATE_NO_WINDOW</code> to both <code>subprocess.run</code> calls, kept in one shared constant:</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># app/winproc.py</span><br>NO_WINDOW = <span class="hljs-built_in">getattr</span>(subprocess, <span class="hljs-string">&quot;CREATE_NO_WINDOW&quot;</span>, <span class="hljs-number">0</span>)<br></code></pre></td></tr></table></figure>
+
+<p>验证没有用眼睛看，而是写了探针。第一版探针想用窗口类 <code>ConsoleWindowClass</code> 判断，结果<strong>抓不到</strong>：</p>
+<blockquote>
+<p>Verification was done with a probe rather than by eye. The first attempt looked for the window class <code>ConsoleWindowClass</code> and <strong>found nothing</strong>:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">old_behaviour: new_window_appeared = false   ← 与实际现象矛盾<br></code></pre></td></tr></table></figure>
+
+<p>原因是本机 Win11 默认控制台宿主已经是 Windows Terminal，类名不再是 <code>ConsoleWindowClass</code>。改成”对比 spawn 前后所有顶层窗口的差异”，才抓到真相：</p>
+<blockquote>
+<p>The reason is that this machine’s default console host is Windows Terminal, so the class name is no longer <code>ConsoleWindowClass</code>. Switching to diffing every top-level window before and after the spawn revealed it:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">NO_WINDOW = 0（修复前）<br>  CASCADIA_HOSTING_WINDOW_CLASS   &quot;C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe&quot;<br>  PseudoConsoleWindow             (conhost)<br>  Windows Terminal / IME / DDE ...<br><br>NO_WINDOW = CREATE_NO_WINDOW（修复后）<br>  0 个新增窗口<br></code></pre></td></tr></table></figure>
+
+<p>那个 <code>CASCADIA_HOSTING_WINDOW_CLASS</code> 的标题，与用户截图里被截断的 <code>C:\Windows\System32\Windo</code> 完全对应，来源确认。这次 A&#x2F;B 用的是真实代码路径——从 <code>app.device_discovery</code> 直接调 <code>discover_devices()</code>，父进程用 <code>pythonw.exe</code> 跑，只有 <code>NO_WINDOW</code> 一个变量不同。</p>
+<blockquote>
+<p>That <code>CASCADIA_HOSTING_WINDOW_CLASS</code> title matches the truncated <code>C:\Windows\System32\Windo</code> in the screenshot exactly, confirming the source. The A&#x2F;B test drove the real code path, calling <code>discover_devices()</code> from <code>app.device_discovery</code> with <code>pythonw.exe</code> as the parent, varying only <code>NO_WINDOW</code>.</p>
+</blockquote>
+<p>教训有两条：一是 GUI 程序里任何 <code>subprocess</code> 调用默认都会弹窗，必须显式压制；二是<strong>检测方法本身会骗人</strong>——按旧的窗口类名去找，会得到”没有问题”的假结论，实际是宿主环境换了。</p>
+<blockquote>
+<p>Two lessons: any <code>subprocess</code> call inside a GUI program will pop a window unless suppressed explicitly, and the <strong>detection method itself can lie</strong> — searching for the old window class yields a false “no problem” because the host environment changed.</p>
+</blockquote>
+<h2 id="8-验证记录与后续-Verification-log-and-next-steps"><a href="#8-验证记录与后续-Verification-log-and-next-steps" class="headerlink" title="8. 验证记录与后续 | Verification log and next steps"></a>8. 验证记录与后续 | Verification log and next steps</h2><p>本轮验证：</p>
 <blockquote>
 <p>Commands and results for this round:</p>
 </blockquote>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">py_compile  app/main.py app/autostart.py app/settings.py app/single_instance.py  -&gt; COMPILE_OK<br>python -m app.main --smoke-test                                                  -&gt; SMOKE_OK<br>git diff --check                                                                 -&gt; 无报错<br></code></pre></td></tr></table></figure>
+
+<p>修复弹窗后的复验：</p>
+<blockquote>
+<p>Re-verification after the console fix:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">py_compile app/winproc.py app/device_discovery.py app/autostart.py app/main.py  -&gt; OK<br>python -m app.main --smoke-test                                                 -&gt; exit=0<br>设备数量前后均为 8，功能无影响<br>重启实例 pid 15736，窗口 visible=True（title: Hardware Viewer）<br></code></pre></td></tr></table></figure>
 
 <p>四步端到端（快捷方式启动 &#x2F; 二次启动唤出 &#x2F; Esc 退出 &#x2F; 关闭后重开）全部通过。</p>
 <blockquote>
@@ -527,7 +579,7 @@
 <blockquote>
 <p>Corresponding commits:</p>
 </blockquote>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">c12f085 feat: add desktop shortcut and single-instance guard<br>9b4364d feat: remember the window position between runs<br>95ce17b fix: closing the overlay now exits and the shortcut reopens it<br></code></pre></td></tr></table></figure>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">c12f085 feat: add desktop shortcut and single-instance guard<br>9b4364d feat: remember the window position between runs<br>95ce17b fix: closing the overlay now exits and the shortcut reopens it<br>2b06587 fix: stop the periodic device query from flashing a console window<br></code></pre></td></tr></table></figure>
 
 <p>后续可做：</p>
 <blockquote>
