@@ -27,7 +27,7 @@
 <meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 面向已连接的音频、键盘与鼠标设备的 Windows 硬件状态查看器。  Windows hardware status viewer for connected audio, keyboard, and mou">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-30T10:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-30T14:22:02.551Z">
+<meta property="article:modified_time" content="2026-10-30T14:28:00.005Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Desktop App">
 <meta property="article:tag" content="Dev Log">
@@ -306,7 +306,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          33k words
+          37k words
         
       </span>
     
@@ -317,7 +317,7 @@
         
         
         
-          275 mins
+          309 mins
         
       </span>
     
@@ -1373,6 +1373,104 @@
 <blockquote>
 <p>Once the charge has dropped noticeably, comparing the rows identifies the field. The reverse case also matters: if only <code>byte6</code> (currently 53) moves, then the real battery is 53 and the current “candidate 100%” assumption needs revisiting.</p>
 </blockquote>
+<h2 id="25-耳机能否用同样的方法-Can-the-same-method-work-for-the-headset"><a href="#25-耳机能否用同样的方法-Can-the-same-method-work-for-the-headset" class="headerlink" title="25. 耳机能否用同样的方法 | Can the same method work for the headset"></a>25. 耳机能否用同样的方法 | Can the same method work for the headset</h2><p>当前接入的耳机是 ZhuAudio ZG2（<code>4C4A:4155</code>），USB 复合音频设备，Windows 暴露的 HID 接口只有一个：<code>0x000C/0x0001</code>（多媒体键，3 字节输入）。三项检查结果：</p>
+<blockquote>
+<p>The headset currently connected is the ZhuAudio ZG2 (<code>4C4A:4155</code>), a USB composite audio device, and Windows exposes exactly one HID interface for it: <code>0x000C/0x0001</code> (consumer control, 3-byte input). Three checks were run:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>检查</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Feature Report</td>
+<td>所有接口 <code>feature_report_length = 0</code>，不存在</td>
+</tr>
+<tr>
+<td>被动监听 30 秒</td>
+<td>0 条报文</td>
+</tr>
+<tr>
+<td><code>DEVPKEY_Device_BatteryLevel</code></td>
+<td>全部节点为空</td>
+</tr>
+</tbody></table>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Feature Report</td>
+<td><code>feature_report_length = 0</code> on every interface, none exist</td>
+</tr>
+<tr>
+<td>30-second passive listen</td>
+<td>zero reports</td>
+</tr>
+<tr>
+<td><code>DEVPKEY_Device_BatteryLevel</code></td>
+<td>empty on every node</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p><code>DEVPKEY_Device_PowerData</code> 有 56 字节数据，但那是 USB 电源管理描述符（含 <code>D2</code> 挂起支持、延迟等字段），不是电量百分比，因此不予采用。</p>
+<blockquote>
+<p><code>DEVPKEY_Device_PowerData</code> does hold 56 bytes, but that is a USB power-management descriptor (suspend support, latency and similar fields) rather than a charge percentage, so it is not used.</p>
+</blockquote>
+<p>结论：键盘2 的方法在这里不成立。该方法依赖两个前提之一——设备提供可主动拉取的 Feature Report，或提供厂商自定义的广播通道。这台耳机两者都没有，只有一个标准多媒体键接口，因此没有任何可读电量入口。</p>
+<blockquote>
+<p>Conclusion: the second keyboard’s method does not apply here. It relies on one of two preconditions, either a Feature Report that can be pulled or a vendor-defined broadcast channel. This headset offers neither, only a standard consumer-control interface, so there is no readable battery entry point.</p>
+</blockquote>
+<p>作为对比，蓝牙耳机 HUAWEI FreeBuds SE 2 的情况不同：它没有 HID 接口，Windows 设置里能显示合并电量，但该数值未通过 PnP 属性或 WinRT 的 <code>BluetoothDevice</code> &#x2F; <code>BluetoothLEDevice</code> 暴露（第 14 节已记录）。</p>
+<blockquote>
+<p>For contrast, the Bluetooth headset HUAWEI FreeBuds SE 2 differs: it has no HID interface, and although Windows Settings shows a combined charge level, that value is not exposed through PnP properties or through WinRT <code>BluetoothDevice</code> &#x2F; <code>BluetoothLEDevice</code> (recorded in section 14).</p>
+</blockquote>
+<p>要在耳机上继续推进，可行的方向只有官方软件：若厂商提供配置工具，从中抓取其真实通信即可定位电量字段，这与键盘2 最终由 <code>hub.aulacn.com</code> 交叉确认的路径一致。</p>
+<blockquote>
+<p>Pushing further on a headset would require vendor software: if the manufacturer ships a configuration tool, capturing its real traffic would locate the battery field, which is the same route that finally cross-confirmed keyboard 2 through <code>hub.aulacn.com</code>.</p>
+</blockquote>
+<h3 id="补充排查：接口与描述符级别-Follow-up-interface-and-descriptor-level"><a href="#补充排查：接口与描述符级别-Follow-up-interface-and-descriptor-level" class="headerlink" title="补充排查：接口与描述符级别 | Follow-up: interface and descriptor level"></a>补充排查：接口与描述符级别 | Follow-up: interface and descriptor level</h3><p>上一节的结论最初只基于顶层集合，随后又做了三层确认。</p>
+<blockquote>
+<p>The previous conclusion was first based on top-level collections only, so three more checks were run.</p>
+</blockquote>
+<p>第一，设备树里只有两个功能，不存在厂商接口：</p>
+<blockquote>
+<p>First, the device tree holds only two functions, with no vendor interface:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">USB Composite Device (usbccgp)<br>├── MI_00  → usbaudio    （音频，接口 0/1/2）<br>└── MI_03  → HidUsb      （多媒体键，接口 3）<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">USB Composite Device (usbccgp)<br>├── MI_00  → usbaudio    (audio, interfaces 0/1/2)<br>└── MI_03  → HidUsb      (consumer control, interface 3)<br></code></pre></td></tr></table></figure></blockquote>
+<p><code>MI_XX</code> 表示该功能的起始接口号，因此接口总数只有 0~3，没有额外的厂商接口可供发送探测包。</p>
+<blockquote>
+<p><code>MI_XX</code> names the first interface of a function, so the interfaces only span 0 to 3 and there is no extra vendor interface to send a probe to.</p>
+</blockquote>
+<p>第二，尝试读取原始报表描述符。<code>DeviceIoControl</code> 配合 <code>IOCTL_HID_GET_REPORT_DESCRIPTOR</code>（<code>0x000B0007</code>）对三个设备全部失败；改查注册表 <code>Enum\HID\...\Device Parameters</code> 时该键为空，<code>Properties</code> 子键无访问权限。两条路都没拿到原始字节。</p>
+<blockquote>
+<p>Second, reading the raw report descriptor was attempted. <code>DeviceIoControl</code> with <code>IOCTL_HID_GET_REPORT_DESCRIPTOR</code> (<code>0x000B0007</code>) failed on all three devices, and the registry key <code>Enum\HID\...\Device Parameters</code> is empty while its <code>Properties</code> subkey denies access. Neither route yielded the raw bytes.</p>
+</blockquote>
+<p>第三，改用 <code>pywinusb</code> 已解析的 usage 列表，枚举每个报文声明的全部字段。耳机的结果全是多媒体键：</p>
+<blockquote>
+<p>Third, <code>pywinusb</code>‘s already-parsed usage lists were used to enumerate every field each report declares. The headset returns only consumer-control usages:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">input id=0 usage=0x000C/0x00B0  （播放）<br>input id=0 usage=0x000C/0x00B1  （暂停）<br>input id=0 usage=0x000C/0x00E2  （静音）<br>input id=0 usage=0x000C/0x00E9  （音量+）<br>input id=0 usage=0x000C/0x00EA  （音量-）<br>... 共 16 个字段，全部属于 0x000C 页面<br>含 Battery Strength (0x0006/0x0020)：False<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">input id=0 usage=0x000C/0x00B0  (play)<br>input id=0 usage=0x000C/0x00B1  (pause)<br>input id=0 usage=0x000C/0x00E2  (mute)<br>input id=0 usage=0x000C/0x00E9  (volume up)<br>input id=0 usage=0x000C/0x00EA  (volume down)<br>... 16 fields in total, all on page 0x000C<br>contains Battery Strength (0x0006/0x0020): False<br></code></pre></td></tr></table></figure></blockquote>
+<p>确认该耳机为<strong>无线 2.4G 接收器形态</strong>，且用户表示没有任何官方配置软件。综合三层证据，结论是：接收器根本没有把耳机电量转发给主机，Windows 侧不存在任何可读入口。</p>
+<blockquote>
+<p>The headset was confirmed to be a wireless 2.4G dongle, and the user reports no vendor configuration software at all. With all three layers checked, the conclusion is that the dongle simply never forwards the headset’s charge level to the host, so no readable entry point exists on the Windows side.</p>
+</blockquote>
+<p>剩余理论路径只有截获耳机与接收器之间的 2.4G 无线链路，需要额外射频硬件且大概率加密，已超出本项目「只读系统已公开数据」的范围，不再尝试。</p>
+<blockquote>
+<p>The only remaining theoretical path is intercepting the 2.4G link between headset and dongle, which needs extra radio hardware and is likely encrypted. That is well outside this project’s scope of reading data Windows already exposes, so it is not attempted.</p>
+</blockquote>
 
                 
               </div>
@@ -1387,11 +1485,11 @@
       
         <a href="/tags/Hardware-Viewer/" class="print-no-link">#Hardware Viewer</a>
       
+        <a href="/tags/Dev-Log/" class="print-no-link">#Dev Log</a>
+      
         <a href="/tags/Python/" class="print-no-link">#Python</a>
       
         <a href="/tags/Windows/" class="print-no-link">#Windows</a>
-      
-        <a href="/tags/Dev-Log/" class="print-no-link">#Dev Log</a>
       
         <a href="/tags/Reverse-Engineering/" class="print-no-link">#Reverse Engineering</a>
       
@@ -1453,6 +1551,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/Hardware-Viewer-Desktop/" title="Hardware-Viewer: Desktop Integration">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Hardware-Viewer: Desktop Integration</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
