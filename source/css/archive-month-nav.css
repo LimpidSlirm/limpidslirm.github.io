@@ -1,0 +1,53 @@
+/* 归档页的年份/月份快捷导航，由 scripts/archive-month-nav.js 注入 */
+.archive-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin: 0 0 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+.archive-nav a {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--line-color);
+  border-radius: 0.25rem;
+  color: var(--sec-text-color);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.archive-nav a:hover {
+  color: var(--post-link-color);
+  border-color: var(--post-link-color);
+  text-decoration: none;
+}
+
+.archive-nav a.current {
+  color: #fff;
+  background-color: var(--post-link-color);
+  border-color: var(--post-link-color);
+}
+
+.archive-nav-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding-left: 0.5rem;
+  border-left: 1px dashed var(--line-color);
+}
+
+.archive-nav-year {
+  font-weight: 600;
+  color: var(--text-color) !important;
+}
+
+.archive-nav-count {
+  margin-left: 0.2rem;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
