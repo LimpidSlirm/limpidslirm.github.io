@@ -565,7 +565,13 @@
   <div class="row mx-auto index-card">
     
     
-    <article class="col-12 col-md-12 mx-auto index-info">
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/Multisim/" target="_self">
+          <img src="/img/1.png" srcset="/img/loading.gif" lazyload alt="关于 Multisim">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
       <h2 class="index-header">
         
         <a href="/Multisim/" target="_self">
@@ -574,9 +580,9 @@
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/Multisim/" target="_self">
+      <a class="index-excerpt " href="/Multisim/" target="_self">
         <div>
-          Multisim 神了。打开之后提示无法打开 Master Database。 数据库文件Multisim 的数据库文件在： 1%ProgramData%\National Instruments\Circuit Design Suite\  检查发现这个玩意是没有损坏的，但是它打不开。删除 config 然后重新注册 dao360.dll 实测有概率打得开。 解决方法12345678910111
+          Multisim 神了。打开之后提示无法打开 Master Database。 1. 现象启动 Multisim 时直接弹出「无法打开 Master Database」，元件库整个不可用：  数据库文件确实存在，检查下来也没有损坏； 删除用户配置里的 config 目录，再重新注册 dao360.dll，有概率恢复正常； 换一台机器、或者重装之后再遇到，同样的操作又不一定生效。  也就是说，这不是
         </div>
       </a>
 
@@ -593,6 +599,8 @@
         
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Windows/">#Windows</a>
             
               <a href="/tags/Multisim/">#Multisim</a>
             
