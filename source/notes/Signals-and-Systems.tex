@@ -1,0 +1,1449 @@
+% !TeX program = xelatex
+\documentclass[11pt,a4paper,fontset=fandol]{ctexart}
+
+% ============================ 1. 基础页面设置 ================================
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+% ============================ 2. 数学基础包与标准定理 ========================
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{bm}                       % 向量/矩阵加粗
+\allowdisplaybreaks                   % 长公式跨页
+
+% 标准学术定理环境（除定义外，其余均直接在正文中排版，无多余框线）
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{property}[theorem]{性质}
+\newtheorem{corollary}[theorem]{推论}
+
+\theoremstyle{remark}
+\newtheorem{remark}{注}[section]
+
+% ============================ 3. 字体设置 ====================================
+\usepackage{newtxtext}               % 英文 Times 系列
+\usepackage{newtxmath}               % 数学公式 Times 系列
+
+% ============================ 4. 仅定义使用的独立环境 ========================
+\usepackage[most]{tcolorbox}
+
+% 定义环境：学术极简浅灰底+细边框（单独突出）
+\newtcbtheorem[number within=section]{definition}{定义}{
+    enhanced,
+    boxrule=0.5pt,
+    arc=0pt,
+    colback=gray!4!white,
+    colframe=black!80,
+    fonttitle=\bfseries\sffamily,
+    coltitle=black,
+    attach boxed title to top left={yshift=-2mm, xshift=2mm},
+    boxed title style={boxrule=0pt, colframe=white, colback=white},
+    separator sign={\ },
+    description font=\normalfont
+}{def}
+
+% ============================ 5. 图表与列表 ==================================
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=2em}
+
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf, justification=centering}
+
+% ============================ 6. 超链接设置 ==================================
+\usepackage{hyperref}
+\usepackage{cleveref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=black
+}
+
+% ============================ 7. 章节格式 ====================================
+\ctexset{
+    section/name={,},
+    section/number=\arabic{section},
+    section/format=\Large\bfseries,
+    subsection/number=\arabic{section}.\arabic{subsection},
+    subsection/format=\large\bfseries,
+    subsubsection/number=\arabic{section}.\arabic{subsection}.\arabic{subsubsection},
+    subsubsection/format=\normalsize\bfseries
+}
+
+\renewcommand{\baselinestretch}{1.15}
+\setlength{\parskip}{0.3em}
+\setlength{\parindent}{2em}
+
+% ============================ 8. 页眉页脚 ====================================
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 信号与系统}
+\fancyhead[R]{\small \leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ============================ 9. 正文开始 ====================================
+\begin{document}
+
+\section{信号与系统分析导论}
+
+\subsection{信号的描述及分类}
+
+\subsubsection{信号的定义与数学描述}
+信号是信息的表现形式与物理载体，数学上表现为一个或多个独立变量的函数或序列。对于一维信号（如随时间变化的电压或电流），自变量通常为时间 $t$ 或序列序号 $k$；对于多维信号（如静止彩色图像），可表示为空间坐标的向量函数 $\bm{I}(x, y) = [I_{\mathrm{R}}(x, y), I_{\mathrm{G}}(x, y), I_{\mathrm{B}}(x, y)]^{\mathrm{T}}$。
+
+\subsubsection{确定信号与随机信号}
+\begin{itemize}
+    \item \textbf{确定信号}：能够用确定的时间函数或解析表达式唯一精确表示的信号。在任意给定时刻均有确定对应的值。
+    \item \textbf{随机信号}（不确定信号）：信号取值具有统计不确定性，不能用确定的时间函数表示，只能通过概率论与数理统计方法（如均值、自相关函数、功率谱等）进行描述。
+\end{itemize}
+
+\subsubsection{连续时间信号与离散时间信号}
+\begin{itemize}
+    \item \textbf{连续时间信号}（Continuous-Time Signal）：在连续时间观测范围内除有限个间断点外均有确定值的信号，自变量 $t \in \mathbb{R}$ 连续取值，通常记为 $x(t)$。
+    \item \textbf{离散时间信号}（Discrete-Time Signal）：仅在离散的时间集合上定义的信号，自变量为离散整数序号 $k \in \mathbb{Z}$，通常记为序列 $x[k]$。
+    \item \textbf{产生方式}：离散序列可通过对连续信号等间隔抽样获得（即 $x[k] = x(kT)$，其中 $T$ 为抽样间隔），亦可由计算机算法生成或物理过程本身离散产生。
+\end{itemize}
+
+\subsubsection{周期信号与非周期信号}
+\begin{definition}{连续时间周期信号}{ct_periodic}
+若对所有时刻 $t \in \mathbb{R}$，均存在非零正数 $T$ 满足：
+\begin{equation}
+    x(t) = x(t + T), \quad \forall t \in \mathbb{R}
+\end{equation}
+则称 $x(t)$ 为连续时间周期信号。满足该式的最小正数 $T_0$ 称为基波周期，基波角频率 $\omega_0 = \frac{2\pi}{T_0}$。
+\end{definition}
+
+\begin{definition}{离散时间周期序列}{dt_periodic}
+若对所有整数 $k \in \mathbb{Z}$，均存在正整数 $N \in \mathbb{Z}^+$ 满足：
+\begin{equation}
+    x[k] = x[k + N], \quad \forall k \in \mathbb{Z}
+\end{equation}
+则称 $x[k]$ 为离散时间周期序列，满足该式的最小正整数 $N_0$ 称为离散基波周期。
+\end{definition}
+
+\begin{property}[正弦序列的周期性判定准则]
+正弦序列 $x[k] = A\cos(\Omega_0 k + \phi)$ 具有周期性的充要条件是其数字角频率 $\Omega_0$ 与 $2\pi$ 之比为有理数，即：
+\begin{equation}
+    \frac{\Omega_0}{2\pi} = \frac{m}{N} \quad (m, N \in \mathbb{Z}^+, \ \gcd(m, N) = 1)
+\end{equation}
+此时其基波周期为 $N_0 = N = m \cdot \frac{2\pi}{\Omega_0}$。若 $\frac{\Omega_0}{2\pi}$ 为无理数，则该正弦序列是非周期的。
+\end{property}
+
+\begin{remark}
+多个连续周期信号 $x(t) = x_1(t) + x_2(t)$ 叠加后仍为周期信号的充要条件是两者的周期之比（或基波频率之比）为有理数，即 $\frac{T_1}{T_2} \in \mathbb{Q}$；其总基波周期为各周期的最小公倍数。
+\end{remark}
+
+\subsubsection{能量信号与功率信号}
+设信号在全时域上的归一化总能量为 $E$，平均功率为 $P$。
+\begin{itemize}
+    \item \textbf{连续时间信号}：
+    \begin{equation}
+        E = \int_{-\infty}^{+\infty} |x(t)|^2\,\mathrm{d}t, \quad P = \lim_{T \to \infty} \frac{1}{T} \int_{-T/2}^{T/2} |x(t)|^2\,\mathrm{d}t
+    \end{equation}
+    \item \textbf{离散时间信号}：
+    \begin{equation}
+        E = \sum_{k=-\infty}^{+\infty} |x[k]|^2, \quad P = \lim_{N \to \infty} \frac{1}{2N + 1} \sum_{k=-N}^{N} |x[k]|^2
+    \end{equation}
+\end{itemize}
+
+根据能量和功率的取值，信号可划分为以下三类互斥类别：
+\begin{enumerate}
+    \item \textbf{能量信号}：总能量有限且非零，平均功率为零（$0 < E < \infty,\ P = 0$）。典型如时域宽度有限的脉冲信号。
+    \item \textbf{功率信号}：平均功率有限且非零，总能量无限（$0 < P < \infty,\ E = \infty$）。典型如所有非零周期信号及稳态随机信号。
+    \item \textbf{非功非能信号}：总能量无穷大且平均功率趋于无穷（或极限不存在）（$E \to \infty,\ P \to \infty$）。典型如斜坡信号 $t\varepsilon(t)$、指数发散信号 $\mathrm{e}^{at}\varepsilon(t) \ (a>0)$ 等。
+\end{enumerate}
+
+\subsection{系统的描述与数学模型}
+
+\subsubsection{系统的基本概念与算子表示}
+系统是指由相互联系和相互制约的若干组成部分按照一定规律构成的综合体，其主要功能是对输入激励信号 $x(t)$ 进行加工、变换或处理，产生所需的输出响应信号 $y(t)$。系统可抽象为变换算子 $\mathcal{T}$：
+\begin{equation}
+    y(t) = \mathcal{T}\{x(t)\} \quad \text{或} \quad y[k] = \mathcal{T}\{x[k]\}
+\end{equation}
+
+\subsubsection{系统的数学模型分类}
+\begin{itemize}
+    \item \textbf{输入输出描述法（外部模型）}：将系统视为黑箱，仅关注端口的激励与响应关系。
+    \begin{itemize}
+        \item 连续时间 LTI 系统：采用 $N$ 阶常系数线性微分方程描述：
+        \begin{equation}
+            \sum_{i=0}^N a_i \frac{\mathrm{d}^i y(t)}{\mathrm{d}t^i} = \sum_{j=0}^M b_j \frac{\mathrm{d}^j x(t)}{\mathrm{d}t^j}
+        \end{equation}
+        \item 离散时间 LTI 系统：采用 $N$ 阶常系数线性差分方程描述：
+        \begin{equation}
+            \sum_{i=0}^N a_i y[k - i] = \sum_{j=0}^M b_j x[k - j]
+        \end{equation}
+    \end{itemize}
+    \item \textbf{状态变量分析法（内部模型）}：引入内部状态向量 $\bm{x}(t)$，通过一组一阶微分/差分方程组同时揭示系统的内部动态演化与外部响应，适用于多输入多输出（MIMO）系统及非线性/时变系统分析。
+\end{itemize}
+
+\subsection{系统特性的判定准则}
+
+\subsubsection{线性（Linearity）}
+\begin{definition}{线性系统}{linearity}
+设系统在零状态下，算子为 $\mathcal{T}$。若对于任意常数 $a, b$ 及任意输入 $x_1(t), x_2(t)$ 均满足：
+\begin{equation}
+    \mathcal{T}\{a x_1(t) + b x_2(t)\} = a \mathcal{T}\{x_1(t)\} + b \mathcal{T}\{x_2(t)\}
+\end{equation}
+则称该系统具有线性（同时满足齐次性与可加性）。
+\end{definition}
+
+\begin{property}[完全响应的线性分解]
+若动态系统存在初始状态，则线性系统的完全响应 $y(t)$ 必能唯一分解为零输入响应 $y_{\mathrm{zi}}(t)$ 与零状态响应 $y_{\mathrm{zs}}(t)$ 之和：
+\begin{equation}
+    y(t) = y_{\mathrm{zi}}(t) + y_{\mathrm{zs}}(t)
+\end{equation}
+且 $y_{\mathrm{zi}}(t)$ 对初始状态呈线性依赖，$y_{\mathrm{zs}}(t)$ 对外加激励呈线性依赖。
+\end{property}
+
+\begin{remark}
+\textbf{期末判别速记}：若输入输出关系中含有常数偏置项（如 $y(t) = 2x(t) + 3$）、乘方/开方（如 $x^2(t)$）、绝对值（$|x(t)|$）或非线性运算（如 $\sin(x(t))$），则系统必为非线性。
+\end{remark}
+
+\subsubsection{时不变性（Time-Invariance）}
+\begin{definition}{时不变系统}{time_invariance}
+若系统对任意输入 $x(t)$ 产生响应 $y(t) = \mathcal{T}\{x(t)\}$，对于任意时间位移量 $t_0 \in \mathbb{R}$，均有：
+\begin{equation}
+    \mathcal{T}\{x(t - t_0)\} = y(t - t_0)
+\end{equation}
+则称该系统为时不变系统。即系统算子与时移算子可对易：响应的波形仅随激励发生整体时移，其代数函数关系与时移起点无关。
+\end{definition}
+
+\begin{remark}
+\textbf{期末判别速记}：
+\begin{enumerate}
+    \item 若微分/差分方程的系数中显含时间变量 $t$ 或序列序号 $k$（如 $t \frac{\mathrm{d}y(t)}{\mathrm{d}t} + y(t) = x(t)$ 或 $y(t) = \cos(t)x(t)$），系统为\textbf{时变}。
+    \item 若输入信号的自变量发生尺度缩放或反转（如 $y(t) = x(2t)$、$y(t) = x(-t)$），系统为\textbf{时变}。
+\end{enumerate}
+\end{remark}
+
+\subsubsection{因果性（Causality）}
+\begin{definition}{因果系统}{causality}
+若系统在任意时刻 $t_0$（或 $k_0$）的输出响应只取决于当前时刻 $t \le t_0$（或 $k \le k_0$）及过去时刻的输入，而与未来时刻 $t > t_0$（或 $k > k_0$）的输入无关，则称该系统为因果系统（非超前系统）。
+\end{definition}
+
+\begin{remark}
+\textbf{期末判别速记}：只要输出表达式在计算当前点时依赖于更靠后的时刻，即为非因果系统。例如：
+\begin{itemize}
+    \item $y(t) = x(t+1)$：在 $t=0$ 时输出为 $x(1)$，依赖未来，\textbf{非因果}；
+    \item $y(t) = x(2t)$：在 $t=1$ 时输出为 $x(2)$，依赖未来，\textbf{非因果}；
+    \item $y(t) = x(-t)$：在 $t=-1$ 时输出为 $x(1)$，依赖未来，\textbf{非因果}。
+\end{itemize}
+物理可实现的实时处理系统必然是因果系统。
+\end{remark}
+
+\subsubsection{记忆性（Memory）}
+\begin{itemize}
+    \item \textbf{即时系统（无记忆系统）}：任意时刻的输出仅由该时刻同一瞬间的输入所决定，与过去和未来的输入完全无关（如纯电阻衰减/放大网络 $y(t) = R \cdot x(t)$）。
+    \item \textbf{动态系统（有记忆系统）}：输出不仅与当前输入有关，还依赖于历史（或未来）时刻的输入（电路中含有电感、电容等储能元件，或数学上包含微分、积分、差分、时移项）。
+\end{itemize}
+
+\subsubsection{稳定性（BIBO Stability）}
+\begin{definition}{有界输入有界输出稳定（BIBO 稳定）}{bibo_stability}
+若系统对任意有界的输入信号 $|x(t)| \le M_x < \infty$，其对应的零状态响应也必然有界，即存在有限正数 $M_y < \infty$ 使得：
+\begin{equation}
+    |y(t)| \le M_y < \infty, \quad \forall t
+\end{equation}
+则称该系统是 BIBO 稳定的。
+\end{definition}
+
+\subsection{系统的互联结构}
+系统通常通过以下三种基础拓扑联结构成复合系统：
+\begin{enumerate}
+    \item \textbf{级联（串联）}：两子系统串接，总传输特性为算子复合 $\mathcal{T} = \mathcal{T}_2 \mathcal{T}_1$。连续 LTI 系统的级联满足冲激响应卷积交换律：$h(t) = h_1(t) * h_2(t) = h_2(t) * h_1(t)$。
+    \item \textbf{并联}：两子系统输入相同，输出求和，总传输特性为算子相加 $\mathcal{T} = \mathcal{T}_1 + \mathcal{T}_2$，对应冲激响应 $h(t) = h_1(t) + h_2(t)$。
+    \item \textbf{反馈联结}：输出的一部分反向送回输入端与原激励比较，构成闭环控制与滤波网络。
+\end{enumerate}
+
+\subsection{信号与系统分析方法总揽}
+信号与系统理论的核心研究架构建立在“信号分解”与“LTI系统的叠加原理”之上：
+\begin{itemize}
+    \item \textbf{核心方法学}：将任意复杂信号正交分解为标准基本信号分量之和（时域分解为冲激函数/序列，频域分解为正弦/虚指数信号，复频域分解为复指数信号），分别求解基本单元激励下的系统响应，最终通过叠加原理合成完全响应。
+    \item \textbf{时域分析法}：以时间为独立自变量，求解常微分/差分方程，利用卷积积分与卷积和直接求解零状态响应，物理图像清晰直观。
+    \item \textbf{变换域分析法}：通过连续/离散傅里叶变换、拉普拉斯变换与 $z$ 变换，将时域的微分、差分与卷积运算映射为变换域的代数乘除运算，极大地简化了高阶动态系统的求解分析与频率响应特性研究。
+\end{itemize}
+
+\section{信号的时域分析}
+
+\subsection{连续时间信号的时域描述}
+
+\subsubsection{典型普通连续信号}
+\begin{itemize}
+    \item \textbf{指数信号}：形式为 $x(t) = A\mathrm{e}^{\alpha t}$。当 $\alpha > 0$ 时单调发散；当 $\alpha < 0$ 时单调衰减；当 $\alpha = 0$ 时退化为直流常数 $A$。定义衰减时间常数 $\tau = 1/|\alpha|$，当 $t = \tau$ 时信号幅值衰减为初始值的 $36.8\%$。
+    \item \textbf{正弦信号}：形式为 $x(t) = A\cos(\omega_0 t + \phi)$。具有严格周期性，基波周期 $T_0 = \frac{2\pi}{\omega_0}$，对时间求导或积分后仍保持相同角频率 $\omega_0$。
+    \item \textbf{复指数信号}：形式为 $x(t) = A\mathrm{e}^{st} = A\mathrm{e}^{(\sigma + \mathrm{j}\omega_0)t} = A\mathrm{e}^{\sigma t}\cos(\omega_0 t) + \mathrm{j}A\mathrm{e}^{\sigma t}\sin(\omega_0 t)$。它是正弦信号与实指数信号的一般形式，构成了频域及复频域变换的基本底座。
+\end{itemize}
+
+\subsubsection{奇异信号及其核心运算性质}
+奇异信号是指函数本身或其导数包含间断、跃变或趋于无穷大的一类非寻常函数。
+
+\begin{definition}{单位阶跃信号}{unit_step}
+单位阶跃函数 $u(t)$ 定义为：
+\begin{equation}
+    u(t) = \begin{cases} 1, & t > 0 \\ 0, & t < 0 \end{cases}
+\end{equation}
+在 $t = 0$ 处发生跃变。延时单位阶跃信号记为 $u(t - t_0)$。
+
+\begin{center}
+\begin{tikzpicture}[scale=0.85, >=stealth]
+    % (a) 单位阶跃信号 u(t)
+    \draw[->] (-1.5,0) -- (2.5,0) node[right] {\small $t$};
+    \draw[->] (0,-0.5) -- (0,1.8) node[above] {\small $u(t)$};
+    \draw[very thick, blue] (-1.3,0) -- (0,0);
+    \draw[very thick, blue] (0,1) -- (2.3,1);
+    \draw[densely dashed] (0,0) -- (0,1);
+    \node[left] at (0,1) {\small $1$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (0.5,-0.6) {\small (a) 单位阶跃信号 $u(t)$};
+    
+    % (b) 延时单位阶跃信号 u(t - t_0)
+    \begin{scope}[xshift=5.2cm]
+    \draw[->] (-1.2,0) -- (3.0,0) node[right] {\small $t$};
+    \draw[->] (0,-0.5) -- (0,1.8) node[above] {\small $u(t-t_0)$};
+    \draw[very thick, blue] (-1.0,0) -- (1.2,0);
+    \draw[very thick, blue] (1.2,1) -- (2.8,1);
+    \draw[densely dashed] (1.2,0) -- (1.2,1);
+    \node[left] at (0,1) {\small $1$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (1.2,0) {\small $t_0$};
+    \node[below] at (0.8,-0.6) {\small (b) 延时阶跃信号 $u(t-t_0)$};
+    \end{scope}
+
+    % (c) 阶跃合成矩形脉冲
+    \begin{scope}[xshift=11.2cm]
+    \draw[->] (-0.8,0) -- (3.2,0) node[right] {\small $t$};
+    \draw[->] (0,-0.5) -- (0,1.8) node[above] {\small $g(t)$};
+    \draw[very thick, blue] (-0.6,0) -- (0.8,0) -- (0.8,1) -- (2.2,1) -- (2.2,0) -- (3.0,0);
+    \node[left] at (0,1) {\small $1$};
+    \node[below] at (0.8,0) {\small $t_1$};
+    \node[below] at (2.2,0) {\small $t_2$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (1.2,-0.6) {\small (c) 矩形门脉冲 $u(t-t_1)-u(t-t_2)$};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{definition}
+
+\begin{definition}{单位冲激信号}{unit_impulse}
+单位冲激函数 $\delta(t)$ 是狄拉克广义函数，其数学定义为同时满足：
+\begin{equation}
+    \delta(t) = 0 \quad (t \neq 0), \qquad \int_{-\infty}^{+\infty} \delta(t)\,\mathrm{d}t = 1
+\end{equation}
+在图形上用带箭头的垂直线段表示，箭头旁括号内的数字表示冲激强度（面积）。
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9, >=stealth]
+    % (a) 单位冲激信号 delta(t)
+    \draw[->] (-1.5,0) -- (2.2,0) node[right] {\small $t$};
+    \draw[->] (0,-0.4) -- (0,2.0) node[above] {\small $\delta(t)$};
+    \draw[->, very thick, red] (0,0) -- (0,1.5);
+    \node[above right] at (0,1.1) {\small $(1)$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (0.3,-0.6) {\small (a) 单位冲激信号 $\delta(t)$};
+
+    % (b) 延时冲激信号 delta(t - t_0)
+    \begin{scope}[xshift=5.2cm]
+    \draw[->] (-1.0,0) -- (2.8,0) node[right] {\small $t$};
+    \draw[->] (0,-0.4) -- (0,2.0) node[above] {\small $\delta(t-t_0)$};
+    \draw[->, very thick, red] (1.3,0) -- (1.3,1.5);
+    \node[above right] at (1.3,1.1) {\small $(1)$};
+    \node[below] at (1.3,0) {\small $t_0$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (0.8,-0.6) {\small (b) 延时冲激信号 $\delta(t-t_0)$};
+    \end{scope}
+
+    % (c) 冲激函数的极限模型（矩形脉冲极限）
+    \begin{scope}[xshift=10.6cm]
+    \draw[->] (-1.6,0) -- (1.8,0) node[right] {\small $t$};
+    \draw[->] (0,-0.4) -- (0,2.0) node[above] {\small $p_\Delta(t)$};
+    \draw[very thick, red] (-0.5,0) -- (-0.5,1.4) -- (0.5,1.4) -- (0.5,0);
+    \draw[densely dashed] (-0.5,0) -- (-0.5,-0.1) node[below] {\scriptsize $-\frac{\Delta}{2}$};
+    \draw[densely dashed] (0.5,0) -- (0.5,-0.1) node[below] {\scriptsize $\frac{\Delta}{2}$};
+    \node[left] at (0,1.4) {\scriptsize $\frac{1}{\Delta}$};
+    \node[below left] at (0,0) {\scriptsize $0$};
+    \node[below] at (0.1,-0.6) {\small (c) 极限模型 ($\Delta \to 0$)};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{definition}
+
+\begin{theorem}[冲激信号的五大核心运算性质]
+设检验函数 $x(t)$ 在相关点处连续且阶数满足微积分要求：
+\begin{enumerate}
+    \item \textbf{筛选性（乘积性）}：
+    \begin{equation}
+        x(t)\delta(t - t_0) = x(t_0)\delta(t - t_0)
+    \end{equation}
+    \item \textbf{取样性（抽样积分性）}：
+    \begin{equation}
+        \int_{-\infty}^{+\infty} x(t)\delta(t - t_0)\,\mathrm{d}t = x(t_0)
+    \end{equation}
+    若积分区间 $[a, b]$ 不包含 $t_0$，则积分值为 0。
+    \item \textbf{尺度展缩性}：
+    \begin{equation}
+        \delta(at + b) = \frac{1}{|a|}\delta\left(t + \frac{b}{a}\right) \quad (a \neq 0)
+    \end{equation}
+    特例：当 $a = -1$ 时，$\delta(-t) = \delta(t)$，冲激函数为偶函数。
+    \item \textbf{与单位阶跃信号的互逆微积分关系}：
+    \begin{equation}
+        \delta(t) = \frac{\mathrm{d}u(t)}{\mathrm{d}t}, \qquad u(t) = \int_{-\infty}^t \delta(\tau)\,\mathrm{d}\tau
+    \end{equation}
+    \item \textbf{单位斜坡信号}：定义 $r(t) = t u(t)$，满足：
+    \begin{equation}
+        u(t) = \frac{\mathrm{d}r(t)}{\mathrm{d}t}, \qquad r(t) = \int_{-\infty}^t u(\tau)\,\mathrm{d}\tau
+    \end{equation}
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9, >=stealth]
+    % 斜坡信号 r(t)
+    \draw[->] (-1.5,0) -- (3.0,0) node[right] {\small $t$};
+    \draw[->] (0,-0.4) -- (0,2.2) node[above] {\small $r(t)$};
+    \draw[very thick, blue] (-1.2,0) -- (0,0);
+    \draw[very thick, blue] (0,0) -- (2.0,1.6);
+    \draw[densely dashed] (1.25,0) -- (1.25,1.0) -- (0,1.0);
+    \node[left] at (0,1.0) {\small $1$};
+    \node[below] at (1.25,0) {\small $1$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (0.8,-0.6) {\small 斜坡信号 $r(t) = t u(t)$};
+\end{tikzpicture}
+\end{center}
+\end{theorem}
+
+\begin{theorem}[冲激偶信号及其性质]
+冲激偶信号 $\delta'(t)$ 为单位冲激函数的一阶导数，即 $\delta'(t) = \frac{\mathrm{d}\delta(t)}{\mathrm{d}t}$。满足下列代数与积分性质：
+\begin{enumerate}
+    \item \textbf{奇函数特性与全域积分为零}：
+    \begin{equation}
+        \delta'(t) = -\delta'(-t), \qquad \int_{-\infty}^{+\infty} \delta'(t)\,\mathrm{d}t = 0
+    \end{equation}
+    \item \textbf{筛选乘积展开}：
+    \begin{equation}
+        x(t)\delta'(t - t_0) = x(t_0)\delta'(t - t_0) - x'(t_0)\delta(t - t_0)
+    \end{equation}
+    \item \textbf{抽样积分性质}：
+    \begin{equation}
+        \int_{-\infty}^{+\infty} x(t)\delta'(t - t_0)\,\mathrm{d}t = -x'(t_0)
+    \end{equation}
+    \item \textbf{尺度展缩性质}：
+    \begin{equation}
+        \delta'(\alpha t) = \frac{1}{\alpha|\alpha|}\delta'(t) \quad (\alpha \neq 0)
+    \end{equation}
+    \item \textbf{卷积微分特性}：
+    \begin{equation}
+        x(t) * \delta'(t) = x'(t)
+    \end{equation}
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9, >=stealth]
+    % (a) 冲激偶示意符号
+    \draw[->] (-1.8,0) -- (1.8,0) node[right] {\small $t$};
+    \draw[->] (0,-1.8) -- (0,1.8) node[above] {\small $\delta'(t)$};
+    \draw[->, very thick, red] (0,0) -- (0,1.3);
+    \draw[->, very thick, red] (0,0) -- (0,-1.3);
+    \node[right] at (0,0.9) {\small $(1)$};
+    \node[left] at (0,-0.9) {\small $(-1)$};
+    \node[below left] at (0,0) {\small $0$};
+    \node[below] at (0,-2.0) {\small (a) 冲激偶信号 $\delta'(t)$ 示意};
+
+    % (b) 冲激偶极限模型（正负双门脉冲极限）
+    \begin{scope}[xshift=6.5cm]
+    \draw[->] (-2.2,0) -- (2.2,0) node[right] {\small $t$};
+    \draw[->] (0,-1.8) -- (0,1.8) node[above] {\small $p'_\varepsilon(t)$};
+    \draw[very thick, red] (-1.0,0) -- (-1.0,1.2) -- (0,1.2) -- (0,-1.2) -- (1.0,-1.2) -- (1.0,0);
+    \node[left] at (0,1.2) {\scriptsize $\frac{1}{\varepsilon^2}$};
+    \node[right] at (0,-1.2) {\scriptsize $-\frac{1}{\varepsilon^2}$};
+    \node[below] at (-1.0,0) {\scriptsize $-\varepsilon$};
+    \node[above] at (1.0,0) {\scriptsize $\varepsilon$};
+    \node[below left] at (0,0) {\scriptsize $0$};
+    \node[below] at (0,-2.0) {\small (b) 脉冲偶极限模型 ($\varepsilon \to 0$)};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{theorem}
+
+\subsection{离散时间信号（序列）的时域描述}
+
+\subsubsection{典型普通序列}
+\begin{itemize}
+    \item \textbf{实指数序列}：$x[k] = A r^k$。当 $|r| > 1$ 时序列发散；当 $|r| < 1$ 时序列衰减；当 $r > 0$ 时单调变化；当 $r < 0$ 时正负交变振荡。
+    \item \textbf{正弦序列及其周期性判据}：正弦序列 $x[k] = A\cos(\Omega_0 k + \phi)$ 具周期性的充要条件是：
+    \begin{equation}
+        \frac{\Omega_0}{2\pi} = \frac{m}{N} \quad (m, N \in \mathbb{Z}^+, \ \gcd(m, N) = 1)
+    \end{equation}
+    其离散基波周期为 $N_0 = N = m \cdot \frac{2\pi}{\Omega_0}$。若该比值为无理数，则序列不具有周期性。
+\end{itemize}
+
+\subsubsection{基本离散脉冲与阶跃序列}
+\begin{definition}{单位脉冲序列与单位阶跃序列}{discrete_impulse_step}
+单位脉冲序列 $\delta[k]$ 及单位阶跃序列 $u[k]$ 分别定义为：
+\begin{equation}
+    \delta[k] = \begin{cases} 1, & k = 0 \\ 0, & k \neq 0 \end{cases}, \qquad u[k] = \begin{cases} 1, & k \ge 0 \\ 0, & k < 0 \end{cases}
+\end{equation}
+两者满足互逆的差分与累加关系：
+\begin{equation}
+    \delta[k] = u[k] - u[k - 1], \qquad u[k] = \sum_{n=-\infty}^k \delta[n] = \sum_{m=0}^\infty \delta[k - m]
+\end{equation}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.85, >=stealth]
+    % (a) 单位脉冲序列 delta[k]
+    \draw[->] (-2.0,0) -- (3.0,0) node[right] {\small $k$};
+    \draw[->] (0,-0.4) -- (0,1.8) node[above] {\small $\delta[k]$};
+    \foreach \x in {-2,-1,1,2} {
+        \draw[fill=black] (\x,0) circle (1.5pt);
+    }
+    \draw[very thick, red] (0,0) -- (0,1.2);
+    \draw[fill=red] (0,1.2) circle (2pt);
+    \node[left] at (0,1.2) {\small $1$};
+    \node[below] at (0,0) {\small $0$};
+    \node[below] at (0.5,-0.6) {\small (a) 单位脉冲序列 $\delta[k]$};
+
+    % (b) 单位阶跃序列 u[k]
+    \begin{scope}[xshift=6.5cm]
+    \draw[->] (-2.0,0) -- (4.0,0) node[right] {\small $k$};
+    \draw[->] (0,-0.4) -- (0,1.8) node[above] {\small $u[k]$};
+    \foreach \x in {-2,-1} {
+        \draw[fill=black] (\x,0) circle (1.5pt);
+    }
+    \foreach \x in {0,1,2,3} {
+        \draw[very thick, blue] (\x,0) -- (\x,1.0);
+        \draw[fill=blue] (\x,1.0) circle (2pt);
+        \node[below] at (\x,0) {\scriptsize $\x$};
+    }
+    \node[left] at (0,1.0) {\small $1$};
+    \node[below] at (1.0,-0.6) {\small (b) 单位阶跃序列 $u[k]$};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{definition}
+
+\begin{property}[离散序列抽样性质]
+对于任意离散序列 $x[k]$，在脉冲作用点处满足乘积筛选：
+\begin{equation}
+    x[k]\delta[k - k_0] = x[k_0]\delta[k - k_0], \qquad \sum_{k=-\infty}^{+\infty} x[k]\delta[k - k_0] = x[k_0]
+\end{equation}
+\end{property}
+
+\subsection{信号的时域基本运算}
+
+\subsubsection{自变量的时域变换}
+对于给定信号 $x(t)$，通过改变独立时间变量可实现以下三种几何变换：
+\begin{enumerate}
+    \item \textbf{时移（平移）}：$x(t) \to x(t \mp t_0)$（$t_0 > 0$）。$x(t - t_0)$ 为波形右移（延时），$x(t + t_0)$ 为波形左移（超前）。
+    \item \textbf{反转（翻转）}：$x(t) \to x(-t)$。波形以纵轴 $t = 0$ 为基准线进行左右镜像对称反转。
+    \item \textbf{尺度变换（展缩）}：$x(t) \to x(at)$（$a > 0$）。当 $a > 1$ 时波形沿时间轴压缩至原来的 $1/a$；当 $0 < a < 1$ 时波形沿时间轴扩展至原来的 $1/a$。
+\end{enumerate}
+
+\begin{remark}
+\textbf{复合变换作图避坑法则}：对任意形如 $x(at + b)$ 的复合变换，推荐使用自变量直接映射法。若原始特征点时间为 $t_{\text{原}}$，则变换后对应的新时间位置 $t_{\text{新}}$ 满足：
+\begin{equation}
+    a t_{\text{新}} + b = t_{\text{原}} \implies t_{\text{新}} = \frac{t_{\text{原}} - b}{a}
+\end{equation}
+若分步作图，可采用“先平移后展缩”：$x(t) \xrightarrow{\text{平移 } b} x(t + b) \xrightarrow{t \to at} x(at + b)$；或“先展缩后平移”：$x(t) \xrightarrow{t \to at} x(at) \xrightarrow{t \to t + \frac{b}{a}} x\left(a\left(t + \frac{b}{a}\right)\right) = x(at + b)$。
+\end{remark}
+
+\subsubsection{信号幅度的代数运算}
+\begin{itemize}
+    \item \textbf{相加与相乘}：同域信号在相同时间瞬时点上的幅度直接求和或相乘：$y(t) = x_1(t) \pm x_2(t)$，$y(t) = x_1(t) \cdot x_2(t)$。
+    \item \textbf{信号的微分与积分}：
+    \begin{itemize}
+        \item 微分：$y(t) = \frac{\mathrm{d}x(t)}{\mathrm{d}t}$。波形在阶跃跳变点处求导必产生冲激，冲激强度等于该跳变点的跃变增量 $\Delta = x(t^+) - x(t^-)$。
+        \item 积分：$y(t) = \int_{-\infty}^t x(\tau)\,\mathrm{d}\tau$。起波形平滑与累积作用。
+    \end{itemize}
+    \item \textbf{离散序列的差分与累加}：
+    \begin{itemize}
+        \item 前向差分：$\Delta x[k] = x[k + 1] - x[k]$；
+        \item 后向差分：$\nabla x[k] = x[k] - x[k - 1]$；
+        \item 累加运算：$y[k] = \sum_{n=-\infty}^k x[n]$。
+    \end{itemize}
+\end{itemize}
+
+\subsection{确定信号的时域分解}
+
+\subsubsection{奇分量与偶分量分解}
+任意定义在对称区间上的实信号 $x(t)$ 均可唯一分解为偶分量 $x_{\mathrm{e}}(t)$ 与奇分量 $x_{\mathrm{o}}(t)$ 之和：
+\begin{equation}
+    x(t) = x_{\mathrm{e}}(t) + x_{\mathrm{o}}(t)
+\end{equation}
+其中各分量计算公式为：
+\begin{equation}
+    x_{\mathrm{e}}(t) = \frac{1}{2}[x(t) + x(-t)], \qquad x_{\mathrm{o}}(t) = \frac{1}{2}[x(t) - x(-t)]
+\end{equation}
+满足对称性：$x_{\mathrm{e}}(-t) = x_{\mathrm{e}}(t)$，$x_{\mathrm{o}}(-t) = -x_{\mathrm{o}}(t)$。离散序列同理满足 $x[k] = x_{\mathrm{e}}[k] + x_{\mathrm{o}}[k]$。
+
+\subsubsection{脉冲分量分解（时域卷积的理论基石）}
+\begin{theorem}[脉冲基底连续展开]
+利用冲激函数的抽样积分性质，任意连续时间信号 $x(t)$ 均可精确展开表示为无穷多经时移与加权处理的单位冲激信号的连续线性叠加：
+\begin{equation}
+    x(t) = \int_{-\infty}^{+\infty} x(\tau)\delta(t - \tau)\,\mathrm{d}\tau
+\end{equation}
+该式表明信号在任意时刻的响应可由基本冲激响应通过卷积积分合成。
+\end{theorem}
+
+\begin{theorem}[脉冲基底离散展开]
+利用离散单位脉冲序列的筛选性，任意离散序列 $x[k]$ 均可表示为各移位脉冲序列的加权求和：
+\begin{equation}
+    x[k] = \sum_{n=-\infty}^{+\infty} x[n]\delta[k - n]
+\end{equation}
+该式是离散 LTI 系统卷积和分析法的数学物理前提。
+\end{theorem}
+
+\section{系统的时域分析}
+
+\subsection{线性时不变系统的数学模型}
+
+\subsubsection{微分方程与差分方程描述}
+线性时不变（LTI）系统在时域中的输入输出动态关系分别由常系数线性微分方程与常系数线性差分方程描述：
+\begin{itemize}
+    \item \textbf{连续时间 LTI 系统}：采用 $n$ 阶常系数线性微分方程描述：
+    \begin{equation}
+        y^{(n)}(t) + a_{n-1}y^{(n-1)}(t) + \cdots + a_1 y'(t) + a_0 y(t) = b_m x^{(m)}(t) + \cdots + b_1 x'(t) + b_0 x(t)
+    \end{equation}
+    \item \textbf{离散时间 LTI 系统}：采用 $n$ 阶常系数线性后向差分方程描述：
+    \begin{equation}
+        y[k] + a_{n-1}y[k-1] + \cdots + a_0 y[k-n] = b_m x[k] + \cdots + b_0 x[k-m]
+    \end{equation}
+\end{itemize}
+
+\subsection{连续时间系统的响应求解}
+
+\subsubsection{经典时域分析法}
+微分方程的全解由齐次解 $y_{\mathrm{h}}(t)$ 与特解 $y_{\mathrm{p}}(t)$ 组成：
+\begin{equation}
+    y(t) = y_{\mathrm{h}}(t) + y_{\mathrm{p}}(t)
+\end{equation}
+齐次解的形式完全由系统微分方程的特征根决定（对应系统的固有响应），特解的形式由外加激励信号决定（对应系统的强迫响应）。
+
+特征方程为：
+\begin{equation}
+    s^n + a_{n-1}s^{n-1} + \cdots + a_1 s + a_0 = 0
+\end{equation}
+
+齐次解 $y_{\mathrm{h}}(t)$ 的三种标准形式：
+\begin{enumerate}
+    \item \textbf{特征根为单实根} $s_1, s_2, \dots, s_n$：
+    \begin{equation}
+        y_{\mathrm{h}}(t) = K_1 \mathrm{e}^{s_1 t} + K_2 \mathrm{e}^{s_2 t} + \cdots + K_n \mathrm{e}^{s_n t}
+    \end{equation}
+    \item \textbf{特征根为 $n$ 重实根} $s_1 = s_2 = \cdots = s_n = s$：
+    \begin{equation}
+        y_{\mathrm{h}}(t) = (K_1 + K_2 t + \cdots + K_n t^{n-1})\mathrm{e}^{st}
+    \end{equation}
+    \item \textbf{特征根为成对共轭复根} $s_{1,2} = \sigma \pm \mathrm{j}\omega$：
+    \begin{equation}
+        y_{\mathrm{h}}(t) = \mathrm{e}^{\sigma t}(K_1 \cos\omega t + K_2 \sin\omega t) = A \mathrm{e}^{\sigma t} \cos(\omega t + \theta)
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{完全响应的“双零”分解法}
+\begin{property}[零输入响应与零状态响应分解]
+LTI 系统的完全响应可唯一分解为：
+\begin{equation}
+    y(t) = y_{\mathrm{zi}}(t) + y_{\mathrm{zs}}(t) = y_{\mathrm{zi}}(t) + x(t) * h(t)
+\end{equation}
+\begin{itemize}
+    \item \textbf{零输入响应 $y_{\mathrm{zi}}(t)$}：输入信号为零（$x(t) \equiv 0$），仅由系统的初始状态 $y(0^-), y'(0^-), \dots$ 单独作用而产生的响应。
+    \item \textbf{零状态响应 $y_{\mathrm{zs}}(t)$}：系统初始储能为零（$y(0^-) = y'(0^-) = \cdots = 0$），仅由外加激励信号 $x(t)$ 单独作用而产生的响应。
+\end{itemize}
+\end{property}
+
+\subsubsection{零输入响应的求解步骤}
+\begin{enumerate}
+    \item 列出对应的齐次微分方程：
+    \begin{equation}
+        y^{(n)}(t) + a_{n-1}y^{(n-1)}(t) + \cdots + a_0 y(t) = 0
+    \end{equation}
+    \item 求特征多项式根，写出含待定系数的齐次通解形式 $y_{\mathrm{zi}}(t)$。
+    \item 将 $t = 0^-$ 处的历史初始状态值代入：
+    \begin{equation}
+        y_{\mathrm{zi}}^{(k)}(0^-) = y^{(k)}(0^-) \quad (k = 0, 1, \dots, n-1)
+    \end{equation}
+    解方程组定出待定系数，得到 $t \ge 0^-$ 范围内的闭式解。
+\end{enumerate}
+
+\subsubsection{单位冲激响应与单位阶跃响应}
+\begin{definition}{单位冲激响应与单位阶跃响应}{impulse_step_response}
+\begin{itemize}
+    \item \textbf{单位冲激响应 $h(t)$}：系统在零状态条件下，外加单位冲激信号 $\delta(t)$ 所产生的零状态响应，即 $h(t) = \mathcal{T}\{\delta(t)\}$。
+    \item \textbf{单位阶跃响应 $g(t)$}：系统在零状态条件下，外加单位阶跃信号 $u(t)$ 所产生的零状态响应，即 $g(t) = \mathcal{T}\{u(t)\}$。
+\end{itemize}
+由微分与积分算子的线性时不变性，两者满足互逆的微积分映射关系：
+\begin{equation}
+    h(t) = \frac{\mathrm{d}g(t)}{\mathrm{d}t}, \qquad g(t) = \int_{-\infty}^t h(\tau)\,\mathrm{d}\tau
+\end{equation}
+\end{definition}
+
+\begin{theorem}[冲激平衡法求冲激响应 $h(t)$]
+对于方程两端最高导数同阶的因果系统（$n = m$）：
+\begin{equation}
+    y^{(n)}(t) + \cdots + a_0 y(t) = b_n x^{(n)}(t) + \cdots + b_0 x(t)
+\end{equation}
+冲激响应的形式中必然包含奇异项：
+\begin{equation}
+    h(t) = A_n \delta(t) + h_{\mathrm{c}}(t)u(t)
+\end{equation}
+其中 $A_n = b_n$，而连续变化分量 $h_{\mathrm{c}}(t)$ 是由微分方程齐次通解形式确定的连续函数。通过在 $t = 0$ 邻域对微分方程两端积分平衡冲激项系数，可定出跃变条件 $h^{(k)}(0^+)$，进而解出各待定系数。
+\end{theorem}
+
+\subsection{卷积积分及其计算}
+
+\subsubsection{卷积积分的数学定义与物理本质}
+\begin{definition}{卷积积分}{conv_integral}
+连续时间信号 $x_1(t)$ 与 $x_2(t)$ 的卷积积分定义为：
+\begin{equation}
+    y(t) = x_1(t) * x_2(t) = \int_{-\infty}^{+\infty} x_1(\tau)x_2(t - \tau)\,\mathrm{d}\tau
+\end{equation}
+连续 LTI 系统的零状态响应完全由输入激励 $x(t)$ 与系统冲激响应 $h(t)$ 的卷积积分给出：
+\begin{equation}
+    y_{\mathrm{zs}}(t) = x(t) * h(t) = \int_{-\infty}^{+\infty} x(\tau)h(t - \tau)\,\mathrm{d}\tau
+\end{equation}
+\end{definition}
+
+\subsubsection{图解卷积的四步法法则}
+图解法是求解分段连续信号或脉冲信号卷积的核心应试技巧：
+\begin{enumerate}
+    \item \textbf{代换自变量}：将信号自变量由 $t$ 改写为哑变量 $\tau$，得 $x(\tau)$ 与 $h(\tau)$。
+    \item \textbf{反转}：将其中一个波形关于纵轴翻转得到 $h(-\tau)$。
+    \item \textbf{时移}：将翻转波形沿横轴右移 $t$ 个单位（$t > 0$ 右移，$t < 0$ 左移），得到 $h(t - \tau)$。
+    \item \textbf{乘积积分}：将 $x(\tau)$ 与 $h(t - \tau)$ 在重叠区间内相乘并求积分面积。不断滑动参变量 $t$，按区间转折点分段讨论积分上下限，最终写出分段连续解析式。
+\end{enumerate}
+
+\subsubsection{卷积积分的代数与微积分性质}
+\begin{theorem}[卷积积分的核心运算性质]
+\begin{enumerate}
+    \item \textbf{代数运算法则}：
+    \begin{itemize}
+        \item 交换律：$x_1(t) * x_2(t) = x_2(t) * x_1(t)$
+        \item 结合律：$[x_1(t) * x_2(t)] * x_3(t) = x_1(t) * [x_2(t) * x_3(t)]$
+        \item 分配律：$x_1(t) * [x_2(t) + x_3(t)] = x_1(t) * x_2(t) + x_1(t) * x_3(t)$
+    \end{itemize}
+    \item \textbf{时移性质}：
+    \begin{equation}
+        \text{若 } x_1(t) * x_2(t) = y(t) \implies x_1(t - t_1) * x_2(t - t_2) = y(t - t_1 - t_2)
+    \end{equation}
+    \item \textbf{微分与积分性质}：
+    \begin{equation}
+        \frac{\mathrm{d}^n}{\mathrm{d}t^n}[x_1(t) * x_2(t)] = x_1^{(n)}(t) * x_2(t) = x_1(t) * x_2^{(n)}(t)
+    \end{equation}
+    \begin{equation}
+        \int_{-\infty}^t [x_1(\tau) * x_2(\tau)]\,\mathrm{d}\tau = \left[\int_{-\infty}^t x_1(\tau)\,\mathrm{d}\tau\right] * x_2(t) = x_1(t) * \left[\int_{-\infty}^t x_2(\tau)\,\mathrm{d}\tau\right]
+    \end{equation}
+    \item \textbf{冲激信号卷积性质（筛选恒等元）}：
+    \begin{equation}
+        x(t) * \delta(t) = x(t), \qquad x(t) * \delta(t - t_0) = x(t - t_0)
+    \end{equation}
+    \begin{equation}
+        x(t) * \delta'(t) = x'(t), \qquad x(t) * u(t) = \int_{-\infty}^t x(\tau)\,\mathrm{d}\tau
+    \end{equation}
+    \item \textbf{展缩性质}：
+    \begin{equation}
+        x_1(at) * x_2(at) = \frac{1}{|a|} y(at) \quad (a \neq 0)
+    \end{equation}
+\end{enumerate}
+\end{theorem}
+
+\subsection{离散时间系统的时域分析}
+
+\subsubsection{经典差分法求解}
+差分方程全解亦由齐次解 $y_{\mathrm{h}}[k]$ 与特解 $y_{\mathrm{p}}[k]$ 叠加构成。特征方程为：
+\begin{equation}
+    \lambda^n + a_{n-1}\lambda^{n-1} + \cdots + a_1 \lambda + a_0 = 0
+\end{equation}
+齐次解形式：
+\begin{enumerate}
+    \item \textbf{单实根}：$y_{\mathrm{h}}[k] = C_1 \lambda_1^k + C_2 \lambda_2^k + \cdots + C_n \lambda_n^k$
+    \item \textbf{$n$ 重实根}：$y_{\mathrm{h}}[k] = (C_1 + C_2 k + \cdots + C_n k^{n-1})\lambda^k$
+    \item \textbf{共轭复根} $\lambda_{1,2} = \rho \mathrm{e}^{\pm \mathrm{j}\Omega_0}$：$y_{\mathrm{h}}[k] = \rho^k (C_1 \cos\Omega_0 k + C_2 \sin\Omega_0 k)$
+\end{enumerate}
+
+\subsubsection{单位脉冲响应与卷积和}
+\begin{definition}{单位脉冲响应与卷积和}{conv_sum}
+离散 LTI 系统的单位脉冲响应定义为 $h[k] = \mathcal{T}\{\delta[k]\}$。系统的离散零状态响应由输入序列 $x[k]$ 与 $h[k]$ 的卷积和确定：
+\begin{equation}
+    y_{\mathrm{zs}}[k] = x[k] * h[k] = \sum_{n=-\infty}^{+\infty} x[n]h[k - n]
+\end{equation}
+\end{definition}
+
+\begin{theorem}[离散卷积和的计算技巧]
+\begin{itemize}
+    \item \textbf{对角线列表法（阵列乘法）}：适用于有限长因果序列 $x[k]$（长为 $L_1$）与 $h[k]$（长为 $L_2$）。输出非零区间长度为 $L = L_1 + L_2 - 1$。
+    \item \textbf{解析求和法}：利用等比数列求和公式 $\sum_{n=0}^{k} a^n = \frac{1 - a^{k+1}}{1 - a} \ (a \neq 1)$ 直接化简累加区间。
+\end{itemize}
+\end{theorem}
+
+\subsection{系统特性的冲激响应判据}
+
+通过时域冲激响应 $h(t)$ 或脉冲响应 $h[k]$，可直接判定系统的核心固有特性：
+
+\begin{theorem}[时域冲激判据系统定理]
+\begin{enumerate}
+    \item \textbf{因果性充要条件}：
+    \begin{itemize}
+        \item 连续因果系统：$h(t) = 0 \quad (t < 0)$
+        \item 离散因果系统：$h[k] = 0 \quad (k < 0)$
+    \end{itemize}
+    \item \textbf{BIBO 稳定性充要条件}：
+    \begin{itemize}
+        \item 连续系统稳定 $\iff$ 冲激响应在全域绝对可积：
+        \begin{equation}
+            \int_{-\infty}^{+\infty} |h(t)|\,\mathrm{d}t < \infty
+        \end{equation}
+        \item 离散系统稳定 $\iff$ 脉冲响应在全域绝对可和：
+        \begin{equation}
+            \sum_{k=-\infty}^{+\infty} |h[k]| < \infty
+        \end{equation}
+    \end{itemize}
+    \item \textbf{无记忆（即时）系统充要条件}：
+    \begin{equation}
+        h(t) = K \delta(t), \qquad h[k] = K \delta[k] \quad (K \text{ 为非零有限常数})
+    \end{equation}
+    \item \textbf{复合互联系统的等效冲激响应}：
+    \begin{itemize}
+        \item 级联系统：$h(t) = h_1(t) * h_2(t)$
+        \item 并联系统：$h(t) = h_1(t) + h_2(t)$
+    \end{itemize}
+\end{enumerate}
+\end{theorem}
+
+\section{周期信号的频域分析}
+
+\subsection{连续时间信号的 Fourier 级数}
+
+\subsubsection{指数形式与三角形式的 Fourier 级数}
+设连续周期信号 $f(t)$ 的基波周期为 $T_0$，基波角频率为 $\omega_0 = \frac{2\pi}{T_0}$。若满足 Dirichlet 条件，可展开为正交函数集的线性组合：
+\begin{enumerate}
+    \item \textbf{指数形式的 Fourier 级数}：
+    \begin{equation}
+        f(t) = \sum_{n=-\infty}^{+\infty} C_n \mathrm{e}^{\mathrm{j}n\omega_0 t}
+    \end{equation}
+    其中 Fourier 系数（频谱系数）$C_n$ 为：
+    \begin{equation}
+        C_n = \frac{1}{T_0} \int_{-T_0/2}^{T_0/2} f(t)\mathrm{e}^{-\mathrm{j}n\omega_0 t}\,\mathrm{d}t = |C_n|\mathrm{e}^{\mathrm{j}\varphi_n}
+    \end{equation}
+    \item \textbf{三角形式的 Fourier 级数}：
+    \begin{equation}
+        f(t) = \frac{a_0}{2} + \sum_{n=1}^\infty \left[ a_n \cos(n\omega_0 t) + b_n \sin(n\omega_0 t) \right] = \frac{a_0}{2} + \sum_{n=1}^\infty A_n \cos(n\omega_0 t + \theta_n)
+    \end{equation}
+    系数计算公式为：
+    \begin{equation}
+        a_n = \frac{2}{T_0} \int_{-T_0/2}^{T_0/2} f(t)\cos(n\omega_0 t)\,\mathrm{d}t, \quad b_n = \frac{2}{T_0} \int_{-T_0/2}^{T_0/2} f(t)\sin(n\omega_0 t)\,\mathrm{d}t
+    \end{equation}
+    \item \textbf{两种形式系数的代数转换关系}（实信号 $f(t)$）：
+    \begin{equation}
+        C_0 = \frac{a_0}{2}, \quad C_n = \frac{1}{2}(a_n - \mathrm{j}b_n), \quad C_{-n} = C_n^* = \frac{1}{2}(a_n + \mathrm{j}b_n)
+    \end{equation}
+    \begin{equation}
+        A_n = 2|C_n| = \sqrt{a_n^2 + b_n^2}, \quad \theta_n = \varphi_n = -\arctan\left(\frac{b_n}{a_n}\right)
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{波形对称性与谐波成分简化（期末速算）}
+\begin{theorem}[波形对称性定理]
+利用时域对称性可直接判定特定谐波的取值，避免繁琐积分：
+\begin{enumerate}
+    \item \textbf{偶对称（偶函数 $f(-t) = f(t)$）}：
+    $b_n = 0$，$C_n$ 为纯实数。级数展开中\textbf{仅含直流项与余弦分量}。
+    \item \textbf{奇对称（奇函数 $f(-t) = -f(t)$）}：
+    $a_n = 0$，$C_0 = 0$，$C_n$ 为纯虚数。级数展开中\textbf{无直流项，仅含有正弦分量}。
+    \item \textbf{奇谐对称（半波镜像对称 $f\left(t \pm \frac{T_0}{2}\right) = -f(t)$）}：
+    波形沿横轴平移半个周期后反折与原波形重合。其级数展开中\textbf{无直流分量且偶次谐波全为零，只包含奇次谐波}（即当 $n$ 为偶数时 $C_n = 0$）。
+    \item \textbf{偶谐对称（半波平移对称 $f\left(t \pm \frac{T_0}{2}\right) = f(t)$）}：
+    实质为以 $T_0/2$ 为实际基波周期的信号，\textbf{所有奇次谐波分量均为零}。
+\end{enumerate}
+\end{theorem}
+
+\subsection{连续时间 Fourier 级数的运算性质}
+
+设周期均为 $T_0$ 的信号 $f(t) \longleftrightarrow C_n$，$g(t) \longleftrightarrow D_n$：
+\begin{itemize}
+    \item \textbf{线性性质}：$a f(t) + b g(t) \longleftrightarrow a C_n + b D_n$
+    \item \textbf{时移性质}：$f(t - t_0) \longleftrightarrow C_n \mathrm{e}^{-\mathrm{j}n\omega_0 t_0}$（幅度谱保持不变，相位谱叠加线性相移 $-n\omega_0 t_0$）
+    \item \textbf{频移性质}：$f(t)\mathrm{e}^{\mathrm{j}m\omega_0 t} \longleftrightarrow C_{n-m}$
+    \item \textbf{尺度变换性质}：$f(at) \ (a>0)$ 的周期变为 $T_0/a$，角频率变为 $a\omega_0$，其 Fourier 系数仍为 $C_n$（谐波谱线间隔变为原来的 $a$ 倍）
+    \item \textbf{时域微分性质}：$\frac{\mathrm{d}^k f(t)}{\mathrm{d}t^k} \longleftrightarrow (\mathrm{j}n\omega_0)^k C_n$（此性质常用于将折线/方波求导至冲激串后求 $C_n$）
+    \item \textbf{时域积分性质}：若 $C_0 = 0$，则 $\int_{-\infty}^t f(\tau)\,\mathrm{d}\tau \longleftrightarrow \frac{1}{\mathrm{j}n\omega_0} C_n$
+    \item \textbf{时域乘积（离散卷积）}：$f(t)g(t) \longleftrightarrow \sum_{m=-\infty}^{+\infty} C_m D_{n-m} = C_n * D_n$
+\end{itemize}
+
+\subsection{周期信号的频谱与功率谱}
+
+\subsubsection{周期信号频谱的四大核心特征}
+周期信号的离散谱线结构具有以下本质特征：
+\begin{enumerate}
+    \item \textbf{离散性}：谱线仅在基频 $\omega_0$ 的离散整数倍谐波频率 $n\omega_0$ 处出现。
+    \item \textbf{谐波性}：谱线间隔为基波角频率 $\omega_0 = \frac{2\pi}{T_0}$。周期 $T_0$ 越大，基频越小，谱线越密集；$T_0 \to \infty$ 时离散谱趋于连续谱。
+    \item \textbf{收敛性（衰减特性）}：随着谐波次数 $n \to \infty$，频谱幅度 $|C_n| \to 0$。若信号存在幅度跳变间断点，其谱线按 $1/n$ 衰减；若信号连续但一阶导数跳变，其谱线按 $1/n^2$ 衰减；一般而言，若信号的 $k-1$ 阶导数连续而第 $k$ 阶导数出现跳变，谱线按 $1/n^{k+1}$ 速率衰减。
+    \item \textbf{共轭对称性（实信号）}：$|C_{-n}| = |C_n|$（双边幅度谱关于纵轴偶对称），$\varphi_{-n} = -\varphi_n$（双边相位谱关于原点奇对称）。
+\end{enumerate}
+
+\subsubsection{有效频带宽度}
+周期矩形脉冲（脉宽为 $\tau$，周期为 $T_0$）的 Fourier 系数为 $C_n = \frac{A\tau}{T_0}\mathrm{Sa}\left(\frac{n\omega_0\tau}{2}\right)$。其第一零点对应的角频率称为第一过零点带宽：
+\begin{equation}
+    B_\omega = \frac{2\pi}{\tau} \quad (\text{或 } B_f = \frac{1}{\tau})
+\end{equation}
+信号的有效频带宽度与脉冲时域宽度 $\tau$ 成严格反比关系（时宽-频宽不确定性原理）。
+
+\subsubsection{Parseval 功率守恒定理与功率谱}
+周期信号为功率信号，其在一个周期内的平均功率满足 Parseval 定理：
+\begin{equation}
+    P = \frac{1}{T_0} \int_{-T_0/2}^{T_0/2} |f(t)|^2\,\mathrm{d}t = \sum_{n=-\infty}^{+\infty} |C_n|^2 = C_0^2 + 2\sum_{n=1}^\infty |C_n|^2 = \left(\frac{a_0}{2}\right)^2 + \frac{1}{2}\sum_{n=1}^\infty A_n^2
+\end{equation}
+$|C_n|^2$ 随频率 $n\omega_0$ 的分布称为\textbf{离散功率谱}。该定理表明：周期信号在时域消耗的总平均功率等于各次谐波分量平均功率之和，且功率谱仅与幅度谱有关，与相位谱无关。
+
+\subsection{离散时间周期序列的频域分析（DFS）}
+
+\subsubsection{离散 Fourier 级数（DFS）定义对}
+设离散周期序列的基波周期为 $N$，其离散角频率 $\Omega_0 = \frac{2\pi}{N}$。定义因子 $W_N = \mathrm{e}^{-\mathrm{j}\frac{2\pi}{N}}$：
+\begin{align}
+    \text{正变换（分析式）}：& F[m] = \mathrm{DFS}\{f[k]\} = \sum_{k=0}^{N-1} f[k] W_N^{km} = \sum_{k=0}^{N-1} f[k]\mathrm{e}^{-\mathrm{j}m\frac{2\pi}{N}k} \\
+    \text{逆变换（综合式）}：& f[k] = \mathrm{IDFS}\{F[m]\} = \frac{1}{N} \sum_{m=0}^{N-1} F[m] W_N^{-km} = \frac{1}{N}\sum_{m=0}^{N-1} F[m]\mathrm{e}^{\mathrm{j}m\frac{2\pi}{N}k}
+\end{align}
+与连续情况不同，离散序列的谐波基底复指数信号满足隐含周期性 $\mathrm{e}^{\mathrm{j}(m+N)\frac{2\pi}{N}k} = \mathrm{e}^{\mathrm{j}m\frac{2\pi}{N}k}$，因此频谱系数序列 $F[m]$ 也是以 $N$ 为周期的离散周期序列（即 $F[m + N] = F[m]$），在一个周期内仅有 $N$ 个独立的频域系数。
+
+\subsubsection{DFS 的核心性质}
+\begin{itemize}
+    \item \textbf{线性度}：$\mathrm{DFS}\{a f_1[k] + b f_2[k]\} = a F_1[m] + b F_2[m]$
+    \item \textbf{圆周时移性质}：若 $\mathrm{DFS}\{f[k]\} = F[m]$，则时移后有：
+    \begin{equation}
+        \mathrm{DFS}\{f[k - n]\} = W_N^{mn} F[m] = F[m]\mathrm{e}^{-\mathrm{j}m\frac{2\pi}{N}n}
+    \end{equation}
+    \item \textbf{圆周频移性质}：$\mathrm{DFS}\{f[k]W_N^{-kn}\} = F[m - n]$
+    \item \textbf{周期卷积定理}：两周期序列在单个周期内的周期卷积对应 DFS 系数的乘积：
+    \begin{equation}
+        f_1[k] \tilde{*} f_2[k] = \sum_{n=0}^{N-1} f_1[n]f_2[k - n] \longleftrightarrow F_1[m]F_2[m]
+    \end{equation}
+    \item \textbf{Parseval 能量守恒关系}：
+    \begin{equation}
+        \sum_{k=0}^{N-1} |f[k]|^2 = \frac{1}{N} \sum_{m=0}^{N-1} |F[m]|^2
+    \end{equation}
+\end{itemize}
+
+\section{非周期信号的频域分析}
+
+\subsection{连续时间非周期信号的 Fourier 变换}
+
+\subsubsection{Fourier 变换的导出与数学定义}
+对于非周期信号 $f(t)$，可将其视为周期 $T_0 \to \infty$ 的极限情况。由 Fourier 级数推导可得连续 Fourier 变换（FT）对：
+\begin{align}
+    \text{正变换}：& F(\mathrm{j}\omega) = \mathcal{F}\{f(t)\} = \int_{-\infty}^{+\infty} f(t)\mathrm{e}^{-\mathrm{j}\omega t}\,\mathrm{d}t \\
+    \text{反变换}：& f(t) = \mathcal{F}^{-1}\{F(\mathrm{j}\omega)\} = \frac{1}{2\pi} \int_{-\infty}^{+\infty} F(\mathrm{j}\omega)\mathrm{e}^{\mathrm{j}\omega t}\,\mathrm{d}\omega
+\end{align}
+其中 $F(\mathrm{j}\omega)$ 称为频谱密度函数（简称频谱），一般为复函数，可表示为：
+\begin{equation}
+    F(\mathrm{j}\omega) = |F(\mathrm{j}\omega)|\mathrm{e}^{\mathrm{j}\varphi(\omega)} = F_{\mathrm{R}}(\mathrm{j}\omega) + \mathrm{j}F_{\mathrm{I}}(\mathrm{j}\omega)
+\end{equation}
+$|F(\mathrm{j}\omega)|$ 称为幅度频谱密度，$\varphi(\omega)$ 称为相位频谱。
+
+\begin{theorem}[实信号频谱的对称性]
+若 $f(t)$ 为实信号，则其 Fourier 变换具有共轭对称性：$F(-\mathrm{j}\omega) = F^*(\mathrm{j}\omega)$。具体表现为：
+\begin{enumerate}
+    \item 幅度谱偶对称：$|F(-\mathrm{j}\omega)| = |F(\mathrm{j}\omega)|$；相位谱奇对称：$\varphi(-\omega) = -\varphi(\omega)$。
+    \item 实部偶对称：$F_{\mathrm{R}}(-\mathrm{j}\omega) = F_{\mathrm{R}}(\mathrm{j}\omega)$；虚部奇对称：$F_{\mathrm{I}}(-\mathrm{j}\omega) = -F_{\mathrm{I}}(\mathrm{j}\omega)$。
+    \item 若 $f(t)$ 为实偶信号，则 $F(\mathrm{j}\omega)$ 为纯实偶函数；若 $f(t)$ 为实奇信号，则 $F(\mathrm{j}\omega)$ 为纯虚奇函数。
+    \item 实信号偶分量对应实部，奇分量对应虚部：$\mathcal{F}\{f_{\mathrm{e}}(t)\} = F_{\mathrm{R}}(\mathrm{j}\omega)$，$\mathcal{F}\{f_{\mathrm{o}}(t)\} = \mathrm{j}F_{\mathrm{I}}(\mathrm{j}\omega)$。
+\end{enumerate}
+\end{theorem}
+
+\subsubsection{常用典型非周期信号的 Fourier 变换（期末必背）}
+\begin{enumerate}
+    \item \textbf{单位冲激信号}：$\delta(t) \longleftrightarrow 1$
+    \item \textbf{直流恒定信号}：$1 \longleftrightarrow 2\pi\delta(\omega)$
+    \item \textbf{复指数信号}：$\mathrm{e}^{\mathrm{j}\omega_0 t} \longleftrightarrow 2\pi\delta(\omega - \omega_0)$
+    \item \textbf{余弦与正弦信号}：
+    \begin{equation}
+        \cos(\omega_0 t) \longleftrightarrow \pi[\delta(\omega - \omega_0) + \delta(\omega + \omega_0)]
+    \end{equation}
+    \begin{equation}
+        \sin(\omega_0 t) \longleftrightarrow \mathrm{j}\pi[\delta(\omega + \omega_0) - \delta(\omega - \omega_0)]
+    \end{equation}
+    \item \textbf{符号函数与单位阶跃信号}：
+    \begin{equation}
+        \operatorname{sgn}(t) \longleftrightarrow \frac{2}{\mathrm{j}\omega}, \qquad u(t) \longleftrightarrow \pi\delta(\omega) + \frac{1}{\mathrm{j}\omega}
+    \end{equation}
+    \item \textbf{单边实指数信号}：$\mathrm{e}^{-\alpha t}u(t) \longleftrightarrow \frac{1}{\alpha + \mathrm{j}\omega} \quad (\alpha > 0)$
+    \item \textbf{双边指数信号}：$\mathrm{e}^{-\alpha|t|} \longleftrightarrow \frac{2\alpha}{\alpha^2 + \omega^2} \quad (\alpha > 0)$
+    \item \textbf{矩形脉冲信号}：$p_\tau(t) = u\left(t + \frac{\tau}{2}\right) - u\left(t - \frac{\tau}{2}\right) \longleftrightarrow \tau \operatorname{Sa}\left(\frac{\omega\tau}{2}\right)$
+    \item \textbf{频域矩形信号（Sa函数）}：$\operatorname{Sa}(\omega_0 t) \longleftrightarrow \frac{\pi}{\omega_0} p_{2\omega_0}(\omega)$
+    \item \textbf{周期冲激串信号}：$\delta_{T_0}(t) = \sum_{n=-\infty}^{+\infty} \delta(t - n T_0) \longleftrightarrow \omega_0 \sum_{n=-\infty}^{+\infty} \delta(\omega - n\omega_0) \quad \left(\omega_0 = \frac{2\pi}{T_0}\right)$
+\end{enumerate}
+
+\subsection{Fourier 变换的核心性质与运算技巧}
+
+设 $\mathcal{F}\{f(t)\} = F(\mathrm{j}\omega)$，$\mathcal{F}\{f_1(t)\} = F_1(\mathrm{j}\omega)$，$\mathcal{F}\{f_2(t)\} = F_2(\mathrm{j}\omega)$：
+\begin{itemize}
+    \item \textbf{线性性质}：$a f_1(t) + b f_2(t) \longleftrightarrow a F_1(\mathrm{j}\omega) + b F_2(\mathrm{j}\omega)$
+    \item \textbf{互易对称特性（对偶性）}：若 $f(t) \longleftrightarrow F(\mathrm{j}\omega)$，则 $F(\mathrm{j}t) \longleftrightarrow 2\pi f(-\omega)$
+    \item \textbf{尺度展缩特性}：$f(at) \longleftrightarrow \frac{1}{|a|} F\left(\mathrm{j}\frac{\omega}{a}\right) \quad (a \neq 0)$（时域压缩则频域展宽且幅度降低）
+    \item \textbf{时移特性}：$f(t - t_0) \longleftrightarrow F(\mathrm{j}\omega)\mathrm{e}^{-\mathrm{j}\omega t_0}$（幅度谱不变，产生线性相移）
+    \item \textbf{频移特性（调制定理）}：$f(t)\mathrm{e}^{\mathrm{j}\omega_0 t} \longleftrightarrow F(\mathrm{j}(\omega - \omega_0))$
+    \begin{equation}
+        f(t)\cos(\omega_0 t) \longleftrightarrow \frac{1}{2}[F(\mathrm{j}(\omega - \omega_0)) + F(\mathrm{j}(\omega + \omega_0))]
+    \end{equation}
+    \item \textbf{时域卷积定理}：$f_1(t) * f_2(t) \longleftrightarrow F_1(\mathrm{j}\omega) F_2(\mathrm{j}\omega)$
+    \item \textbf{频域卷积（乘积定理）}：$f_1(t) f_2(t) \longleftrightarrow \frac{1}{2\pi} [F_1(\mathrm{j}\omega) * F_2(\mathrm{j}\omega)]$
+    \item \textbf{时域微分特性}：$\frac{\mathrm{d}^n f(t)}{\mathrm{d}t^n} \longleftrightarrow (\mathrm{j}\omega)^n F(\mathrm{j}\omega)$
+    \item \textbf{时域积分特性}：
+    \begin{equation}
+        \int_{-\infty}^t f(\tau)\,\mathrm{d}\tau \longleftrightarrow \frac{1}{\mathrm{j}\omega}F(\mathrm{j}\omega) + \pi F(0)\delta(\omega) \quad \left(\text{其中 } F(0) = \int_{-\infty}^{+\infty} f(t)\,\mathrm{d}t\right)
+    \end{equation}
+    \item \textbf{频域微分特性}：$(- \mathrm{j}t)^n f(t) \longleftrightarrow \frac{\mathrm{d}^n F(\mathrm{j}\omega)}{\mathrm{d}\omega^n} \implies t f(t) \longleftrightarrow \mathrm{j}\frac{\mathrm{d}F(\mathrm{j}\omega)}{\mathrm{d}\omega}$
+\end{itemize}
+
+\subsection{能量谱与 Parseval 能量守恒定理}
+对于连续非周期能量信号，在时域与频域中计算的总能量守恒（Parseval 定理）：
+\begin{equation}
+    E = \int_{-\infty}^{+\infty} |f(t)|^2\,\mathrm{d}t = \frac{1}{2\pi} \int_{-\infty}^{+\infty} |F(\mathrm{j}\omega)|^2\,\mathrm{d}\omega = \int_{-\infty}^{+\infty} |F(\mathrm{j}2\pi f)|^2\,\mathrm{d}f
+\end{equation}
+定义能量谱密度（简称能量谱）为：
+\begin{equation}
+    G(\omega) = \frac{1}{2\pi} |F(\mathrm{j}\omega)|^2
+\end{equation}
+实信号的能量谱 $G(\omega)$ 为实偶函数，仅取决于幅度谱，与相位谱无关。
+
+\subsection{离散时间非周期序列的 Fourier 变换（DTFT）}
+
+\subsubsection{DTFT 定义对}
+对绝对可和离散时间非周期序列 $f[k]$，其正反变换对定义为：
+\begin{align}
+    \text{DTFT 正变换}：& F(\mathrm{e}^{\mathrm{j}\Omega}) = \sum_{k=-\infty}^{+\infty} f[k]\mathrm{e}^{-\mathrm{j}\Omega k} \\
+    \text{IDTFT 逆变换}：& f[k] = \frac{1}{2\pi} \int_{-\pi}^{\pi} F(\mathrm{e}^{\mathrm{j}\Omega})\mathrm{e}^{\mathrm{j}\Omega k}\,\mathrm{d}\Omega
+\end{align}
+\begin{property}[DTFT 的核心本质特征]
+\begin{enumerate}
+    \item 周期性：$F(\mathrm{e}^{\mathrm{j}\Omega})$ 是以 $2\pi$ 为周期的连续连续谱函数，即 $F(\mathrm{e}^{\mathrm{j}(\Omega + 2\pi)}) = F(\mathrm{e}^{\mathrm{j}\Omega})$。主值区间通常取 $[-\pi, \pi]$。
+    \item 典型对：$a^k u[k] \longleftrightarrow \frac{1}{1 - a\mathrm{e}^{-\mathrm{j}\Omega}} \quad (|a| < 1)$；$\delta[k] \longleftrightarrow 1$。
+\end{enumerate}
+\end{property}
+
+\section{系统的频域分析}
+
+\subsection{连续系统的频域响应分析}
+
+\subsubsection{系统的频率响应函数 $H(\mathrm{j}\omega)$}
+连续时间 LTI 系统的单位冲激响应为 $h(t)$，其 Fourier 变换定义为系统的频率响应函数：
+\begin{equation}
+    H(\mathrm{j}\omega) = \mathcal{F}\{h(t)\} = \int_{-\infty}^{+\infty} h(t)\mathrm{e}^{-\mathrm{j}\omega t}\,\mathrm{d}t = |H(\mathrm{j}\omega)|\mathrm{e}^{\mathrm{j}\theta(\omega)}
+\end{equation}
+其中 $|H(\mathrm{j}\omega)|$ 称为幅频特性，$\theta(\omega)$ 称为相频特性。
+
+\subsubsection{激励通过 LTI 系统的零状态响应}
+\begin{enumerate}
+    \item \textbf{非周期信号激励}：若输入为 $f(t)$，则频域响应与时域输出为：
+    \begin{equation}
+        Y(\mathrm{j}\omega) = F(\mathrm{j}\omega) H(\mathrm{j}\omega) \implies y(t) = \mathcal{F}^{-1}\{F(\mathrm{j}\omega) H(\mathrm{j}\omega)\}
+    \end{equation}
+    \item \textbf{复指数与正弦稳态响应（特征函数性质）}：
+    \begin{align}
+        f(t) = \mathrm{e}^{\mathrm{j}\omega_0 t} &\implies y(t) = H(\mathrm{j}\omega_0)\mathrm{e}^{\mathrm{j}\omega_0 t} \\
+        f(t) = \cos(\omega_0 t + \phi) &\implies y(t) = |H(\mathrm{j}\omega_0)|\cos(\omega_0 t + \phi + \theta(\omega_0))
+    \end{align}
+    \item \textbf{周期信号激励}：若 $f(t) = \sum_{n=-\infty}^{+\infty} C_n \mathrm{e}^{\mathrm{j}n\omega_0 t}$，则输出响应为：
+    \begin{equation}
+        y(t) = \sum_{n=-\infty}^{+\infty} C_n H(\mathrm{j}n\omega_0)\mathrm{e}^{\mathrm{j}n\omega_0 t}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{微分方程的频域代数求解法}
+对 $n$ 阶微分方程 $\sum_{i=0}^n a_i \frac{\mathrm{d}^i y(t)}{\mathrm{d}t^i} = \sum_{j=0}^m b_j \frac{\mathrm{d}^j f(t)}{\mathrm{d}t^j}$ 两端取 Fourier 变换，可得代数比值：
+\begin{equation}
+    H(\mathrm{j}\omega) = \frac{Y(\mathrm{j}\omega)}{F(\mathrm{j}\omega)} = \frac{\sum_{j=0}^m b_j (\mathrm{j}\omega)^j}{\sum_{i=0}^n a_i (\mathrm{j}\omega)^i}
+\end{equation}
+再由 $Y(\mathrm{j}\omega) = F(\mathrm{j}\omega)H(\mathrm{j}\omega)$ 经部分分式展开后查表求反变换即可得到时域零状态响应 $y(t)$。
+
+\subsection{无失真传输系统与理想滤波器}
+
+\subsubsection{无失真传输的充要条件}
+\begin{definition}{无失真传输系统}{distortionless}
+若系统输出波形与输入波形相比仅产生幅度比例缩放常数 $K$ 和恒定时间延迟 $t_{\mathrm{d}}$，即 $y(t) = K f(t - t_{\mathrm{d}})$，则称系统实现了无失真传输。
+\end{definition}
+
+\begin{theorem}[无失真传输频域充要条件]
+对微分方程或电路网络，系统实现无失真传输的充要条件为：
+\begin{equation}
+    H(\mathrm{j}\omega) = K \mathrm{e}^{-\mathrm{j}\omega t_{\mathrm{d}}}
+\end{equation}
+即：
+\begin{enumerate}
+    \item \textbf{幅频特性}为水平恒定常数：$|H(\mathrm{j}\omega)| = K$（全频段平坦，避免幅度失真）；
+    \item \textbf{相频特性}为过原点的负斜率直线：$\theta(\omega) = -\omega t_{\mathrm{d}}$（避免相位失真）；
+    \item \textbf{群时延}为常数：$\tau_{\mathrm{g}}(\omega) = -\frac{\mathrm{d}\theta(\omega)}{\mathrm{d}\omega} = t_{\mathrm{d}}$。
+\end{enumerate}
+\end{theorem}
+
+\subsubsection{理想低通滤波器（LPF）及其不可实现性}
+理想低通滤波器的频响特性为：
+\begin{equation}
+    H(\mathrm{j}\omega) = \begin{cases} \mathrm{e}^{-\mathrm{j}\omega t_{\mathrm{d}}}, & |\omega| \le \omega_{\mathrm{c}} \\ 0, & |\omega| > \omega_{\mathrm{c}} \end{cases}
+\end{equation}
+其单位冲激响应为：
+\begin{equation}
+    h(t) = \frac{\omega_{\mathrm{c}}}{\pi} \operatorname{Sa}[\omega_{\mathrm{c}}(t - t_{\mathrm{d}})]
+\end{equation}
+\begin{remark}
+\textbf{因果不可实现性分析}：
+由于在 $t < 0$ 时 $h(t) \neq 0$（存在超前非零尾巴），且不满足 Paley-Wiener 准则（$\int_{-\infty}^{+\infty} \frac{|\ln |H(\mathrm{j}\omega)||}{1 + \omega^2}\mathrm{d}\omega < \infty$），故理想低通滤波器是物理不可实现的非因果系统，仅可作为逼近设计的基准模型。
+\end{remark}
+
+\subsection{时域抽样定理（Nyquist 抽样定理）}
+
+\subsubsection{连续信号的时域抽样机制与频谱变化}
+设连续信号 $f(t)$ 的最高截止角频率为 $\omega_{\mathrm{m}}$（频带限制在 $[-\omega_{\mathrm{m}}, \omega_{\mathrm{m}}]$）。采用周期冲激串 $p(t) = \sum_{k=-\infty}^{+\infty} \delta(t - k T_{\mathrm{s}})$ 对 $f(t)$ 进行理想抽样：
+\begin{equation}
+    f_{\mathrm{s}}(t) = f(t) \cdot p(t) = \sum_{k=-\infty}^{+\infty} f(k T_{\mathrm{s}})\delta(t - k T_{\mathrm{s}})
+\end{equation}
+由频域卷积定理，抽样后信号的频谱为原信号频谱的周期延拓与叠加：
+\begin{equation}
+    F_{\mathrm{s}}(\mathrm{j}\omega) = \frac{1}{2\pi}[F(\mathrm{j}\omega) * P(\mathrm{j}\omega)] = \frac{1}{T_{\mathrm{s}}} \sum_{n=-\infty}^{+\infty} F(\mathrm{j}(\omega - n\omega_{\mathrm{s}})) \quad \left(\omega_{\mathrm{s}} = \frac{2\pi}{T_{\mathrm{s}}}\right)
+\end{equation}
+
+\subsubsection{时域抽样定理内容与无失真重建}
+\begin{theorem}[时域抽样定理]
+为保证抽样后信号的频谱不发生混叠（频谱分量互不重叠），抽样角频率 $\omega_{\mathrm{s}}$（或抽样频率 $f_{\mathrm{s}}$）必须满足：
+\begin{equation}
+    \omega_{\mathrm{s}} \ge 2\omega_{\mathrm{m}} \quad \left(\text{或 } f_{\mathrm{s}} \ge 2 f_{\mathrm{m}}\right), \qquad T_{\mathrm{s}} \le \frac{\pi}{\omega_{\mathrm{m}}} = \frac{1}{2 f_{\mathrm{m}}}
+\end{equation}
+\begin{itemize}
+    \item $\omega_{\mathrm{N}} = 2\omega_{\mathrm{m}}$ 称为 \textbf{Nyquist 抽样角频率}；$T_{\mathrm{N}} = \frac{1}{2 f_{\mathrm{m}}}$ 称为 \textbf{Nyquist 抽样间隔}。
+    \item \textbf{信号的理想内插重建}：当满足抽样定理时，将抽样信号通过增益为 $T_{\mathrm{s}}$、截止频率为 $\omega_{\mathrm{m}} < \omega_{\mathrm{c}} < \omega_{\mathrm{s}} - \omega_{\mathrm{m}}$ 的理想低通滤波器，可无失真恢复原模拟信号。时域重建内插公式（Whittaker-Shannon 内插公式）为：
+    \begin{equation}
+        f(t) = f_{\mathrm{s}}(t) * h(t) = \sum_{k=-\infty}^{+\infty} f(k T_{\mathrm{s}}) \operatorname{Sa}\left( \frac{\pi}{T_{\mathrm{s}}}(t - k T_{\mathrm{s}}) \right)
+    \end{equation}
+\end{itemize}
+\end{theorem}
+
+\section{连续时间信号与系统的复频域分析}
+
+\subsection{Laplace 变换的定义与收敛域}
+
+\subsubsection{双边与单边 Laplace 变换的数学定义}
+为了克服部分非绝对可积信号（如 $t^n u(t)$、$\mathrm{e}^{at} u(t)$ 等）不存在 Fourier 变换的局限性，引入复频率 $s = \sigma + \mathrm{j}\omega$，利用衰减因子 $\mathrm{e}^{-\sigma t}$ 对信号加权衰减，从而导出 Laplace 变换：
+\begin{align}
+    \text{双边 Laplace 正变换}：& F_{\mathrm{b}}(s) = \mathcal{L}_{\mathrm{b}}\{f(t)\} = \int_{-\infty}^{+\infty} f(t)\mathrm{e}^{-st}\,\mathrm{d}t \\
+    \text{单边 Laplace 正变换}：& F(s) = \mathcal{L}\{f(t)\} = \int_{0^-}^{+\infty} f(t)\mathrm{e}^{-st}\,\mathrm{d}t \\
+    \text{Laplace 逆变换（Bromwich 积分）}：& f(t) = \mathcal{L}^{-1}\{F(s)\} = \frac{1}{2\pi \mathrm{j}} \int_{\sigma - \mathrm{j}\infty}^{\sigma + \mathrm{j}\infty} F(s)\mathrm{e}^{st}\,\mathrm{d}s
+\end{align}
+工程实际与因果系统分析中普遍采用下限取 $0^-$ 的单边 Laplace 变换，其能够自然计入 $t = 0$ 处的冲激 $\delta(t)$ 及其各阶导数，并直接结合系统在 $0^-$ 处的历史初始状态。
+
+\subsubsection{收敛域（ROC）的核心规律}
+使积分 $\int_{0^-}^{+\infty} |f(t)\mathrm{e}^{-\sigma t}|\,\mathrm{d}t < \infty$ 绝对收敛的 $\sigma$ 取值集合称为收敛域（Region of Convergence, ROC）。
+\begin{enumerate}
+    \item \textbf{右边信号（因果信号）}：满足 $f(t) = 0 \ (t < t_0)$ 的信号，其收敛域必定呈现为复平面上某一垂线的右半开平面：
+    \begin{equation}
+        \mathrm{ROC}: \operatorname{Re}[s] = \sigma > \sigma_0 \quad (\sigma_0 \text{ 称为收敛坐标})
+    \end{equation}
+    且对于有理分式 $F(s)$，其收敛域边界由最右侧的一个极点确定，收敛域内绝对不包含任何极点。
+    \item \textbf{时域有限长信号}：若信号仅在有限时间区间 $[t_1, t_2]$ 内非零且绝对可积，其收敛域为整个复平面（$\mathbb{C}$），即 $\sigma \in (-\infty, +\infty)$。
+    \item \textbf{与 Fourier 变换的收敛联系}：若 $F(s)$ 的收敛域包含虚轴（即 $\sigma = 0$ 位于 ROC 内），则信号 $f(t)$ 的 Fourier 变换存在，且直接满足：
+    \begin{equation}
+        F(\mathrm{j}\omega) = \left. F(s) \right|_{s = \mathrm{j}\omega}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{典型信号的单边 Laplace 变换对}
+\begin{enumerate}
+    \item \textbf{单位冲激信号}：$\delta(t) \longleftrightarrow 1 \quad (\operatorname{Re}[s] \in \mathbb{C})$
+    \item \textbf{单位阶跃信号}：$u(t) \longleftrightarrow \frac{1}{s} \quad (\operatorname{Re}[s] > 0)$
+    \item \textbf{单边实指数信号}：$\mathrm{e}^{-\alpha t}u(t) \longleftrightarrow \frac{1}{s + \alpha} \quad (\operatorname{Re}[s] > -\alpha)$
+    \item \textbf{幂函数脉冲}：$t^n u(t) \longleftrightarrow \frac{n!}{s^{n+1}} \quad (\operatorname{Re}[s] > 0, \ n \in \mathbb{N})$
+    \item \textbf{指数阻尼幂函数}：$t^n \mathrm{e}^{-\alpha t}u(t) \longleftrightarrow \frac{n!}{(s + \alpha)^{n+1}} \quad (\operatorname{Re}[s] > -\alpha)$
+    \item \textbf{正弦与余弦信号}：
+    \begin{equation}
+        \cos(\omega_0 t)u(t) \longleftrightarrow \frac{s}{s^2 + \omega_0^2}, \qquad \sin(\omega_0 t)u(t) \longleftrightarrow \frac{\omega_0}{s^2 + \omega_0^2} \quad (\operatorname{Re}[s] > 0)
+    \end{equation}
+    \item \textbf{阻尼正余弦信号}：
+    \begin{align}
+        \mathrm{e}^{-\alpha t}\cos(\omega_0 t)u(t) &\longleftrightarrow \frac{s + \alpha}{(s + \alpha)^2 + \omega_0^2} \quad (\operatorname{Re}[s] > -\alpha) \\
+        \mathrm{e}^{-\alpha t}\sin(\omega_0 t)u(t) &\longleftrightarrow \frac{\omega_0}{(s + \alpha)^2 + \omega_0^2} \quad (\operatorname{Re}[s] > -\alpha)
+    \end{align}
+\end{enumerate}
+
+\subsection{单边 Laplace 变换的运算性质}
+
+设 $\mathcal{L}\{f(t)\} = F(s)$，$\mathcal{L}\{f_1(t)\} = F_1(s)$，$\mathcal{L}\{f_2(t)\} = F_2(s)$：
+\begin{itemize}
+    \item \textbf{线性性质}：$a f_1(t) + b f_2(t) \longleftrightarrow a F_1(s) + b F_2(s)$
+    \item \textbf{时移（延时）性质}：$f(t - t_0)u(t - t_0) \longleftrightarrow \mathrm{e}^{-s t_0}F(s) \quad (t_0 \ge 0)$
+    \item \textbf{复频移（$s$ 域平移）性质}：$\mathrm{e}^{s_0 t}f(t) \longleftrightarrow F(s - s_0)$
+    \item \textbf{尺度变换性质}：$f(at) \longleftrightarrow \frac{1}{a}F\left(\frac{s}{a}\right) \quad (a > 0)$
+    \item \textbf{时域微分性质（核心计算考点）}：
+    \begin{equation}
+        f'(t) \longleftrightarrow s F(s) - f(0^-)
+    \end{equation}
+    \begin{equation}
+        f''(t) \longleftrightarrow s^2 F(s) - s f(0^-) - f'(0^-)
+    \end{equation}
+    高阶推论：
+    \begin{equation}
+        f^{(n)}(t) \longleftrightarrow s^n F(s) - \sum_{k=1}^n s^{n-k} f^{(k-1)}(0^-)
+    \end{equation}
+    \item \textbf{时域积分性质}：
+    \begin{equation}
+        \int_{0^-}^t f(\tau)\,\mathrm{d}\tau \longleftrightarrow \frac{F(s)}{s}, \qquad \int_{-\infty}^t f(\tau)\,\mathrm{d}\tau \longleftrightarrow \frac{F(s)}{s} + \frac{\int_{-\infty}^{0^-} f(\tau)\,\mathrm{d}\tau}{s}
+    \end{equation}
+    \item \textbf{时域卷积定理}：$f_1(t) * f_2(t) \longleftrightarrow F_1(s) F_2(s)$
+    \item \textbf{复频域微分（$s$ 域求导）}：$(-t)^n f(t) \longleftrightarrow \frac{\mathrm{d}^n F(s)}{\mathrm{d}s^n} \implies t f(t) \longleftrightarrow -\frac{\mathrm{d}F(s)}{\mathrm{d}s}$
+    \item \textbf{初值定理与终值定理（期末极易丢分点）}：
+    \begin{itemize}
+        \item \textbf{初值定理}：若 $f(t)$ 在 $t=0$ 处不包含冲激函数 $\delta(t)$（即 $F(s)$ 为真分式），则：
+        \begin{equation}
+            f(0^+) = \lim_{s \to \infty} s F(s)
+        \end{equation}
+        \item \textbf{终值定理}：若极限 $\lim_{t \to \infty} f(t)$ 存在（充要条件为 $s F(s)$ 的所有极点均位于开左半平面，且在虚轴上至多允许存在 $s = 0$ 处的一阶单极点），则：
+        \begin{equation}
+            \lim_{t \to \infty} f(t) = \lim_{s \to 0} s F(s)
+        \end{equation}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Laplace 反变换的部分分式展开法}
+对于实际有理分式 $F(s) = \frac{B(s)}{A(s)} = \frac{b_m s^m + \cdots + b_0}{s^n + a_{n-1}s^{n-1} + \cdots + a_0}$：
+\begin{enumerate}
+    \item \textbf{假分式处理（$m \ge n$）}：执行多项式长除法化为多项式与真分式之和：
+    \begin{equation}
+        F(s) = \sum_{k=0}^{m-n} c_k s^k + \frac{B_1(s)}{A(s)} \longleftrightarrow \sum_{k=0}^{m-n} c_k \delta^{(k)}(t) + \mathcal{L}^{-1}\left\{ \frac{B_1(s)}{A(s)} \right\}
+    \end{equation}
+    \item \textbf{单极点展开法}：若 $A(s) = (s - p_1)(s - p_2)\cdots(s - p_n)$，所有极点 $p_i$ 互异，则：
+    \begin{equation}
+        F(s) = \sum_{i=1}^n \frac{K_i}{s - p_i}, \qquad K_i = \left. (s - p_i)F(s) \right|_{s = p_i} \implies f(t) = \sum_{i=1}^n K_i \mathrm{e}^{p_i t} u(t)
+    \end{equation}
+    \item \textbf{重极点展开法}：若分母含有 $r$ 重极点 $(s - p)^r$，其对应展开式项为：
+    \begin{equation}
+        F(s) = \frac{K_{r}}{(s - p)^r} + \frac{K_{r-1}}{(s - p)^{r-1}} + \cdots + \frac{K_1}{s - p}
+    \end{equation}
+    留数计算公式为：
+    \begin{equation}
+        K_j = \frac{1}{(r - j)!} \left. \frac{\mathrm{d}^{r - j}}{\mathrm{d}s^{r - j}} \left[ (s - p)^r F(s) \right] \right|_{s = p} \quad (j = 1, 2, \dots, r)
+    \end{equation}
+    时域对应项为：$\mathcal{L}^{-1}\left\{ \frac{K_j}{(s - p)^j} \right\} = \frac{K_j}{(j - 1)!} t^{j-1}\mathrm{e}^{pt} u(t)$。
+\end{enumerate}
+
+\subsection{连续时间系统的复频域解法与电路 $s$ 域模型}
+
+\subsubsection{微分方程的复频域求解（全响应分解）}
+对连续微分方程两端取单边 Laplace 变换，自动将微分运算化为代数方程：
+\begin{equation}
+    A(s)Y(s) - U(0^-) = B(s)X(s)
+\end{equation}
+其中 $U(0^-)$ 为由历史初始状态 $y^{(k)}(0^-)$ 构成的初值多项式。由此解得输出响应的复频域代数形式：
+\begin{equation}
+    Y(s) = \frac{U(0^-)}{A(s)} + \frac{B(s)}{A(s)}X(s) = Y_{\mathrm{zi}}(s) + Y_{\mathrm{zs}}(s)
+\end{equation}
+\begin{itemize}
+    \item \textbf{零输入响应}：$Y_{\mathrm{zi}}(s) = \frac{U(0^-)}{A(s)} \longleftrightarrow y_{\mathrm{zi}}(t)$（与激励 $X(s)$ 无关，仅由储能决定）
+    \item \textbf{零状态响应}：$Y_{\mathrm{zs}}(s) = H(s)X(s) \longleftrightarrow y_{\mathrm{zs}}(t)$（与初始状态无关，仅由激励决定）
+\end{itemize}
+
+\subsubsection{电路元件的 $s$ 域模型（阻抗与附加源）}
+通过将电阻、电感、电容的伏安方程进行 Laplace 变换，可直接画出 $s$ 域等效电路网络：
+\begin{enumerate}
+    \item \textbf{电阻元件 $R$}：$v_R(t) = R i_R(t) \longleftrightarrow V_R(s) = R I_R(s)$，等效阻抗 $Z_R(s) = R$。
+    \item \textbf{电感元件 $L$}：$v_L(t) = L \frac{\mathrm{d}i_L(t)}{\mathrm{d}t} \longleftrightarrow V_L(s) = sL I_L(s) - L i_L(0^-)$
+    \begin{itemize}
+        \item 串联形式：等效阻抗 $sL$ 串联冲激初值反向电压源 $L i_L(0^-)$；
+        \item 并联形式：等效导纳 $\frac{1}{sL}$ 并联正向附加电流源 $\frac{i_L(0^-)}{s}$。
+    \end{itemize}
+    \item \textbf{电容元件 $C$}：$i_C(t) = C \frac{\mathrm{d}v_C(t)}{\mathrm{d}t} \longleftrightarrow I_C(s) = sC V_C(s) - C v_C(0^-)$
+    \begin{itemize}
+        \item 串联形式：等效阻抗 $\frac{1}{sC}$ 串联正向初值电压源 $\frac{v_C(0^-)}{s}$；
+        \item 并联形式：等效导纳 $sC$ 并联反向附加电流源 $C v_C(0^-)$。
+    \end{itemize}
+\end{enumerate}
+
+\subsection{系统函数 $H(s)$ 与系统特性分析}
+
+\subsubsection{系统函数 $H(s)$ 的定义与零极点图}
+连续 LTI 系统的系统函数 $H(s)$ 定义为零状态下系统响应的 Laplace 变换与激励的 Laplace 变换之比：
+\begin{equation}
+    H(s) = \frac{Y_{\mathrm{zs}}(s)}{X(s)} = \mathcal{L}\{h(t)\} = K \frac{\prod_{j=1}^m (s - z_j)}{\prod_{i=1}^n (s - p_i)}
+\end{equation}
+其中 $z_j$ 称为系统的零点（用小圆圈“$\circ$”在复平面标出），$p_i$ 称为系统的极点（用叉号“$\times$”标出）。
+
+\subsubsection{因果性与 BIBO 稳定性的 $H(s)$ 判据}
+\begin{theorem}[$s$ 域系统特性判据定理]
+\begin{enumerate}
+    \item \textbf{因果性充要条件}：系统冲激响应满足 $h(t) = 0 \ (t < 0)$，其充要条件为 $H(s)$ 的收敛域为最右侧极点所在垂线的右半平面：
+    \begin{equation}
+        \mathrm{ROC}: \operatorname{Re}[s] > \max_{i} \operatorname{Re}[p_i]
+    \end{equation}
+    且若 $H(s)$ 为有理分式，其必须为有理真分式或等于常数（分子阶数 $m \le$ 分母阶数 $n$）。
+    \item \textbf{因果系统的 BIBO 稳定性充要条件}：
+    连续因果 LTI 系统为 BIBO 稳定的充要条件是：\textbf{系统函数 $H(s)$ 的所有极点全部严格分布在 $s$ 平面的开左半平面（LHP）}，即：
+    \begin{equation}
+        \operatorname{Re}[p_i] < 0 \quad (\forall i = 1, 2, \dots, n)
+    \end{equation}
+    \item \textbf{临界稳定与不稳定状态}：
+    \begin{itemize}
+        \item 若在虚轴上有单极点（如 $s = \pm \mathrm{j}\omega_0$ 或 $s = 0$），其余极点全在开左半平面，则系统为临界稳定（阶跃响应呈现等幅振荡或直流偏置）；
+        \item 若在虚轴上存在二阶及以上重极点（产生 $t \sin(\omega_0 t)$ 等无界项），或开右半平面（RHP）存在任意极点，则系统必\textbf{不稳定}。
+    \end{itemize}
+\end{enumerate}
+\end{theorem}
+
+\subsubsection{Routh-Hurwitz 稳定性代数判据}
+对于分母特征多项式 $A(s) = a_n s^n + a_{n-1}s^{n-1} + \cdots + a_1 s + a_0 = 0$（设 $a_n > 0$）：
+\begin{enumerate}
+    \item \textbf{必要条件}：各项系数必须严格全非零且符号相同（即 $a_i > 0 \ (i=0, 1, \dots, n)$）。
+    \item \textbf{二阶与三阶系统充要速判}：
+    \begin{itemize}
+        \item 二阶系统稳定充要条件：$a_2, a_1, a_0 > 0$；
+        \item 三阶系统 $a_3 s^3 + a_2 s^2 + a_1 s + a_0 = 0$ 稳定充要条件：系数全正且满足 $a_2 a_1 > a_3 a_0$。
+    \end{itemize}
+    \item \textbf{Routh 表充要条件}：Routh 表第一列所有元素严格大于零。第一列元素发生符号改变的次数精确等于方程在开右半平面（RHP）中的不稳定极点个数。
+\end{enumerate}
+
+\section{离散时间信号与系统的 $z$ 域分析}
+
+\subsection{$z$ 变换的定义与收敛域}
+
+\subsubsection{$z$ 变换的定义对}
+$z$ 变换是离散时间序列分析的复频域工具，实质是 DTFT 在复平面上的解析延拓（设复变量 $z = r\mathrm{e}^{\mathrm{j}\Omega}$）：
+\begin{align}
+    \text{双边 $z$ 正变换}：& X_{\mathrm{b}}(z) = \mathcal{Z}_{\mathrm{b}}\{x[k]\} = \sum_{k=-\infty}^{+\infty} x[k] z^{-k} \\
+    \text{单边 $z$ 正变换}：& X(z) = \mathcal{Z}\{x[k]\} = \sum_{k=0}^{+\infty} x[k] z^{-k} \\
+    \text{逆 $z$ 变换（环路围道积分）}：& x[k] = \mathcal{Z}^{-1}\{X(z)\} = \frac{1}{2\pi \mathrm{j}} \oint_C X(z) z^{k-1}\,\mathrm{d}z
+\end{align}
+
+\subsubsection{$z$ 变换收敛域（ROC）的圆环几何特征}
+级数 $\sum_{k=-\infty}^{+\infty} |x[k] r^{-k}| < \infty$ 收敛的 $r = |z|$ 集合构成收敛域，其几何形态必为以复平面原点为中心的圆环：
+\begin{enumerate}
+    \item \textbf{因果（右边）序列}：$x[k] = 0 \ (k < 0)$，其收敛域为最外层极点圆的圆外区域：
+    \begin{equation}
+        \mathrm{ROC}: |z| > R_x = \max_{i} |p_i|
+    \end{equation}
+    若序列在 $k=0$ 处非零，收敛域包含 $\infty$ 点（$|z| = \infty$）。
+    \item \textbf{反因果（左边）序列}：$x[k] = 0 \ (k > 0)$，其收敛域为最内层极点圆的圆内区域：$\mathrm{ROC}: |z| < R_{x\min}$。
+    \item \textbf{双边序列}：收敛域为夹在两极点圆之间的环状区域：$R_1 < |z| < R_2$。
+    \item \textbf{与 DTFT 的映射关系}：若收敛域包含单位圆（即包含 $|z| = 1$ 的环路），则序列的 DTFT 存在，且在单位圆上计算即得：
+    \begin{equation}
+        X(\mathrm{e}^{\mathrm{j}\Omega}) = \left. X(z) \right|_{z = \mathrm{e}^{\mathrm{j}\Omega}}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{常用典型序列的单边 $z$ 变换对}
+\begin{enumerate}
+    \item \textbf{单位脉冲序列}：$\delta[k] \longleftrightarrow 1 \quad (|z| > 0)$
+    \item \textbf{单位阶跃序列}：$u[k] \longleftrightarrow \frac{1}{1 - z^{-1}} = \frac{z}{z - 1} \quad (|z| > 1)$
+    \item \textbf{实指数序列}：$a^k u[k] \longleftrightarrow \frac{1}{1 - a z^{-1}} = \frac{z}{z - a} \quad (|z| > |a|)$
+    \item \textbf{斜坡序列}：$k u[k] \longleftrightarrow \frac{z^{-1}}{(1 - z^{-1})^2} = \frac{z}{(z - 1)^2} \quad (|z| > 1)$
+    \item \textbf{阻尼斜坡序列}：$k a^k u[k] \longleftrightarrow \frac{a z^{-1}}{(1 - a z^{-1})^2} = \frac{a z}{(z - a)^2} \quad (|z| > |a|)$
+    \item \textbf{正弦与余弦序列}：
+    \begin{align}
+        \cos(\Omega_0 k)u[k] &\longleftrightarrow \frac{1 - (\cos\Omega_0)z^{-1}}{1 - (2\cos\Omega_0)z^{-1} + z^{-2}} = \frac{z(z - \cos\Omega_0)}{z^2 - 2z\cos\Omega_0 + 1} \quad (|z| > 1) \\
+        \sin(\Omega_0 k)u[k] &\longleftrightarrow \frac{(\sin\Omega_0)z^{-1}}{1 - (2\cos\Omega_0)z^{-1} + z^{-2}} = \frac{z\sin\Omega_0}{z^2 - 2z\cos\Omega_0 + 1} \quad (|z| > 1)
+    \end{align}
+    \item \textbf{阻尼正余弦序列}：
+    \begin{equation}
+        a^k \cos(\Omega_0 k)u[k] \longleftrightarrow \frac{z(z - a\cos\Omega_0)}{z^2 - 2az\cos\Omega_0 + a^2} \quad (|z| > |a|)
+    \end{equation}
+\end{enumerate}
+
+\subsection{单边 $z$ 变换的核心性质}
+
+设 $\mathcal{Z}\{x[k]\} = X(z)$，$\mathcal{Z}\{x_1[k]\} = X_1(z)$，$\mathcal{Z}\{x_2[k]\} = X_2(z)$：
+\begin{itemize}
+    \item \textbf{线性性质}：$a x_1[k] + b x_2[k] \longleftrightarrow a X_1(z) + b X_2(z)$
+    \item \textbf{单边时移性质（差分方程求解必考）}：
+    \begin{itemize}
+        \item \textbf{时延（向后平移）}：
+        \begin{equation}
+            x[k - 1]u[k] \longleftrightarrow z^{-1}X(z) + x[-1]
+        \end{equation}
+        \begin{equation}
+            x[k - 2]u[k] \longleftrightarrow z^{-2}X(z) + z^{-1}x[-1] + x[-2]
+        \end{equation}
+        \begin{equation}
+            x[k - n]u[k] \longleftrightarrow z^{-n}X(z) + \sum_{m=1}^n x[-m] z^{-(n - m)}
+        \end{equation}
+        \item \textbf{时超（向前平移）}：
+        \begin{equation}
+            x[k + 1]u[k] \longleftrightarrow z X(z) - z x[0]
+        \end{equation}
+        \begin{equation}
+            x[k + n]u[k] \longleftrightarrow z^n X(z) - \sum_{m=0}^{n-1} x[m] z^{n - m}
+        \end{equation}
+    \end{itemize}
+    \item \textbf{$z$ 域展缩（乘指数因子）}：$a^k x[k] \longleftrightarrow X\left(\frac{z}{a}\right)$
+    \item \textbf{$z$ 域求导（时域乘以 $k$）}：$k x[k] \longleftrightarrow -z \frac{\mathrm{d}X(z)}{\mathrm{d}z}$
+    \item \textbf{时域卷积定理}：$x_1[k] * x_2[k] \longleftrightarrow X_1(z) X_2(z)$
+    \item \textbf{时域累加性质}：$\sum_{m=0}^k x[m] \longleftrightarrow \frac{1}{1 - z^{-1}}X(z) = \frac{z}{z - 1}X(z)$
+    \item \textbf{初值定理与终值定理}：
+    \begin{itemize}
+        \item \textbf{初值定理}：若 $x[k]$ 为因果序列，则：
+        \begin{equation}
+            x[0] = \lim_{z \to \infty} X(z)
+        \end{equation}
+        \item \textbf{终值定理}：若 $(1 - z^{-1})X(z)$ 的所有极点均严格位于单位圆内（$|z| < 1$），则：
+        \begin{equation}
+            \lim_{k \to \infty} x[k] = \lim_{z \to 1} (1 - z^{-1})X(z) = \lim_{z \to 1} (z - 1)\frac{X(z)}{z}
+        \end{equation}
+    \end{itemize}
+\end{itemize}
+
+\subsection{逆 $z$ 变换（反变换）的实用解法}
+\begin{enumerate}
+    \item \textbf{部分分式展开法（标准常用法）}：
+    对有理分式，通常先构造 $\frac{X(z)}{z}$ 进行部分分式拆分，再两端乘回 $z$，直接查典型表：
+    \begin{equation}
+        \frac{X(z)}{z} = \sum_{i=1}^n \frac{A_i}{z - p_i} \implies X(z) = \sum_{i=1}^n A_i \frac{z}{z - p_i} \longleftrightarrow x[k] = \sum_{i=1}^n A_i p_i^k u[k]
+    \end{equation}
+    其中待定系数为 $A_i = \left. (z - p_i)\frac{X(z)}{z} \right|_{z = p_i}$。
+    \item \textbf{长除幂级数展开法}：将 $X(z)$ 分子分母按 $z^{-1}$ 降幂排列进行多项式长除，直接读出展开式负幂项的系数即为各点样值序列：$X(z) = x[0] + x[1]z^{-1} + x[2]z^{-2} + \cdots$。
+\end{enumerate}
+
+\subsection{离散系统的 $z$ 域分析与网络特性}
+
+\subsubsection{差分方程的 $z$ 域求解}
+对后向差分方程 $\sum_{i=0}^n a_i y[k - i] = \sum_{j=0}^m b_j x[k - j]$ 两端取单边 $z$ 变换并代入负索引初值 $y[-1], y[-2], \dots$，可直接解出：
+\begin{equation}
+    Y(z) = Y_{\mathrm{zi}}(z) + Y_{\mathrm{zs}}(z) = \frac{C(z)}{A(z)} + \frac{B(z)}{A(z)}X(z)
+\end{equation}
+其中系统函数为零状态转移比率：
+\begin{equation}
+    H(z) = \frac{Y_{\mathrm{zs}}(z)}{X(z)} = \frac{\sum_{j=0}^m b_j z^{-j}}{\sum_{i=0}^n a_i z^{-i}} = \mathcal{Z}\{h[k]\}
+\end{equation}
+
+\subsubsection{离散系统的因果性与 BIBO 稳定性判据}
+\begin{theorem}[$z$ 域系统特性判据定理]
+\begin{enumerate}
+    \item \textbf{因果性充要条件}：
+    离散 LTI 系统具有因果性的充要条件是其系统函数 $H(z)$ 的收敛域为最外层极点所在的圆外开区域（即 $\mathrm{ROC}: |z| > \max_i |p_i|$），且 $H(z)$ 分子关于 $z$ 的阶数不能超过分母关于 $z$ 的阶数。
+    \item \textbf{因果系统的 BIBO 稳定性充要条件}：
+    离散因果 LTI 系统为 BIBO 稳定的充要条件是：\textbf{系统函数 $H(z)$ 的所有极点全部严格位于 $z$ 平面的单位圆内部}，即：
+    \begin{equation}
+        |p_i| < 1 \quad (\forall i = 1, 2, \dots, n)
+    \end{equation}
+    此时收敛域包含单位圆 $|z| = 1$，系统存在稳态频率响应特性 $H(\mathrm{e}^{\mathrm{j}\Omega}) = \left. H(z) \right|_{z = \mathrm{e}^{\mathrm{j}\Omega}}$。
+    \item \textbf{不稳定与临界状态}：
+    \begin{itemize}
+        \item 若在单位圆 $|z| = 1$ 上存在一阶单极点，其余极点全在单位圆内，则为临界稳定；
+        \item 若在单位圆上存在二阶及以上重极点（导致 $k$-乘幂发散项），或单位圆外存在任意极点（$|p_i| > 1$），则系统必然不稳定。
+    \end{itemize}
+\end{enumerate}
+\end{theorem}
+
+\subsubsection{Jury 稳定性代数判据（二阶系统速判）}
+对于二阶离散特征多项式 $A(z) = a_2 z^2 + a_1 z + a_0 = 0 \ (a_2 > 0)$，其两个极点均严格位于单位圆内的充要条件为：
+\begin{equation}
+    \begin{cases}
+        A(1) = a_2 + a_1 + a_0 > 0 \\
+        (-1)^2 A(-1) = a_2 - a_1 + a_0 > 0 \\
+        |a_0| < a_2
+    \end{cases}
+\end{equation}
+
+\subsection{$s$ 平面到 $z$ 平面的映射关系与两域对偶总结}
+通过标准冲激抽样变换关系 $z = \mathrm{e}^{s T_{\mathrm{s}}} = \mathrm{e}^{(\sigma + \mathrm{j}\omega) T_{\mathrm{s}}}$，两变换域构成严密几何映射：
+\begin{enumerate}
+    \item $s$ 平面的虚轴（$\sigma = 0$）$\implies$ 映射为 $z$ 平面的\textbf{单位圆周}（$|z| = 1$）；
+    \item $s$ 平面的开左半平面（稳定域 $\sigma < 0$）$\implies$ 映射为 $z$ 平面的\textbf{单位圆内部}（稳定域 $|z| < 1$）；
+    \item $s$ 平面的开右半平面（非稳域 $\sigma > 0$）$\implies$ 映射为 $z$ 平面的\textbf{单位圆外部}（非稳域 $|z| > 1$）；
+    \item 连续系统的稳态频率响应由虚轴计算（$s = \mathrm{j}\omega$），离散系统的稳态频率响应由单位圆周计算（$z = \mathrm{e}^{\mathrm{j}\Omega}$）。
+\end{enumerate}
+
+\end{document}

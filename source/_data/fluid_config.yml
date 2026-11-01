@@ -1,0 +1,9 @@
+banner:
+  random_img: true
+  banner_img_list:
+    - /img/background/background-01.png
+    - /img/background/background-02.png
+    - /img/background/background-03.png
+    - /img/background/background-04.png
+    - /img/background/background-05.png
+    - /img/background/background-06.png
