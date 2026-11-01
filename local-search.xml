@@ -14,13 +14,13 @@
     
     <tags>
       
+      <tag>Windows</tag>
+      
       <tag>Hardware Viewer</tag>
       
       <tag>Dev Log</tag>
       
       <tag>Python</tag>
-      
-      <tag>Windows</tag>
       
       <tag>Reverse Engineering</tag>
       
@@ -43,13 +43,13 @@
     
     <tags>
       
+      <tag>Windows</tag>
+      
       <tag>Hardware Viewer</tag>
       
       <tag>Dev Log</tag>
       
       <tag>Python</tag>
-      
-      <tag>Windows</tag>
       
       <tag>Desktop App</tag>
       
@@ -74,17 +74,17 @@
     
     <tags>
       
+      <tag>Windows</tag>
+      
       <tag>Hardware Viewer</tag>
       
       <tag>Dev Log</tag>
       
       <tag>Python</tag>
       
-      <tag>Windows</tag>
+      <tag>Reverse Engineering</tag>
       
       <tag>Desktop App</tag>
-      
-      <tag>Reverse Engineering</tag>
       
       <tag>Hardware</tag>
       
@@ -151,9 +151,9 @@
     
     <tags>
       
-      <tag>Windows</tag>
-      
       <tag>Multisim</tag>
+      
+      <tag>Windows</tag>
       
     </tags>
     
@@ -166,7 +166,7 @@
     <link href="/Introduction/"/>
     <url>/Introduction/</url>
     
-    <content type="html"><![CDATA[<p>工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。</p><p>这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。</p><h3 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h3><p>我是<strong>Limpid</strong>，厦门大学自动化系在读。</p><p>穿行于算法与电路之间，在无序的世界里追求秩序感。</p><p>对文字、逻辑与故事保有长久的敬畏。喜欢在海风里扬帆或仰望星空，以及那些在严谨工程之外肆意生长的灵感。</p><h3 id="联系我"><a href="#联系我" class="headerlink" title="联系我"></a>联系我</h3><ul><li><strong>邮箱</strong>：<a href="mailto:&#x68;&#101;&#x73;&#105;&#x67;&#101;&#108;&#x69;&#110;&#64;&#x73;&#116;&#x75;&#x2e;&#120;&#109;&#117;&#46;&#101;&#x64;&#117;&#46;&#99;&#110;">hesigelin@stu.xmu.edu.cn</a></li><li><strong>GitHub</strong>：<a href="https://github.com/LimpidSlirm">LimpidSlirm</a></li></ul><h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>“长路漫漫，且行且看。”</p><p>若你偶然途经此地，读到某段文字或某行代码恰好引发了共鸣，那么这个站点的存在便有了意义。</p><p>欢迎来到这里。</p>]]></content>
+    <content type="html"><![CDATA[<p>工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。</p><p>这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。</p><h3 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h3><p>我是<strong>Limpid</strong>，厦门大学自动化系在读。</p><p>穿行于算法与电路之间，在无序的世界里追求秩序感。</p><p>对文字、逻辑与故事保有长久的敬畏。喜欢在海风里扬帆或仰望星空，以及那些在严谨工程之外肆意生长的灵感。</p><h3 id="联系我"><a href="#联系我" class="headerlink" title="联系我"></a>联系我</h3><ul><li><strong>邮箱</strong>：<a href="mailto:&#104;&#x65;&#115;&#x69;&#103;&#101;&#x6c;&#x69;&#110;&#x40;&#115;&#116;&#x75;&#x2e;&#x78;&#109;&#117;&#46;&#101;&#100;&#x75;&#46;&#99;&#x6e;">hesigelin@stu.xmu.edu.cn</a></li><li><strong>GitHub</strong>：<a href="https://github.com/LimpidSlirm">LimpidSlirm</a></li></ul><h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>“长路漫漫，且行且看。”</p><p>若你偶然途经此地，读到某段文字或某行代码恰好引发了共鸣，那么这个站点的存在便有了意义。</p><p>欢迎来到这里。</p>]]></content>
     
     
     
