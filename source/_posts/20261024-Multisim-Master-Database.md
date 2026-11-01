@@ -1,7 +1,6 @@
 ---
 title: Multisim 打不开 Database
 date: 2026-10-24 17:40:00
-permalink: Multisim-Master-Database/
 tags:
   - Multisim
   - Windows

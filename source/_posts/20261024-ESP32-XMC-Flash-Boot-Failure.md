@@ -1,7 +1,6 @@
 ---
 title: ESP32 - Day 1：XMC Flash 启动失败
 date: 2026-10-24 23:21:00
-permalink: ESP32-XMC-Flash-Boot-Failure/
 tags:
   - ESP32
   - Embedded Systems
