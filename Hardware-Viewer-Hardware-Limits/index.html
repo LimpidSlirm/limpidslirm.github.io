@@ -1,0 +1,968 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="LimpidSlirm">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 昨天给 3554:FA09 这块键盘显示的电量是 100%，但那是从没被证实过的猜测。今天把它查清楚了：这个设备在 Windows 侧根本读不到电量。另外发现自己昨天修「控制台弹窗」时留下了一个中文乱码的回归。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hardware-Viewer - Hardware Limits">
+<meta property="og:url" content="https://limpidslirm.github.io/Hardware-Viewer-Hardware-Limits/index.html">
+<meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
+<meta property="og:description" content="开发一个可以看硬件实时电量的 app。 仓库地址为 https:&#x2F;&#x2F;github.com&#x2F;LimpidSlirm&#x2F;2.4G-Hardware-Viewer 以下为 agent 输出的日志。 昨天给 3554:FA09 这块键盘显示的电量是 100%，但那是从没被证实过的猜测。今天把它查清楚了：这个设备在 Windows 侧根本读不到电量。另外发现自己昨天修「控制台弹窗」时留下了一个中文乱码的回归。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-11-01T05:05:00.000Z">
+<meta property="article:modified_time" content="2026-11-01T05:10:39.987Z">
+<meta property="article:author" content="LimpidSlirm">
+<meta property="article:tag" content="Debugging">
+<meta property="article:tag" content="Dev Log">
+<meta property="article:tag" content="Hardware Viewer">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Reverse Engineering">
+<meta property="article:tag" content="Windows">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Hardware-Viewer - Hardware Limits - LimpidSlirm&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Limpid&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>Home</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>Archives</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>About</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>Search</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="Light"
+               data-label-dark="Dark">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">Dark</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true data-random-banner='/img/random/background-01.png,/img/random/background-02.png,/img/random/background-03.png,/img/random/background-04.png,/img/random/background-05.png,/img/random/background-06.png'
+     style="background: url('/img/random/background-01.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Hardware-Viewer - Hardware Limits"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-01 13:05" pubdate>
+          November 1, 2026 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.8k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          74 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    (function() {
+      var banner = document.getElementById('banner');
+      if (!banner) return;
+      var list = banner.getAttribute('data-random-banner');
+      if (!list) return;
+      list = list.split(',').filter(Boolean);
+      if (list.length === 0) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      banner.style.backgroundImage = "url('" + pick + "')";
+    })();
+  </script>
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Hardware-Viewer - Hardware Limits</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>开发一个可以看硬件实时电量的 app。</p>
+<p>仓库地址为 <a target="_blank" rel="noopener" href="https://github.com/LimpidSlirm/2.4G-Hardware-Viewer">https://github.com/LimpidSlirm/2.4G-Hardware-Viewer</a></p>
+<p>以下为 agent 输出的日志。</p>
+<p>昨天给 3554:FA09 这块键盘显示的电量是 100%，但那是从没被证实过的猜测。今天把它查清楚了：这个设备在 Windows 侧根本读不到电量。另外发现自己昨天修「控制台弹窗」时留下了一个中文乱码的回归。</p>
+<blockquote>
+<p>Yesterday the 3554:FA09 keyboard showed a 100% battery that had never actually been proven. Today it is settled: this device exposes no readable charge level to Windows at all. The same session also turned up a Chinese-text regression I had introduced yesterday while fixing the flashing console window.</p>
+</blockquote>
+<h2 id="1-三十八小时，一个字节都没动-Thirty-eight-hours-not-a-single-byte-moved"><a href="#1-三十八小时，一个字节都没动-Thirty-eight-hours-not-a-single-byte-moved" class="headerlink" title="1. 三十八小时，一个字节都没动 | Thirty-eight hours, not a single byte moved"></a>1. 三十八小时，一个字节都没动 | Thirty-eight hours, not a single byte moved</h2><p>键盘1 的采样器从 10-30 晚开始记录，到 11-01 中午停了 24.6 小时没人发现。重启继续采之后，把全部数据统计了一遍：</p>
+<blockquote>
+<p>The keyboard-1 sampler had been recording since the evening of 10-30, then sat idle for 24.6 hours before anyone noticed. After restarting it and collecting more data, the whole log was tallied:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">采样条数: 273<br>时间跨度: 2026-10-30 22:20 -&gt; 2026-11-01 13:00:24   （38.7 小时）<br>不同报文: 1 / 273<br></code></pre></td></tr></table></figure>
+
+<p>报文的每一列都只有一个取值：</p>
+<blockquote>
+<p>Every column of the report has exactly one value:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">byte0=6  byte1=0  byte2=2  byte3=100  byte4=100  byte5=100  byte6=53  byte7=21<br></code></pre></td></tr></table></figure>
+
+<p>不是「掉电了但没记到」，而是<strong>两位都没变过</strong>。用户当时的判断是「应该这里面没有电量吧」——这个判断方向是对的，但还需要证据。</p>
+<blockquote>
+<p>This is not a case of the level dropping without being logged: <strong>nothing changed at all</strong>. The user’s hunch was that the report simply contains no battery, which pointed the right way, but a hunch still needs evidence.</p>
+</blockquote>
+<h2 id="2-先确认设备上还有没有别的通道-First-are-there-any-other-channels-on-this-device"><a href="#2-先确认设备上还有没有别的通道-First-are-there-any-other-channels-on-this-device" class="headerlink" title="2. 先确认设备上还有没有别的通道 | First, are there any other channels on this device"></a>2. 先确认设备上还有没有别的通道 | First, are there any other channels on this device</h2><p>在否定 Report 6 之前，得排除「电量藏在另一个报告里」。把这块键盘的全部接口和 0~32 号 Feature Report 扫了一遍：</p>
+<blockquote>
+<p>Before dismissing Report 6, the possibility that the battery lives in a different report had to be ruled out. Every interface of the keyboard and every feature report ID from 0 to 32 was enumerated:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">usage_page=0x1      usage=0x2    in= 8  out= 0  feat=0<br>usage_page=0xff04   usage=0x2    in= 0  out= 0  feat=8   &lt;- 唯一可读的 Feature Report<br>usage_page=0x1      usage=0x6    in=21  out= 0  feat=0<br>usage_page=0xff02   usage=0x2    in=20  out=20  feat=0<br>usage_page=0x1      usage=0x6    in= 9  out= 2  feat=0<br>usage_page=0xc      usage=0x1    in= 3  out= 0  feat=0<br>usage_page=0x1      usage=0x80   in= 2  out= 0  feat=0<br></code></pre></td></tr></table></figure>
+
+<p>结果只有 <code>0xFF04 / id 6</code> 一个能读出内容，没有备选报告。同时注意到<strong>没有任何 <code>usage_page 0x06</code></strong> —— 也就是 HID 标准的 Battery Strength，所以 Windows 自己也不知道这块键盘还有多少电，系统设置里自然也不会显示。</p>
+<blockquote>
+<p>Only <code>0xFF04 / id 6</code> returned data, so there is no alternate report. Note also the absence of any <code>usage_page 0x06</code>, i.e. the HID Battery Strength usage, which means Windows itself has no idea about this keyboard’s charge and never displays it in system settings.</p>
+</blockquote>
+<h2 id="3-主动写入：它是寄存器，不是查询接口-Active-writes-a-register-not-a-query-interface"><a href="#3-主动写入：它是寄存器，不是查询接口-Active-writes-a-register-not-a-query-interface" class="headerlink" title="3. 主动写入：它是寄存器，不是查询接口 | Active writes: a register, not a query interface"></a>3. 主动写入：它是寄存器，不是查询接口 | Active writes: a register, not a query interface</h2><p>剩下的可能是「需要先写一条查询命令，它才回应」。为了验证这个假设，先证明写入通道可用：把刚读到的内容原样写回去。</p>
+<blockquote>
+<p>The remaining hypothesis was that a query command must be written first before the device answers. To test it, writing had to be proven to work at all: the bytes just read were written straight back.</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">写回 [6,0,2,100,100,100,53,21]  -&gt; 成功<br>再读回                          -&gt; 完全一致<br></code></pre></td></tr></table></figure>
+
+<p>写入可用。接下来分两轮扫描 <code>byte1</code> 和 <code>byte2</code>（各 0~15），每次写完读回，然后立刻把原值写回去：</p>
+<blockquote>
+<p>Writing works. Next, <code>byte1</code> and <code>byte2</code> were swept from 0 to 15 in two passes, reading back after each write and restoring the original value immediately afterwards:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">byte1 扫描 0~15 ：16 次写入全部成功<br>  读回结果 = 写入值     （写 1 得 1，写 15 得 15）<br><br>byte2 扫描 0~15 ：16 次写入全部成功<br>  读回结果 = 2，一次都没变<br></code></pre></td></tr></table></figure>
+
+<p>两个字段的行为正好相反，这个对比很关键：<code>byte1</code> 是<strong>可写配置项</strong>，<code>byte2</code> 是<strong>设备自己维护的只读状态位</strong>。如果这只是一个查询接口，写入之后不该出现「某些字节跟着变、某些字节纹丝不动」这种分化。结论是 Report 6 属于<strong>配置寄存器</strong>，不是提问-应答通道，写什么都不可能问出电量。</p>
+<blockquote>
+<p>The two fields behave in opposite ways, and that contrast is the point: <code>byte1</code> is a <strong>writable configuration value</strong>, while <code>byte2</code> is a <strong>read-only status bit maintained by the device</strong>. A query interface would not split like that after a write. The conclusion is that Report 6 is a <strong>configuration register</strong>, not a request-response channel, so no write can ever ask it for a charge level.</p>
+</blockquote>
+<p>每次试探后都写回了原值，最后确认设备配置完好：</p>
+<blockquote>
+<p>The original value was restored after every trial, and the device configuration was confirmed intact at the end:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">当前 Report 6 : [6,0,2,100,100,100,53,21]<br>原始 baseline : [6,0,2,100,100,100,53,21]<br>一致: true<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-Output-Report-全部拒收-Every-output-report-is-rejected"><a href="#4-Output-Report-全部拒收-Every-output-report-is-rejected" class="headerlink" title="4. Output Report 全部拒收 | Every output report is rejected"></a>4. Output Report 全部拒收 | Every output report is rejected</h2><p><code>0xFF02</code> 接口有 20 字节的 Output Report，这是最后一个可能的下行通道。第一次扫描时错误码拿到的是 0，说明错误没捕获到，结果不可信；用 <code>use_last_error=True</code> 重测：</p>
+<blockquote>
+<p>The <code>0xFF02</code> interface exposes a 20-byte output report, the last possible downstream channel. The first sweep reported error code 0, which means the error was never captured, so that result was worthless. Re-running with <code>use_last_error=True</code> gave a trustworthy answer:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">HidD_SetOutputReport：<br>  id=0,1,2,8   -&gt; 失败  err=87  ERROR_INVALID_PARAMETER<br>  id=3,4,5,6,7 -&gt; 失败  err=1   ERROR_INVALID_FUNCTION<br>WriteFile：<br>  结果完全相同<br></code></pre></td></tr></table></figure>
+
+<p><code>0~8</code> 号全部被拒，两种写入 API 表现一致。这个设备不接受任何下行写入。</p>
+<blockquote>
+<p>IDs 0 through 8 are all rejected, and both write APIs agree. The device accepts no downstream writes whatsoever.</p>
+</blockquote>
+<p>顺带说明一个教训：第一次那个「err&#x3D;0」如果直接采信，会得出「写入成功了但没反应」的错误结论，方向就完全跑偏。<strong>探针本身的 bug 会伪装成设备的 bug。</strong></p>
+<blockquote>
+<p>A lesson worth recording: taking the first “err&#x3D;0” at face value would have suggested “writes succeed but nothing happens”, which points in entirely the wrong direction. <strong>A bug in the probe disguises itself as a bug in the device.</strong></p>
+</blockquote>
+<h2 id="5-三条通道都堵死，那就别再显示假数据-With-all-three-channels-closed-stop-showing-fake-data"><a href="#5-三条通道都堵死，那就别再显示假数据-With-all-three-channels-closed-stop-showing-fake-data" class="headerlink" title="5. 三条通道都堵死，那就别再显示假数据 | With all three channels closed, stop showing fake data"></a>5. 三条通道都堵死，那就别再显示假数据 | With all three channels closed, stop showing fake data</h2><p>汇总一下：</p>
+<blockquote>
+<p>The tally:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>通道</th>
+<th>实测结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Feature Report 6（<code>0xFF04</code>）</td>
+<td>273 次采样、38.7 小时只有 1 种报文；<code>byte1</code> 可写、<code>byte2</code> 只读，是配置寄存器</td>
+</tr>
+<tr>
+<td>Output Report（<code>0xFF02</code>）</td>
+<td>Report ID <code>0~8</code> 全部拒收，两种写入 API 一致</td>
+</tr>
+<tr>
+<td>标准 HID Battery Strength</td>
+<td>设备没有暴露 <code>usage_page 0x06</code>，Windows 也无从得知</td>
+</tr>
+</tbody></table>
+<p>还有一条判据来自用户：这块键盘<strong>一直在用</strong>（正在用来打字），不是闲置状态。真实电量计在 38 小时里不可能一位不漂，<code>byte3/4/5</code> 三个候选值始终恰好 100、<code>byte6=53</code>、<code>byte7=21</code> 也分毫不动。</p>
+<blockquote>
+<p>One more piece of evidence came from the user: this keyboard <strong>is in active use</strong> — it was the one being typed on — rather than sitting idle. A real fuel gauge cannot hold every bit steady for 38 hours, yet the three candidate bytes <code>byte3/4/5</code> stayed at exactly 100 while <code>byte6=53</code> and <code>byte7=21</code> never budged either.</p>
+</blockquote>
+<p>所以那个 100 是固件写死的值或配置项。删掉它：</p>
+<blockquote>
+<p>So that 100 is a firmware constant or a configuration value. It was removed:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">app/battery_protocols.py  删除 read_vendor_battery_candidates() 与 BatteryReading（37 行）<br>app/main.py               删除对应调用与 import（8 行）<br>README.md                 设备表改为「无可用通道」，新增一节记录排除过程<br></code></pre></td></tr></table></figure>
+
+<p>界面现在落到原有分支，标记 <code>电量未公开</code>——这也是项目从一开始就写进 README 的原则：不猜测、不伪造百分比。讽刺的是这条原则当时就被自己违反了。</p>
+<blockquote>
+<p>The row now falls through to the existing branch and is labelled <code>电量未公开</code>, which is the principle the project documented from day one: never guess, never invent a percentage. Ironically that principle had been violated by the project itself.</p>
+</blockquote>
+<h2 id="6-昨天那个修复留下的回归-A-regression-left-behind-by-yesterday’s-fix"><a href="#6-昨天那个修复留下的回归-A-regression-left-behind-by-yesterday’s-fix" class="headerlink" title="6. 昨天那个修复留下的回归 | A regression left behind by yesterday’s fix"></a>6. 昨天那个修复留下的回归 | A regression left behind by yesterday’s fix</h2><p>改完之后截图检查界面，发现音频设备名显示成 <code>���� (ZhuAudio ZG2)</code>。中文全变成替换字符了。</p>
+<blockquote>
+<p>After the change the UI was screenshotted for a check, and audio device names showed up as <code>���� (ZhuAudio ZG2)</code>. Every Chinese character had become a replacement glyph.</p>
+</blockquote>
+<p>先确认这不是新问题：昨天改代码之前的探针数据里同样是乱码，所以不是第 5 节引入的。然后做 A&#x2F;B 定位——同一个脚本、同一套解码，只改 <code>creationflags</code>：</p>
+<blockquote>
+<p>First, confirm this is not new: probe data taken yesterday before the code change was already garbled, so section 5 did not cause it. Then A&#x2F;B it, same script and same decoder, varying only <code>creationflags</code>:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">creationflags = CREATE_NO_WINDOW  -&gt;  &quot;\ufffd\ufffd\ufffd (ZhuAudio ZG2)&quot;   乱码<br>creationflags = 0                 -&gt;  &quot;\u626c\u58f0\u5668 (ZhuAudio ZG2)&quot;   正常<br></code></pre></td></tr></table></figure>
+
+<p>根因清楚了：昨天为了让 PowerShell 不弹出控制台窗口，给子进程加了 <code>CREATE_NO_WINDOW</code>。这让子进程<strong>彻底失去控制台</strong>，<code>[Console]::OutputEncoding</code> 于是退回系统 ANSI 代码页（本机 cp936&#x2F;GBK），而 Python 侧仍然按 <code>encoding=&quot;utf-8&quot;</code> 解码。</p>
+<blockquote>
+<p>The cause is clear: yesterday’s fix for the flashing console added <code>CREATE_NO_WINDOW</code>, which leaves the child with <strong>no console at all</strong>. <code>[Console]::OutputEncoding</code> therefore falls back to the system ANSI code page (cp936&#x2F;GBK here) while the Python side still decodes as <code>encoding=&quot;utf-8&quot;</code>.</p>
+</blockquote>
+<p>这也解释了为什么只有<strong>音频设备名</strong>乱码：<code>HID-compliant mouse</code>、<code>HID Keyboard Device</code> 是纯 ASCII，怎么解都不会错；<code>扬声器</code>、<code>麦克风</code> 是中文，才把问题暴露出来。</p>
+<blockquote>
+<p>It also explains why only <strong>audio device names</strong> were garbled: <code>HID-compliant mouse</code> and <code>HID Keyboard Device</code> are pure ASCII and survive any decoder, whereas <code>扬声器</code> and <code>麦克风</code> expose the mismatch.</p>
+</blockquote>
+<p>修复试了四种写法，只有明确锁定编码才有效：</p>
+<blockquote>
+<p>Four approaches were tried; only pinning the encoding explicitly works:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">plain                                    -&gt; GBK（乱码）<br>[Console]::OutputEncoding = UTF8         -&gt; UTF-8  ✓<br>$OutputEncoding = UTF8                   -&gt; GBK（无效）<br>try&#123;[Console]...&#125;catch&#123;&#125; + $OutputEncoding -&gt; UTF-8  ✓（等效）<br></code></pre></td></tr></table></figure>
+
+<p>注意 <code>$OutputEncoding</code> 单独设置<strong>不管用</strong> —— 它影响的是 PowerShell 传给外部原生程序的编码，不是自己写 stdout 的编码。这个区分很容易搞混。</p>
+<blockquote>
+<p>Note that setting <code>$OutputEncoding</code> alone does <strong>not</strong> work: it controls the encoding PowerShell uses when piping to external native programs, not the encoding it uses for its own stdout. That distinction is easy to get wrong.</p>
+</blockquote>
+<p>最终在 <a target="_blank" rel="noopener" href="https://github.com/LimpidSlirm/2.4G-Hardware-Viewer/blob/main/app/device_discovery.py">device_discovery.py</a> 和 <a target="_blank" rel="noopener" href="https://github.com/LimpidSlirm/2.4G-Hardware-Viewer/blob/main/app/autostart.py">autostart.py</a> 的 PowerShell 脚本开头都加了这一行，并在代码注释和 README 里写明了因果，避免以后有人把 <code>CREATE_NO_WINDOW</code> 当成纯粹的界面优化。</p>
+<blockquote>
+<p>In the end the line was added to the top of the PowerShell scripts in both <a target="_blank" rel="noopener" href="https://github.com/LimpidSlirm/2.4G-Hardware-Viewer/blob/main/app/device_discovery.py">device_discovery.py</a> and <a target="_blank" rel="noopener" href="https://github.com/LimpidSlirm/2.4G-Hardware-Viewer/blob/main/app/autostart.py">autostart.py</a>, with the causal link recorded in code comments and the README so nobody treats <code>CREATE_NO_WINDOW</code> as a pure UI tweak again.</p>
+</blockquote>
+<h2 id="7-验证记录与后续-Verification-log-and-next-steps"><a href="#7-验证记录与后续-Verification-log-and-next-steps" class="headerlink" title="7. 验证记录与后续 | Verification log and next steps"></a>7. 验证记录与后续 | Verification log and next steps</h2><p>本轮验证：</p>
+<blockquote>
+<p>Commands and results for this round:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">py_compile app/battery_protocols.py app/main.py app/device_discovery.py app/autostart.py  -&gt; COMPILE_OK<br>python -m app.main --smoke-test                                                          -&gt; exit=0<br>python -m app.main --create-shortcut                                                     -&gt; 快捷方式重建成功<br>删除后残留引用扫描                                                                          -&gt; 无<br></code></pre></td></tr></table></figure>
+
+<p>数据层（走真实 <code>DeviceDiscoveryThread</code>）：</p>
+<blockquote>
+<p>Data layer, through the real <code>DeviceDiscoveryThread</code>:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">键盘 3554:FA09  battery = null   source = null        &lt;- 假 100% 已消失<br>鼠标 24AE:1411  battery = 96     source = 厂商 HID 报告 · 缓存<br>音频设备名称     \u626c\u58f0\u5668 (ZhuAudio ZG2)      &lt;- 无 \ufffd<br></code></pre></td></tr></table></figure>
+
+<p>界面截图确认：完整模式下音频设备显示 <code>扬声器 (ZhuAudio ZG2)</code>、<code>麦克风 (ZhuAudio ZG2)</code>，键盘行显示 <code>3554:FA09 · 电量未公开</code>。</p>
+<blockquote>
+<p>Screenshots confirm it: in full mode the audio rows read <code>扬声器 (ZhuAudio ZG2)</code> and <code>麦克风 (ZhuAudio ZG2)</code>, and the keyboard row reads <code>3554:FA09 · 电量未公开</code>.</p>
+</blockquote>
+<p>对应提交：</p>
+<blockquote>
+<p>Corresponding commits:</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">0f90266 fix: stop showing a fabricated battery for the 3554:FA09 keyboard<br>96db750 fix: pin PowerShell stdout to UTF-8 so device names stop garbling<br></code></pre></td></tr></table></figure>
+
+<p>后续可做：</p>
+<blockquote>
+<p>Possible next steps:</p>
+</blockquote>
+<ol>
+<li>键盘1 已放弃，采样器停在 273 条；<code>app/feature_log.py</code> 保留为通用诊断工具</li>
+<li>耳机 <code>4C4A:4155</code> 与键盘1 现在同属「协议不暴露电量」，可在 README 里合并成统一说明</li>
+<li><code>CREATE_NO_WINDOW</code> 这类「看起来只是界面优化」的改动值得加一条回归清单，下次改前后都验一遍中文显示</li>
+</ol>
+<blockquote>
+<ol>
+<li>Keyboard 1 is given up on; the sampler stopped at 273 samples and <code>app/feature_log.py</code> stays as a general diagnostic tool</li>
+<li>The headset <code>4C4A:4155</code> and keyboard 1 now share the same “the protocol exposes no charge level” verdict and could be merged into one README note</li>
+<li>Changes like <code>CREATE_NO_WINDOW</code> that look like pure UI polish deserve a regression checklist, so Chinese text gets verified both before and after</li>
+</ol>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Hardware-Viewer/" class="print-no-link">#Hardware Viewer</a>
+      
+        <a href="/tags/Dev-Log/" class="print-no-link">#Dev Log</a>
+      
+        <a href="/tags/Python/" class="print-no-link">#Python</a>
+      
+        <a href="/tags/Windows/" class="print-no-link">#Windows</a>
+      
+        <a href="/tags/Reverse-Engineering/" class="print-no-link">#Reverse Engineering</a>
+      
+        <a href="/tags/Debugging/" class="print-no-link">#Debugging</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Hardware-Viewer - Hardware Limits</div>
+      <div>https://limpidslirm.github.io/Hardware-Viewer-Hardware-Limits/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>LimpidSlirm</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 1, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/Hardware-Viewer-Desktop/" title="Hardware-Viewer - Desktop Integration">
+                        <span class="hidden-mobile">Hardware-Viewer - Desktop Integration</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://www.xmu.edu.cn/" target="_blank" rel="nofollow noopener"><span>Xiamen University</span></a> <span> · </span> <span>© 2026 LimpidSlirm</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
