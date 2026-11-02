@@ -37,6 +37,7 @@ source/
   _data/             # 主题数据覆盖 / theme data overrides
   notes/             # 学习笔记 PDF/TeX / study note files
   img/ downloads/    # 静态资源 / static assets
+  css/               # 自定义样式 / custom styles
   categories/        # 分类页 / category pages
 themes/              # 主题 / themes
 public/              # 构建输出（已忽略）/ build output (git-ignored)
@@ -55,6 +56,7 @@ Front matter 示例 / example front matter:
 title: 文章标题
 date: 2026-10-30 18:00:00
 index_img: /img/1.png   # 可选：首页卡片封面 / optional card cover
+index_img_position: right  # 可选：封面放到卡片右侧（默认左侧）/ optional, cover on the right of the card
 tags:
   - Tag Name
 ---
@@ -65,6 +67,7 @@ tags:
 - 文章文件名使用 `YYYYMMDD-Title.md`，标题按日期排序 / posts are named `YYYYMMDD-Title.md`
 - 标签统一使用英文 / tags are written in English
 - `scripts/study-notes-archive.js` 会把 `Study Notes` 分类聚合到一个归档页 / aggregates the `Study Notes` category into one archive page
+- `scripts/index-img-right.js` 配合 `source/css/custom.css` 实现 `index_img_position: right`（桌面端首页卡片头图靠右，移动端仍在标题上方）/ implements the right-side cover for desktop index cards
 - `source/notes/*.tex` 通过 `skip_render` 原样输出 / `.tex` files bypass rendering
 - 构建产物 `public/`、缓存 `db.json` 与 `node_modules/` 不入库 / build artifacts are git-ignored
 

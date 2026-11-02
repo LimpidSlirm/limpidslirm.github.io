@@ -1,0 +1,11 @@
+/* 首页卡片头图靠右，由 front-matter `index_img_position: right` 触发 */
+/* Index card cover on the right, triggered by front-matter `index_img_position: right` */
+@media (min-width: 768px) {
+  .index-card-right .index-img {
+    order: 2;
+  }
+
+  .index-card-right .index-info {
+    order: 1;
+  }
+}
