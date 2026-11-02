@@ -6,8 +6,8 @@ index_img_position: right
 tags:
   - Smart Car
   - Embedded Systems
-  - Software Architecture
   - TC264
+  - Software Architecture
 ---
 
 2026-11-02 智能车课程架构研究与工程落地记录。今天围绕当前 TC264 裸机工程，设计了适合课程小车的轻量级软件架构，并将第一阶段的接口骨架同步到项目。

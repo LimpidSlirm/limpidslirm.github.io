@@ -4,8 +4,8 @@ date: 2026-11-02 16:05:00
 tags:
   - Smart Car
   - Embedded Systems
-  - PID
   - TC264
+  - PID
 ---
 
 2026-11-02 智能车课程调试记录。今天完成了双轮电机开环验证，并在此基础上恢复编码器速度 PID 控制。

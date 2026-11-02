@@ -5,6 +5,7 @@ index_img: /img/20261026.png
 tags:
   - Smart Car
   - Embedded Systems
+  - TC264
   - Headless Build
 ---
 
