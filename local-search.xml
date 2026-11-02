@@ -4,6 +4,25 @@
   
   
   <entry>
+    <title>刻度尺与荒原</title>
+    <link href="/The-Ruler-And-The-Wasteland/"/>
+    <url>/The-Ruler-And-The-Wasteland/</url>
+    
+    <content type="html"><![CDATA[<p>我有一种感觉，在大学里，每个人心里都有一个计算器。</p><p>做一件事之前，习惯性地先称量它的投入产出比：算绩点的收益、算比赛的加分、算人脉的置换。如果一件事落在线外，做好了功劳不在自己身上，投入了又不见得有立竿见影的回报，它就会被迅速归类为“不值得”的亏损项。</p><p>曾经有朋友问过我，为什么明明不在职责范围内，做好了也没有功劳的事情，你也会去做？</p><p>我突然意识到，在别人眼里，这是一场必须步步为营的生存博弈；而在我这里，做一件事的起点从来不是为了升职、功劳或综测，仅仅是因为我喜欢。所谓的精力充沛，不过是一点未泯的童心在作祟。像个误入竞技场的孩子，哪怕周围都在严阵以待地算计输赢，我却只想把每一个未知的关卡当成游乐场，亲手把混乱理成秩序，看看它到底有多好玩。</p><p>可讽刺的是，我觉得自己又是个极其矛盾的优绩主义者。</p><p>我讨厌优绩主义对人的异化，讨厌这套把具体的血肉压缩成排名与分值的冷酷系统。但在面对未来的迷茫与恐惧时，我伸出的双手，又总是本能而熟练地抓起那把熟悉的刻度尺，去丈量自己、校准自己。从小到大，由分数和阶梯式正反馈筑起的确定性，早已渗进我的骨髓，成了自我认同不可分割的支柱。如果彻底把这把尺子抽走，迎面扑来的绝非纯粹的自由，而是一场足以将人逼疯的失重与虚空。</p><p>于是，一种极度荒诞的割裂诞生了：我厌恶这套规则，却又在依靠它的确定性抵抗沉沦；我曾说我想开一家小酒馆，辟出一张木桌去听世间过客卸下风尘的故事，却又清醒地知道，那不过是灵魂被齿轮挤压到窒息时，大脑为了自我保护而捏造的乌托邦。</p><p>很多个深夜，我总会想起十七岁那个夏天的毓才街。那是高中落下的最后一个落日，斜阳漫天，像一场盛大而残酷的大火。</p><p>十七岁时，我们天真地以为高考是一场轰轰烈烈的终局。只要咬牙穿过那场烈焰，所有的苦难都会化为灰烬，大火熄灭后，前方必然是辽阔灿烂的无边旷野。</p><p>可直到烈火燃尽、烟尘落定，我才狼狈地发现，高考带走的从来不是苦难，它带走的是“相信未来永远开阔明亮”的信念。高墙倒塌之后，外面根本没有旷野，只有被更复杂、更隐秘的规则重新切分好的另一片荒原。</p><p>我曾在心底无数次追问：十七岁的大火啊，你烧尽后，能不能告诉我废墟上究竟要怎么长出花朵？</p><p>有一句诡异的话突然跑进了大脑。</p><p>我读大学，是在优绩主义里体验人生。</p><p>别人因恐惧而被规则驱赶，每走一步都在消耗。而我选择把优绩主义当成一套用来探索世界的脚手架。我承认它的存在，熟练地在其中冲锋陷阵、拿到靠前的席位，但我并不打算把灵魂当成抵押品。我在这套最严苛的规则里，偏要怀揣着近乎天真的热情去活着；在最讲究性价比的赛道上，偏要为了纯粹的喜欢而不计成本地投入。</p><p>痛苦与撕裂不是软弱，恰恰是我没有被机器彻底格式化的铁证。废墟上的花从来不需要谁来允诺土壤，它靠的是生命本身不甘驯服的韧性。</p><p>哪怕身处一片优绩主义的荒原，只要心里还留着那一盏温热的灯，还记得十七岁落日下的炽热心跳，这具躯壳就永远不会被冰冷的算计掏空。在大火烧过的荒原深处，那些带着刺的枝桠，终究会顶破坚硬的规训，野蛮而自洽地盛开。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Essays</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>面向 TC264 课程小车的裸机混合软件架构</title>
     <link href="/TC264-Car-Software-Architecture/"/>
     <url>/TC264-Car-Software-Architecture/</url>
@@ -43,9 +62,9 @@
       
       <tag>Smart Car</tag>
       
-      <tag>PID</tag>
-      
       <tag>TC264</tag>
+      
+      <tag>PID</tag>
       
     </tags>
     
@@ -64,13 +83,13 @@
     
     <tags>
       
-      <tag>Windows</tag>
-      
       <tag>Hardware Viewer</tag>
       
       <tag>Dev Log</tag>
       
       <tag>Python</tag>
+      
+      <tag>Windows</tag>
       
       <tag>Reverse Engineering</tag>
       
@@ -93,13 +112,13 @@
     
     <tags>
       
-      <tag>Windows</tag>
-      
       <tag>Hardware Viewer</tag>
       
       <tag>Dev Log</tag>
       
       <tag>Python</tag>
+      
+      <tag>Windows</tag>
       
       <tag>Desktop App</tag>
       
@@ -124,17 +143,17 @@
     
     <tags>
       
-      <tag>Windows</tag>
-      
       <tag>Hardware Viewer</tag>
       
       <tag>Dev Log</tag>
       
       <tag>Python</tag>
       
-      <tag>Desktop App</tag>
+      <tag>Windows</tag>
       
       <tag>Reverse Engineering</tag>
+      
+      <tag>Desktop App</tag>
       
       <tag>Hardware</tag>
       
@@ -158,6 +177,8 @@
       <tag>Embedded Systems</tag>
       
       <tag>Smart Car</tag>
+      
+      <tag>TC264</tag>
       
       <tag>Headless Build</tag>
       
@@ -201,9 +222,9 @@
     
     <tags>
       
-      <tag>Multisim</tag>
-      
       <tag>Windows</tag>
+      
+      <tag>Multisim</tag>
       
     </tags>
     
@@ -216,7 +237,7 @@
     <link href="/Introduction/"/>
     <url>/Introduction/</url>
     
-    <content type="html"><![CDATA[<p>工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。</p><p>这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。</p><h3 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h3><p>我是<strong>Limpid</strong>，厦门大学自动化系在读。</p><p>穿行于算法与电路之间，在无序的世界里追求秩序感。</p><p>对文字、逻辑与故事保有长久的敬畏。喜欢在海风里扬帆或仰望星空，以及那些在严谨工程之外肆意生长的灵感。</p><h3 id="联系我"><a href="#联系我" class="headerlink" title="联系我"></a>联系我</h3><ul><li><strong>邮箱</strong>：<a href="mailto:&#104;&#x65;&#115;&#x69;&#x67;&#101;&#x6c;&#x69;&#110;&#64;&#115;&#x74;&#x75;&#46;&#x78;&#109;&#x75;&#46;&#101;&#x64;&#x75;&#x2e;&#x63;&#x6e;">hesigelin@stu.xmu.edu.cn</a></li><li><strong>GitHub</strong>：<a href="https://github.com/LimpidSlirm">LimpidSlirm</a></li></ul><h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>“长路漫漫，且行且看。”</p><p>若你偶然途经此地，读到某段文字或某行代码恰好引发了共鸣，那么这个站点的存在便有了意义。</p><p>欢迎来到这里。</p>]]></content>
+    <content type="html"><![CDATA[<p>工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。</p><p>这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。</p><h3 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h3><p>我是<strong>Limpid</strong>，厦门大学自动化系在读。</p><p>穿行于算法与电路之间，在无序的世界里追求秩序感。</p><p>对文字、逻辑与故事保有长久的敬畏。喜欢在海风里扬帆或仰望星空，以及那些在严谨工程之外肆意生长的灵感。</p><h3 id="联系我"><a href="#联系我" class="headerlink" title="联系我"></a>联系我</h3><ul><li><strong>邮箱</strong>：<a href="mailto:&#x68;&#x65;&#x73;&#105;&#x67;&#101;&#108;&#x69;&#x6e;&#64;&#115;&#x74;&#x75;&#x2e;&#120;&#x6d;&#117;&#x2e;&#101;&#x64;&#117;&#46;&#99;&#x6e;">hesigelin@stu.xmu.edu.cn</a></li><li><strong>GitHub</strong>：<a href="https://github.com/LimpidSlirm">LimpidSlirm</a></li></ul><h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>“长路漫漫，且行且看。”</p><p>若你偶然途经此地，读到某段文字或某行代码恰好引发了共鸣，那么这个站点的存在便有了意义。</p><p>欢迎来到这里。</p>]]></content>
     
     
     
