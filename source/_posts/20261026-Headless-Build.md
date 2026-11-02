@@ -1,7 +1,7 @@
 ---
 title: 智能车的 Headless Build
 date: 2026-10-26 15:18:00
-index_img: /img/1.png
+index_img: /img/20261026.png
 tags:
   - Smart Car
   - Embedded Systems
