@@ -1,0 +1,922 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="LimpidSlirm">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="2026-11-02 智能车课程架构研究与工程落地记录。今天围绕当前 TC264 裸机工程，设计了适合课程小车的轻量级软件架构，并将第一阶段的接口骨架同步到项目。 1. 为什么需要重新组织架构当前小车已经包含：  按键输入； PIT 周期中断； A&#x2F;B H 桥电机输出； 编码器计数； 左右轮速度 PID； UART 和 TFT 调试接口。  如果所有逻辑继续堆积在 app.c 或 isr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面向 TC264 课程小车的裸机混合软件架构">
+<meta property="og:url" content="https://limpidslirm.github.io/TC264-Car-Software-Architecture/index.html">
+<meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
+<meta property="og:description" content="2026-11-02 智能车课程架构研究与工程落地记录。今天围绕当前 TC264 裸机工程，设计了适合课程小车的轻量级软件架构，并将第一阶段的接口骨架同步到项目。 1. 为什么需要重新组织架构当前小车已经包含：  按键输入； PIT 周期中断； A&#x2F;B H 桥电机输出； 编码器计数； 左右轮速度 PID； UART 和 TFT 调试接口。  如果所有逻辑继续堆积在 app.c 或 isr">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://limpidslirm.github.io/img/20261102.png">
+<meta property="article:published_time" content="2026-11-02T08:15:00.000Z">
+<meta property="article:modified_time" content="2026-11-02T08:28:41.642Z">
+<meta property="article:author" content="LimpidSlirm">
+<meta property="article:tag" content="Embedded Systems">
+<meta property="article:tag" content="Smart Car">
+<meta property="article:tag" content="Software Architecture">
+<meta property="article:tag" content="TC264">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://limpidslirm.github.io/img/20261102.png">
+  
+  
+  
+  <title>面向 TC264 课程小车的裸机混合软件架构 - LimpidSlirm&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Limpid&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>Home</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>Archives</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>About</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>Search</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="Light"
+               data-label-dark="Dark">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">Dark</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true data-random-banner='/img/random/background-01.png,/img/random/background-02.png,/img/random/background-03.png,/img/random/background-04.png,/img/random/background-05.png,/img/random/background-06.png'
+     style="background: url('/img/random/background-01.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="面向 TC264 课程小车的裸机混合软件架构"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-02 16:15" pubdate>
+          November 2, 2026 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.1k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          27 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    (function() {
+      var banner = document.getElementById('banner');
+      if (!banner) return;
+      var list = banner.getAttribute('data-random-banner');
+      if (!list) return;
+      list = list.split(',').filter(Boolean);
+      if (list.length === 0) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      banner.style.backgroundImage = "url('" + pick + "')";
+    })();
+  </script>
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">面向 TC264 课程小车的裸机混合软件架构</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>2026-11-02 智能车课程架构研究与工程落地记录。今天围绕当前 TC264 裸机工程，设计了适合课程小车的轻量级软件架构，并将第一阶段的接口骨架同步到项目。</p>
+<h2 id="1-为什么需要重新组织架构"><a href="#1-为什么需要重新组织架构" class="headerlink" title="1. 为什么需要重新组织架构"></a>1. 为什么需要重新组织架构</h2><p>当前小车已经包含：</p>
+<ul>
+<li>按键输入；</li>
+<li>PIT 周期中断；</li>
+<li>A&#x2F;B H 桥电机输出；</li>
+<li>编码器计数；</li>
+<li>左右轮速度 PID；</li>
+<li>UART 和 TFT 调试接口。</li>
+</ul>
+<p>如果所有逻辑继续堆积在 <code>app.c</code> 或 <code>isr.c</code> 中，新增循迹、姿态、避障和通信功能后会出现几个问题：</p>
+<ol>
+<li>硬件端口和业务逻辑互相污染；</li>
+<li>PID、传感器和电机模块难以独立测试；</li>
+<li>中断函数越来越长，实时性难以评估；</li>
+<li>修改一个引脚可能影响多个业务文件；</li>
+<li>后续扩展只能不断增加条件分支。</li>
+</ol>
+<p>因此本次选择不引入 RTOS，而是在现有裸机工程基础上采用：</p>
+<blockquote>
+<p>分层架构 + 周期任务调度 + 事件驱动的轻量级混合架构。</p>
+</blockquote>
+<h2 id="2-推荐架构"><a href="#2-推荐架构" class="headerlink" title="2. 推荐架构"></a>2. 推荐架构</h2><p>整体分为四层：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs text">应用层<br>    模式管理、目标速度、故障策略、用户交互<br>        ↓<br>控制与功能模块层<br>    PID、速度控制、按键、循迹、姿态、避障、通信<br>        ↓<br>设备抽象层<br>    电机、编码器、传感器、显示、UART<br>        ↓<br>底层驱动层<br>    GPIO、PWM、GPT12、PIT、UART、SPI<br></code></pre></td></tr></table></figure>
+
+<p>数据流原则是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">传感器数据向上汇聚<br>控制目标向下传递<br>硬件细节停留在设备抽象层<br>按键和故障以事件进入应用层<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-裸机任务模型"><a href="#3-裸机任务模型" class="headerlink" title="3. 裸机任务模型"></a>3. 裸机任务模型</h2><p>当前工程没有 RTOS，因此不能依赖操作系统提供任务调度。可以使用 PIT 作为统一时间基准，把任务按实时性划分：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">快速基础任务：采样、计时、电机输出刷新<br>控制任务：编码器测速、速度 PID、姿态控制<br>中速任务：循迹计算、状态机、传感器融合<br>低速任务：UART、参数保存、显示和日志<br></code></pre></td></tr></table></figure>
+
+<p>具体周期不应脱离传感器和执行器特性随意决定。当前已验证的控制链路是 1 ms 基础节拍和 10 ms 速度 PID 更新；未来循迹、姿态和通信任务应根据实际采样率再分配。</p>
+<p>中断函数统一放在 <code>user/isr.c</code>，建议中断只做：</p>
+<ol>
+<li>清除中断标志；</li>
+<li>读取极短的硬件数据；</li>
+<li>更新必要的快速输出；</li>
+<li>递增时间基准或置任务标志；</li>
+<li>尽快退出。</li>
+</ol>
+<p>字符串解析、参数校验、模式切换和复杂故障策略应放在主循环或低频任务中。</p>
+<h2 id="4-当前工程的模块映射"><a href="#4-当前工程的模块映射" class="headerlink" title="4. 当前工程的模块映射"></a>4. 当前工程的模块映射</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>架构职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user/cpu0_main.c</code></td>
+<td>CPU0 启动入口</td>
+</tr>
+<tr>
+<td><code>user/isr.c</code></td>
+<td>PIT 和其他中断函数</td>
+</tr>
+<tr>
+<td><code>code/app.c/.h</code></td>
+<td>应用层、按键行为和目标管理</td>
+</tr>
+<tr>
+<td><code>code/key_module.c/.h</code></td>
+<td>按键采样、消抖和事件</td>
+</tr>
+<tr>
+<td><code>code/motor.c/.h</code></td>
+<td>A&#x2F;B H 桥输出和电机缓启动</td>
+</tr>
+<tr>
+<td><code>code/pid.c/.h</code></td>
+<td>通用 PID 算法</td>
+</tr>
+<tr>
+<td><code>code/speed_control.c/.h</code></td>
+<td>编码器采样和左右轮闭环</td>
+</tr>
+<tr>
+<td><code>code/motion_interface.h</code></td>
+<td>运动命令和运动反馈结构</td>
+</tr>
+</tbody></table>
+<p><code>libraries/</code> 只作为底层能力来源，不修改其中的文件。</p>
+<h2 id="5-第一阶段接口骨架"><a href="#5-第一阶段接口骨架" class="headerlink" title="5. 第一阶段接口骨架"></a>5. 第一阶段接口骨架</h2><p>为了避免应用层直接依赖控制模块内部变量，新增了统一的运动接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>    int16 left_target;<br>    int16 right_target;<br>    uint8 enable;<br>    uint8 safety_stop;<br>&#125; <span class="hljs-type">motion_command_t</span>;<br><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>    int16 left_measurement;<br>    int16 right_measurement;<br>    int16 left_output;<br>    int16 right_output;<br>    uint8 feedback_valid;<br>&#125; <span class="hljs-type">motion_feedback_t</span>;<br></code></pre></td></tr></table></figure>
+
+<p>应用层通过命令结构提交目标：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">speed_control_set_command(&amp;command);<br></code></pre></td></tr></table></figure>
+
+<p>控制模块通过反馈结构提供状态：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">speed_control_get_feedback(&amp;feedback);<br></code></pre></td></tr></table></figure>
+
+<p>本次接口整理采用兼容方式，保留原来的 <code>speed_control_set_target()</code> 和分项读取函数，因此不会改变已经验证的 PID、电机映射和按键行为。</p>
+<h2 id="6-运动控制数据流"><a href="#6-运动控制数据流" class="headerlink" title="6. 运动控制数据流"></a>6. 运动控制数据流</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs text">KEY3 / KEY4<br>     ↓<br>app.c 生成 motion_command_t<br>     ↓<br>speed_control.c<br>     ├── 读取 TIM5/TIM6 编码器增量<br>     ├── 分别运行左右轮 PID<br>     └── 调用 motor_set()<br>             ↓<br>motor.c<br>     ├── 逻辑左轮：P02.4 / P02.5<br>     └── 逻辑右轮：P02.6 / P02.7<br></code></pre></td></tr></table></figure>
+
+<p>这样，PID 不需要知道 PWM 的具体引脚，应用层也不需要知道编码器计数器的寄存器细节。</p>
+<h2 id="7-目录结构规划"><a href="#7-目录结构规划" class="headerlink" title="7. 目录结构规划"></a>7. 目录结构规划</h2><p>当前工程可以逐步整理为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs text">E01_gpio_demo/<br>|-- code/<br>|   |-- app.c / app.h<br>|   |-- scheduler.c / scheduler.h<br>|   |-- motion_interface.h<br>|   |-- pid.c / pid.h<br>|   |-- speed_control.c / speed_control.h<br>|   |-- motor.c / motor.h<br>|   |-- encoder.c / encoder.h<br>|   |-- key_module.c / key_module.h<br>|   |-- line_sensor.c / line_sensor.h<br>|   |-- imu.c / imu.h<br>|   |-- safety_manager.c / safety_manager.h<br>|   `-- protocol.c / protocol.h<br>|-- user/<br>|   |-- cpu0_main.c<br>|   |-- isr.c<br>|   `-- isr_config.h<br>|-- libraries/<br>|-- 实验报告/<br>`-- AI对话日志.md<br></code></pre></td></tr></table></figure>
+
+<p>其中 <code>scheduler</code>、循迹、姿态和安全管理模块属于后续扩展，不在本次接口骨架阶段一次性实现。</p>
+<h2 id="8-架构优点"><a href="#8-架构优点" class="headerlink" title="8. 架构优点"></a>8. 架构优点</h2><h3 id="8-1-硬件变化影响范围小"><a href="#8-1-硬件变化影响范围小" class="headerlink" title="8.1 硬件变化影响范围小"></a>8.1 硬件变化影响范围小</h3><p>本次调试中，电机接口从“方向+PWM”的错误假设改成 A&#x2F;B H 桥输出，并重新交换了左右轮逻辑映射。由于电机硬件细节集中在 <code>motor.c</code>，应用层和 PID 算法不需要跟着修改。</p>
+<h3 id="8-2-适合实时控制"><a href="#8-2-适合实时控制" class="headerlink" title="8.2 适合实时控制"></a>8.2 适合实时控制</h3><p>编码器采样和 PID 有固定周期，通信、显示和按键事件则可以放到低频处理。这样能够避免串口输出或复杂逻辑阻塞速度环。</p>
+<h3 id="8-3-便于测试"><a href="#8-3-便于测试" class="headerlink" title="8.3 便于测试"></a>8.3 便于测试</h3><p>可以按层验证：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs text">PID 数学计算<br>    ↓<br>编码器反馈<br>    ↓<br>单轮电机输出<br>    ↓<br>双轮开环<br>    ↓<br>双轮闭环<br></code></pre></td></tr></table></figure>
+
+<h3 id="8-4-便于扩展"><a href="#8-4-便于扩展" class="headerlink" title="8.4 便于扩展"></a>8.4 便于扩展</h3><p>循迹可以输出左右轮差速目标，姿态控制可以复用 PID，避障可以通过安全管理器发出限速或停车请求，而不需要直接操作 PWM。</p>
+<h2 id="9-架构缺点和风险"><a href="#9-架构缺点和风险" class="headerlink" title="9. 架构缺点和风险"></a>9. 架构缺点和风险</h2><p>裸机混合架构仍然需要手动处理共享数据和任务时序。随着功能增加，软件计时器和任务标志可能变复杂；一个模块执行时间过长，也可能影响其他任务。由于没有 RTOS 的任务隔离，还需要主动增加：</p>
+<ul>
+<li>传感器数据有效性检查；</li>
+<li>控制任务超时检测；</li>
+<li>通信命令边界检查；</li>
+<li>统一的故障停车接口；</li>
+<li>对 ISR 和主循环共享变量的临界区保护。</li>
+</ul>
+<p>因此，架构设计不能只停留在目录划分，还必须持续测量任务执行时间和控制周期。</p>
+<h2 id="10-构建验证"><a href="#10-构建验证" class="headerlink" title="10. 构建验证"></a>10. 构建验证</h2><p>接口骨架完成后，使用工程现有 headless 构建脚本进行回归编译：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">build_headless.bat build<br></code></pre></td></tr></table></figure>
+
+<p>结果为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Build Finished. 0 errors, 0 warnings.<br></code></pre></td></tr></table></figure>
+
+<p>本阶段只整理接口，没有改变已验证的电机映射、PID 参数和按键行为，因此没有重新烧录。后续若实现调度器或安全管理器，应重新进行编译、烧录和实车回归测试。</p>
+<h2 id="11-后续实施顺序"><a href="#11-后续实施顺序" class="headerlink" title="11. 后续实施顺序"></a>11. 后续实施顺序</h2><p>建议按以下顺序继续：</p>
+<ol>
+<li>增加统一状态快照和故障停车接口；</li>
+<li>将 PIT 中的周期控制改为任务标志调度；</li>
+<li>增加循迹传感器模块；</li>
+<li>增加姿态&#x2F;角度控制模块；</li>
+<li>增加避障和安全管理；</li>
+<li>最后接入通信参数服务。</li>
+</ol>
+<p>每一步都应保持已有电机和速度 PID 接口稳定，并单独完成编译和硬件回归。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Embedded-Systems/" class="print-no-link">#Embedded Systems</a>
+      
+        <a href="/tags/Smart-Car/" class="print-no-link">#Smart Car</a>
+      
+        <a href="/tags/Software-Architecture/" class="print-no-link">#Software Architecture</a>
+      
+        <a href="/tags/TC264/" class="print-no-link">#TC264</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>面向 TC264 课程小车的裸机混合软件架构</div>
+      <div>https://limpidslirm.github.io/TC264-Car-Software-Architecture/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>LimpidSlirm</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 2, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/TC264-Car-PID-Debugging/" title="TC264 小车双轮 PID 调试记录">
+                        <span class="hidden-mobile">TC264 小车双轮 PID 调试记录</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://www.xmu.edu.cn/" target="_blank" rel="nofollow noopener"><span>Xiamen University</span></a> <span> · </span> <span>© 2026 LimpidSlirm</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

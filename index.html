@@ -57,6 +57,10 @@
 
 
 
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
@@ -314,6 +318,104 @@
 
 <h1 style="display: none">LimpidSlirm&#39;s Blog</h1>
 
+  <div class="row mx-auto index-card index-card-right">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/TC264-Car-Software-Architecture/" target="_self">
+          <img src="/img/20261102.png" srcset="/img/loading.gif" lazyload alt="面向 TC264 课程小车的裸机混合软件架构">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/TC264-Car-Software-Architecture/" target="_self">
+          面向 TC264 课程小车的裸机混合软件架构
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/TC264-Car-Software-Architecture/" target="_self">
+        <div>
+          2026-11-02 智能车课程架构研究与工程落地记录。今天围绕当前 TC264 裸机工程，设计了适合课程小车的轻量级软件架构，并将第一阶段的接口骨架同步到项目。 1. 为什么需要重新组织架构当前小车已经包含：  按键输入； PIT 周期中断； A&#x2F;B H 桥电机输出； 编码器计数； 左右轮速度 PID； UART 和 TFT 调试接口。  如果所有逻辑继续堆积在 app.c 或 isr
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-02 16:15" pubdate>
+              2026-11-02
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
+            
+              <a href="/tags/Smart-Car/">#Smart Car</a>
+            
+              <a href="/tags/Software-Architecture/">#Software Architecture</a>
+            
+              <a href="/tags/TC264/">#TC264</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/TC264-Car-PID-Debugging/" target="_self">
+          TC264 小车双轮 PID 调试记录
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/TC264-Car-PID-Debugging/" target="_self">
+        <div>
+          2026-11-02 智能车课程调试记录。今天完成了双轮电机开环验证，并在此基础上恢复编码器速度 PID 控制。 1. PID 需求确定本次控制目标是左右轮独立速度环： 123456反馈：编码器增量计数控制输出：左右轮电机 PWM控制周期：10 ms目标单位：每 10 ms 编码器脉冲数控制器：左右轮各一个 PID停止策略：目标速度为 0 时清除积分并停止  编码器映射为： 12左轮：TIM5，P
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-02 16:05" pubdate>
+              2026-11-02
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
+            
+              <a href="/tags/Smart-Car/">#Smart Car</a>
+            
+              <a href="/tags/TC264/">#TC264</a>
+            
+              <a href="/tags/PID/">#PID</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
   <div class="row mx-auto index-card">
     
     
@@ -473,7 +575,7 @@
     
       <div class="col-12 col-md-4 m-auto index-img">
         <a href="/Headless-Build/" target="_self">
-          <img src="/img/1.png" srcset="/img/loading.gif" lazyload alt="智能车的 Headless Build">
+          <img src="/img/20261026.png" srcset="/img/loading.gif" lazyload alt="智能车的 Headless Build">
         </a>
       </div>
     
