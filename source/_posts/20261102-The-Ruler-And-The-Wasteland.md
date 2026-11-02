@@ -1,5 +1,5 @@
 ---
-title: 每个人心里都有一个计算器
+title: 刻度尺与荒原
 date: 2026-11-02 22:21:00
 index_img: /img/random/background-03.png
 tags:
