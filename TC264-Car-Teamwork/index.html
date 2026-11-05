@@ -27,7 +27,7 @@
 <meta property="og:description" content="我有的时候在想一件事，到底该如何从零开始学习怎么做一个项目。 很多同学第一次参加项目时，最先想到的是“我负责写哪一段代码”。但一个能稳定运行的小车，通常不是某个人写出一段很长的程序，而是团队把需求、接口、测试和交付组织起来的结果。 这篇文章面向会基础 C、但缺少完整单片机项目经验的同学，以课程小车为例介绍如何协作完成一个嵌入式项目。 1. 从功能目标开始，而不是从文件开始如何跟 AI 沟通？ 先确">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-11-05T02:50:00.000Z">
-<meta property="article:modified_time" content="2026-11-05T03:16:42.838Z">
+<meta property="article:modified_time" content="2026-11-05T03:28:19.877Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Embedded Systems">
 <meta property="article:tag" content="Git">
@@ -323,7 +323,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.7k words
+          5.5k words
         
       </span>
     
@@ -334,7 +334,7 @@
         
         
         
-          48 mins
+          46 mins
         
       </span>
     
@@ -517,20 +517,7 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">修改内容：<br>测试命令：<br>测试结果：<br>未解决问题：<br>是否涉及引脚或硬件：<br></code></pre></td></tr></table></figure>
 
 <p>如果修改了硬件映射，必须明确写出旧映射、新映射和上板现象，不能只写“修复电机问题”。</p>
-<h2 id="6-代码评审看什么"><a href="#6-代码评审看什么" class="headerlink" title="6. 代码评审看什么"></a>6. 代码评审看什么</h2><p>嵌入式代码评审不只看语法，还要看：</p>
-<ol>
-<li>初始化时输出是否处于安全状态；</li>
-<li>ISR 是否过长，是否包含阻塞操作；</li>
-<li>共享变量是否可能产生竞态；</li>
-<li>计数器、数组和枚举是否有边界检查；</li>
-<li>PWM、方向和有效电平是否与原理图一致；</li>
-<li>目标为零、传感器失效和通信超时是否有处理；</li>
-<li>是否提供了可以复现的测试步骤。</li>
-</ol>
-<p>特别是电机代码，合并前应先确认：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">上电：两轮停止<br>单轮：只改变目标轮<br>方向：正反方向符合预期<br>停止：不会自动重新启动<br></code></pre></td></tr></table></figure>
-
-<h2 id="7-联调顺序"><a href="#7-联调顺序" class="headerlink" title="7. 联调顺序"></a>7. 联调顺序</h2><p>不要等所有模块都写完才第一次上板。推荐顺序是：</p>
+<h2 id="6-联调顺序"><a href="#6-联调顺序" class="headerlink" title="6. 联调顺序"></a>6. 联调顺序</h2><p>不要等所有模块都写完才第一次上板。推荐顺序是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs text">编译空工程<br>    ↓<br>单独验证按键<br>    ↓<br>单轮开环电机测试<br>    ↓<br>双轮开环测试<br>    ↓<br>编码器计数测试<br>    ↓<br>速度 PID 测试<br>    ↓<br>循迹/姿态/避障集成<br></code></pre></td></tr></table></figure>
 
 <p>每一步都要记录：</p>
@@ -540,7 +527,7 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">现象：第一次按键后右轮转动，第二次按键后左轮转动。<br>假设：左右电机通道映射相反。<br>验证：分别测试 P02.4/P02.5 和 P02.6/P02.7。<br>结论：逻辑左右轮需要交换，A/B 极性也需要调整。<br></code></pre></td></tr></table></figure>
 
 <p>这种记录比“改了几次终于能转”更有复用价值。</p>
-<h2 id="8-给初学者的建议"><a href="#8-给初学者的建议" class="headerlink" title="8. 给初学者的建议"></a>8. 给初学者的建议</h2><p>团队协作的核心不是把任务平均分成几份，而是让每个人负责一个边界清晰、可以独立验收的结果。</p>
+<h2 id="7-给初学者的建议"><a href="#7-给初学者的建议" class="headerlink" title="7. 给初学者的建议"></a>7. 给初学者的建议</h2><p>团队协作的核心不是把任务平均分成几份，而是让每个人负责一个边界清晰、可以独立验收的结果。</p>
 <p>对第一次做小车的同学，最重要的习惯是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">先确认需求，再确认接口；<br>先单模块验证，再做系统联调；<br>先记录现象，再修改代码；<br>先保证能回退，再持续迭代。<br></code></pre></td></tr></table></figure>
 
