@@ -9,3 +9,24 @@
     order: 1;
   }
 }
+
+/* Improve readability of code blocks in both light and dark modes. */
+.post-content figure.highlight {
+  border: 1px solid rgba(127, 127, 127, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.post-content figure.highlight table {
+  margin: 0;
+}
+
+.post-content figure.highlight pre {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.post-content figure.highlight .gutter {
+  user-select: none;
+}
