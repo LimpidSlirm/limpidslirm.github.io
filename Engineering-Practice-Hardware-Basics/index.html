@@ -26,16 +26,14 @@
 <meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
 <meta property="og:description" content="一个简单的硬件入门。 程序写错通常只是功能不正常，接线和供电理解错误则可能导致芯片、传感器或驱动器损坏。 硬件入门不要求马上掌握复杂电路，但至少要理解： 12345电压决定电平和供电范围电流决定负载和驱动能力GPIO 负责传递控制信号电源负责提供能量GND 负责建立共同参考  1. 电压、电流和功率1.1 电压电压可以理解为推动电荷运动的“压力”。单片机常见的逻辑电平可能是 3.3 V 或 5 V">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://limpidslirm.github.io/img/20261105.png">
 <meta property="article:published_time" content="2026-11-05T04:20:00.000Z">
-<meta property="article:modified_time" content="2026-11-05T04:21:25.904Z">
+<meta property="article:modified_time" content="2026-11-05T04:23:58.805Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Embedded Systems">
 <meta property="article:tag" content="Engineering Practice">
 <meta property="article:tag" content="GPIO">
 <meta property="article:tag" content="Hardware">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://limpidslirm.github.io/img/20261105.png">
   
   
   
@@ -309,7 +307,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.9k words
+          4.4k words
         
       </span>
     
@@ -320,7 +318,7 @@
         
         
         
-          25 mins
+          37 mins
         
       </span>
     
@@ -407,7 +405,98 @@
 <p>使用开漏输出时，必须确认：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">是否已经提供上拉电阻<br>上拉电压是否在设备允许范围内<br>多个设备是否会同时拉低<br></code></pre></td></tr></table></figure>
 
-<h2 id="3-引脚电流：为什么不能直接带负载"><a href="#3-引脚电流：为什么不能直接带负载" class="headerlink" title="3. 引脚电流：为什么不能直接带负载"></a>3. 引脚电流：为什么不能直接带负载</h2><p>每个 GPIO 通常都有以下限制：</p>
+<h3 id="2-4-如何读引脚名称"><a href="#2-4-如何读引脚名称" class="headerlink" title="2.4 如何读引脚名称"></a>2.4 如何读引脚名称</h3><p>同一个引脚可能同时有多个名字，初学者最容易把它们混为一谈：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">封装引脚号：芯片物理封装上的第几个脚<br>端口名称：例如 P1.2、PA3，表示某个 GPIO 端口和位号<br>复用功能名：例如 UART_TX、PWM、ADC 或定时器通道<br>开发板丝印：排针旁边印出的编号或功能名称<br></code></pre></td></tr></table></figure>
+
+<p>这些名称不一定相同。开发板排针上的“3”可能表示排针位置，也可能表示板卡定义的信号编号，不能直接当成芯片的 GPIO 编号。正确做法是通过开发板原理图或引脚映射表，把：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">开发板丝印<br>    ↓<br>排针或连接器编号<br>    ↓<br>芯片封装引脚号<br>    ↓<br>端口名称和复用功能<br></code></pre></td></tr></table></figure>
+
+<p>逐级对应起来。编写程序时通常使用芯片库定义的端口名称或宏，不要只根据排针位置猜测 GPIO。</p>
+<p>还要注意编号中的数字含义。例如 <code>P2.4</code> 通常表示 2 号端口的第 4 位，但具体命名规则由芯片厂商决定；<code>P2.4</code>、封装第 24 脚和开发板排针第 24 位可能完全是三个不同的概念。</p>
+<h2 id="3-如何看开发板丝印图和原理图"><a href="#3-如何看开发板丝印图和原理图" class="headerlink" title="3. 如何看开发板丝印图和原理图"></a>3. 如何看开发板丝印图和原理图</h2><h3 id="3-1-先看丝印"><a href="#3-1-先看丝印" class="headerlink" title="3.1 先看丝印"></a>3.1 先看丝印</h3><p>丝印是印在 PCB 表面的文字、符号和编号。拿到开发板后，可以先观察：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">电源接口：VIN、5V、3V3、VCC、GND<br>数字接口：D0、D1、IO、GPIO<br>模拟接口：A0、ADC<br>通信接口：TX、RX、SCL、SDA、CAN<br>功能标记：LED、KEY、RST、EN、BOOT<br></code></pre></td></tr></table></figure>
+
+<p>丝印只能作为定位提示，不能作为全部电气信息。比如 <code>5V</code> 可能是 5 V 输入，也可能是板上的 5 V 电源输出；<code>VIN</code> 可能允许较宽输入范围，也可能必须经过特定接口供电。具体含义必须继续查板卡说明和原理图。</p>
+<h3 id="3-2-判断排针方向和编号"><a href="#3-2-判断排针方向和编号" class="headerlink" title="3.2 判断排针方向和编号"></a>3.2 判断排针方向和编号</h3><p>观察排针时，先确认：</p>
+<ol>
+<li>从元件面看还是从焊接面看；</li>
+<li>排针的第 1 脚在哪里；</li>
+<li>是否有方形焊盘、缺口、圆点或三角标记；</li>
+<li>编号是从左到右、从上到下，还是按连接器标准排列。</li>
+</ol>
+<p>双排针常见的编号方式并不一定是肉眼看到的顺序，可能是一列从上到下为奇数，另一列从下到上为偶数。因此不能只凭“左边第一脚”推断其他引脚。</p>
+<h3 id="3-3-判断芯片封装引脚"><a href="#3-3-判断芯片封装引脚" class="headerlink" title="3.3 判断芯片封装引脚"></a>3.3 判断芯片封装引脚</h3><p>看芯片引脚图时，先找封装方向标记：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">缺口、圆点或斜角 = 第 1 脚附近的定位标记<br></code></pre></td></tr></table></figure>
+
+<p>从芯片正面观察时，很多双列封装会按照逆时针方向编号，但不同封装和视图可能造成误读。最终应以芯片数据手册中的 Pin 1 标记和引脚图为准，不能仅凭照片判断。</p>
+<h3 id="3-4-丝印、原理图和数据手册的分工"><a href="#3-4-丝印、原理图和数据手册的分工" class="headerlink" title="3.4 丝印、原理图和数据手册的分工"></a>3.4 丝印、原理图和数据手册的分工</h3><p>三种资料解决的问题不同：</p>
+<table>
+<thead>
+<tr>
+<th>资料</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PCB 丝印图</td>
+<td>快速找到接口、按键、指示灯和排针位置</td>
+</tr>
+<tr>
+<td>原理图</td>
+<td>确认引脚实际连接到哪个器件、是否经过电阻或跳线</td>
+</tr>
+<tr>
+<td>芯片数据手册</td>
+<td>确认电压、电流、复用功能、输入阈值和绝对最大额定值</td>
+</tr>
+</tbody></table>
+<p>例如，丝印可能只标出 <code>LED</code>，原理图才能看出 LED 接在哪个 GPIO、是否低电平点亮、串联电阻多大；数据手册则用来确认这个 GPIO 是否支持输出以及允许的电气范围。</p>
+<h3 id="3-5-一个完整的查脚流程"><a href="#3-5-一个完整的查脚流程" class="headerlink" title="3.5 一个完整的查脚流程"></a>3.5 一个完整的查脚流程</h3><p>遇到“某个接口到底是什么引脚”时，可以按照下面步骤：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs text">找到板卡丝印和连接器编号<br>    ↓<br>查开发板用户手册或原理图<br>    ↓<br>确认连接器对应的芯片引脚<br>    ↓<br>查芯片数据手册的端口名称和复用功能<br>    ↓<br>确认电压、电流、上下拉和输入输出限制<br>    ↓<br>最后再写初始化代码<br></code></pre></td></tr></table></figure>
+
+<p>如果资料之间出现冲突，应优先相信芯片数据手册中的电气限制，并用实物版本的原理图确认板卡连接。不同批次的开发板可能修改过排针、跳线或外设连接，不能完全依赖网上同型号图片。</p>
+<h3 id="3-6-上电前的引脚核对表"><a href="#3-6-上电前的引脚核对表" class="headerlink" title="3.6 上电前的引脚核对表"></a>3.6 上电前的引脚核对表</h3><p>在把外设接到开发板之前，建议记录一张简单的引脚表：</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>板卡标记</th>
+<th>芯片端口</th>
+<th>工作模式</th>
+<th>电平&#x2F;电流注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>按键输入</td>
+<td>按键标记</td>
+<td>查表确认</td>
+<td>输入上拉</td>
+<td>按下可能为低电平</td>
+</tr>
+<tr>
+<td>指示灯</td>
+<td>LED 标记</td>
+<td>查表确认</td>
+<td>推挽输出</td>
+<td>可能低电平点亮</td>
+</tr>
+<tr>
+<td>串口</td>
+<td>TX&#x2F;RX</td>
+<td>查表确认</td>
+<td>外设复用</td>
+<td>注意交叉连接和电平</td>
+</tr>
+<tr>
+<td>模拟输入</td>
+<td>ADC 标记</td>
+<td>查表确认</td>
+<td>ADC 复用</td>
+<td>不得超过参考电压</td>
+</tr>
+</tbody></table>
+<p>这张表可以避免把排针编号、芯片引脚号和 GPIO 名称混用，也方便后续编写初始化代码和排查接线问题。</p>
+<h2 id="4-引脚电流：为什么不能直接带负载"><a href="#4-引脚电流：为什么不能直接带负载" class="headerlink" title="4. 引脚电流：为什么不能直接带负载"></a>4. 引脚电流：为什么不能直接带负载</h2><p>每个 GPIO 通常都有以下限制：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">单个引脚允许的输出电流<br>单个引脚允许的输入电流<br>一个端口所有引脚的总电流<br>整个芯片所有 GPIO 的总电流<br></code></pre></td></tr></table></figure>
 
 <p>具体数值必须查看芯片数据手册，不能只看开发板名称或网上示例。数据手册中的最大额定值通常是极限，不是建议长期工作的目标。</p>
@@ -425,11 +514,11 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">单片机 GPIO<br>    ↓ 小电流控制信号<br>三极管或 MOSFET<br>    ↓<br>外部电源和负载<br></code></pre></td></tr></table></figure>
 
 <p>单片机只负责提供控制信号，真正的负载电流由外部电源和功率器件承担。</p>
-<h2 id="4-LED-为什么需要限流电阻"><a href="#4-LED-为什么需要限流电阻" class="headerlink" title="4. LED 为什么需要限流电阻"></a>4. LED 为什么需要限流电阻</h2><p>LED 不能简单地直接接到电源上。LED 的电压变化并不能稳定限制电流，直接连接可能导致电流快速增大并损坏 LED 或 GPIO。</p>
+<h2 id="5-LED-为什么需要限流电阻"><a href="#5-LED-为什么需要限流电阻" class="headerlink" title="5. LED 为什么需要限流电阻"></a>5. LED 为什么需要限流电阻</h2><p>LED 不能简单地直接接到电源上。LED 的电压变化并不能稳定限制电流，直接连接可能导致电流快速增大并损坏 LED 或 GPIO。</p>
 <p>串联电阻可以限制电流。近似计算为：</p>
 <p>$$<br>R&#x3D;\frac{V_{\mathrm{out}}-V_{\mathrm{LED}}}{I_{\mathrm{LED}}}<br>$$</p>
 <p>实际选择时，应优先选择标准阻值，并确认电阻功率足够。对初学者来说，使用较小的安全电流通常比追求最大亮度更重要。</p>
-<h2 id="5-供电和共地"><a href="#5-供电和共地" class="headerlink" title="5. 供电和共地"></a>5. 供电和共地</h2><h3 id="5-1-共地"><a href="#5-1-共地" class="headerlink" title="5.1 共地"></a>5.1 共地</h3><p>两个设备之间传输数字信号时，接收端需要知道发送端的电平相对于什么参考。通常需要把两个设备的 GND 连接在一起：</p>
+<h2 id="6-供电和共地"><a href="#6-供电和共地" class="headerlink" title="6. 供电和共地"></a>6. 供电和共地</h2><h3 id="5-1-共地"><a href="#5-1-共地" class="headerlink" title="5.1 共地"></a>5.1 共地</h3><p>两个设备之间传输数字信号时，接收端需要知道发送端的电平相对于什么参考。通常需要把两个设备的 GND 连接在一起：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">控制器 GND ───── 外设 GND<br>控制器信号 ──── 外设输入<br></code></pre></td></tr></table></figure>
 
 <p>没有共同地参考时，即使信号线电压看起来正常，接收端也可能无法正确判断高低电平。</p>
@@ -440,21 +529,21 @@
 <p>常见改进方法包括使用足够能力的电源、缩短大电流回路、增加合适的滤波电容，并让动力地和逻辑地按照可靠方式连接。</p>
 <h3 id="5-3-去耦电容"><a href="#5-3-去耦电容" class="headerlink" title="5.3 去耦电容"></a>5.3 去耦电容</h3><p>去耦电容用于减小芯片电源引脚附近的瞬态电压波动。它应尽量靠近芯片或模块的电源引脚和 GND 引脚。</p>
 <p>电容不能代替电源，也不能解决所有接线问题。它的作用是为快速变化的电流提供局部缓冲，降低高频噪声。</p>
-<h2 id="6-数字信号和模拟信号"><a href="#6-数字信号和模拟信号" class="headerlink" title="6. 数字信号和模拟信号"></a>6. 数字信号和模拟信号</h2><p>数字信号通常关心高电平和低电平，模拟信号则表示一个连续变化的电压。使用 ADC 读取模拟量时，需要关注：</p>
+<h2 id="7-数字信号和模拟信号"><a href="#7-数字信号和模拟信号" class="headerlink" title="7. 数字信号和模拟信号"></a>7. 数字信号和模拟信号</h2><p>数字信号通常关心高电平和低电平，模拟信号则表示一个连续变化的电压。使用 ADC 读取模拟量时，需要关注：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">输入电压范围<br>ADC 分辨率<br>参考电压<br>采样速度<br>输入阻抗和噪声<br></code></pre></td></tr></table></figure>
 
 <p>如果模拟输入超过允许范围，可能损坏输入端。需要测量更高电压时，应使用电阻分压，并根据输入阻抗和保护要求设计电路。</p>
-<h2 id="7-万用表的基本使用"><a href="#7-万用表的基本使用" class="headerlink" title="7. 万用表的基本使用"></a>7. 万用表的基本使用</h2><h3 id="7-1-测电压"><a href="#7-1-测电压" class="headerlink" title="7.1 测电压"></a>7.1 测电压</h3><p>测电压时，万用表并联在被测两点之间。黑表笔通常接 GND，红表笔接待测节点。</p>
+<h2 id="8-万用表的基本使用"><a href="#8-万用表的基本使用" class="headerlink" title="8. 万用表的基本使用"></a>8. 万用表的基本使用</h2><h3 id="7-1-测电压"><a href="#7-1-测电压" class="headerlink" title="7.1 测电压"></a>7.1 测电压</h3><p>测电压时，万用表并联在被测两点之间。黑表笔通常接 GND，红表笔接待测节点。</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">测量电源：电源正极与 GND 之间<br>测量信号：信号线与 GND 之间<br></code></pre></td></tr></table></figure>
 
 <h3 id="7-2-测通断"><a href="#7-2-测通断" class="headerlink" title="7.2 测通断"></a>7.2 测通断</h3><p>断电后才能使用通断档检查线路。不要在带电电路上随意使用电阻档或通断档。</p>
 <h3 id="7-3-测电流"><a href="#7-3-测电流" class="headerlink" title="7.3 测电流"></a>7.3 测电流</h3><p>测电流时，万用表需要串联到电路中。电流档通常不是高阻输入，误把表笔并联到电源两端，可能造成短路、烧保险丝甚至损坏设备。</p>
 <p>初学者第一次测量前，应先确认表笔插孔、档位和电路连接方式。</p>
-<h2 id="8-上电前检查清单"><a href="#8-上电前检查清单" class="headerlink" title="8. 上电前检查清单"></a>8. 上电前检查清单</h2><p>第一次给电路上电前，建议逐项确认：</p>
+<h2 id="9-上电前检查清单"><a href="#9-上电前检查清单" class="headerlink" title="9. 上电前检查清单"></a>9. 上电前检查清单</h2><p>第一次给电路上电前，建议逐项确认：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs text">电源电压符合所有器件要求<br>电源正负极没有接反<br>单片机和外设已经共地<br>GPIO 没有直接连接到大电流负载<br>LED 已经串联限流电阻<br>输入引脚没有悬空<br>电机和继电器由驱动器控制<br>没有把两个电源输出直接短接<br>万用表确认电源轨电压正常<br></code></pre></td></tr></table></figure>
 
 <p>如果条件允许，可以先使用限流电源或串联保护装置进行第一次上电。发现芯片快速发热、指示灯异常、供电电压明显下降或出现异味时，应立即断电，不要继续观察。</p>
-<h2 id="9-学习路线"><a href="#9-学习路线" class="headerlink" title="9. 学习路线"></a>9. 学习路线</h2><p>硬件入门可以按下面的顺序推进：</p>
+<h2 id="10-学习路线"><a href="#10-学习路线" class="headerlink" title="10. 学习路线"></a>10. 学习路线</h2><p>硬件入门可以按下面的顺序推进：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs text">认识电压、电流和功率<br>    ↓<br>使用 GPIO 点亮 LED<br>    ↓<br>读取按键和数字输入<br>    ↓<br>学习上拉、下拉和消抖<br>    ↓<br>使用 PWM 控制小功率负载<br>    ↓<br>使用驱动器控制电机<br>    ↓<br>读取编码器和模拟传感器<br>    ↓<br>结合反馈实现闭环控制<br></code></pre></td></tr></table></figure>
 
 <p>写代码之前先确认电压、电流、引脚功能和供电关系，很多硬件问题就可以在上电前被发现。硬件安全检查不是额外负担，而是嵌入式开发的一部分。</p>
