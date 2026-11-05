@@ -1,0 +1,1016 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="LimpidSlirm">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="我有的时候在想一件事，到底该如何从零开始学习怎么做一个项目。 很多同学第一次参加项目时，最先想到的是“我负责写哪一段代码”。但一个能稳定运行的小车，通常不是某个人写出一段很长的程序，而是团队把需求、接口、测试和交付组织起来的结果。 这篇文章面向会基础 C、但缺少完整单片机项目经验的同学，以课程小车为例介绍如何协作完成一个嵌入式项目。 1. 从功能目标开始，而不是从文件开始如何跟 AI 沟通？ 先确">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从能写代码到能做项目：小车团队协作入门">
+<meta property="og:url" content="https://limpidslirm.github.io/TC264-Car-Teamwork/index.html">
+<meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
+<meta property="og:description" content="我有的时候在想一件事，到底该如何从零开始学习怎么做一个项目。 很多同学第一次参加项目时，最先想到的是“我负责写哪一段代码”。但一个能稳定运行的小车，通常不是某个人写出一段很长的程序，而是团队把需求、接口、测试和交付组织起来的结果。 这篇文章面向会基础 C、但缺少完整单片机项目经验的同学，以课程小车为例介绍如何协作完成一个嵌入式项目。 1. 从功能目标开始，而不是从文件开始如何跟 AI 沟通？ 先确">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-11-05T02:50:00.000Z">
+<meta property="article:modified_time" content="2026-11-05T03:16:42.838Z">
+<meta property="article:author" content="LimpidSlirm">
+<meta property="article:tag" content="Embedded Systems">
+<meta property="article:tag" content="Git">
+<meta property="article:tag" content="Smart Car">
+<meta property="article:tag" content="Teamwork">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>从能写代码到能做项目：小车团队协作入门 - LimpidSlirm&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":false,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Limpid&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>Home</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>Archives</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>About</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>Search</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="Light"
+               data-label-dark="Dark">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">Dark</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true data-random-banner='/img/random/background-01.png,/img/random/background-02.png,/img/random/background-03.png,/img/random/background-04.png,/img/random/background-05.png,/img/random/background-06.png'
+     style="background: url('/img/random/background-01.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="从能写代码到能做项目：小车团队协作入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-05 10:50" pubdate>
+          November 5, 2026 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          48 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    (function() {
+      var banner = document.getElementById('banner');
+      if (!banner) return;
+      var list = banner.getAttribute('data-random-banner');
+      if (!list) return;
+      list = list.split(',').filter(Boolean);
+      if (list.length === 0) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      banner.style.backgroundImage = "url('" + pick + "')";
+    })();
+  </script>
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">从能写代码到能做项目：小车团队协作入门</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>我有的时候在想一件事，到底该如何从零开始学习怎么做一个项目。</p>
+<p>很多同学第一次参加项目时，最先想到的是“我负责写哪一段代码”。但一个能稳定运行的小车，通常不是某个人写出一段很长的程序，而是团队把需求、接口、测试和交付组织起来的结果。</p>
+<p>这篇文章面向会基础 C、但缺少完整单片机项目经验的同学，以课程小车为例介绍如何协作完成一个嵌入式项目。</p>
+<h2 id="1-从功能目标开始，而不是从文件开始"><a href="#1-从功能目标开始，而不是从文件开始" class="headerlink" title="1. 从功能目标开始，而不是从文件开始"></a>1. 从功能目标开始，而不是从文件开始</h2><p>如何跟 AI 沟通？</p>
+<p>先确定需求，再让 AI 帮你写代码。</p>
+<p>如何确认这个模块无误？</p>
+<p>告诉 agent 你要测试，让它告诉你测试的预期现象，反馈现象给 agent。</p>
+<p>当然 agent 并不是非常非常聪明的，它有时候也不懂为什么会产生这样的现象，所以此时就需要你懂原理。</p>
+<p>如下是一个实例：</p>
+<p>把目标写成可以验证的功能：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">F1：上电后电机保持停止<br>F2：按键可以切换运行模式<br>F3：编码器可以提供速度反馈<br>F4：PID 可以让左右轮跟踪目标速度<br>F5：故障时可以停止电机<br></code></pre></td></tr></table></figure>
+
+<p>每个功能都应有三个要素：</p>
+<table>
+<thead>
+<tr>
+<th>要素</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>输入</td>
+<td>KEY3 短按、编码器计数、距离传感器数据</td>
+</tr>
+<tr>
+<td>处理</td>
+<td>消抖、测速、PID 计算、故障判断</td>
+</tr>
+<tr>
+<td>输出</td>
+<td>目标速度、PWM、停止命令、状态提示</td>
+</tr>
+</tbody></table>
+<p>如果一个需求无法说明输入和验收现象，它通常还不够具体。</p>
+<h2 id="2-按可独立测试的模块分工"><a href="#2-按可独立测试的模块分工" class="headerlink" title="2. 按可独立测试的模块分工"></a>2. 按可独立测试的模块分工</h2><p>小车项目不应该简单地按“底层、控制、应用”把工作拆给不同的人。更适合初学者团队的分工方式是：每个人负责一个能够单独运行、单独测试、单独验收的模块。</p>
+<p>例如，两个人可以这样分工：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs text">成员 A：电机模块<br>    独立完成 PWM、A/B H 桥输出、方向和停止测试<br><br>成员 B：视觉模块<br>    独立完成摄像头/图像传感器初始化、图像采集和识别结果测试<br><br>联调阶段：<br>    视觉模块输出路线或偏差<br>    电机模块接收运动命令<br>    两个模块通过约定接口连接<br></code></pre></td></tr></table></figure>
+
+<p>这里的关键是：成员 B 不需要等成员 A 的电机代码全部完成，成员 A 也不需要等待摄像头接入。双方可以先使用测试桩或固定数据验证自己的模块是否正常。</p>
+<p>以 TC264 小车的视觉部分为例，视觉模块不只是“调用摄像头”，还可能包括边线识别、路线判断等功能。摄像头模块负责初始化硬件，并通过已有接口读取图像数据；边线识别模块则调用摄像头模块提供的接口，对图像进行处理并输出边线位置或车辆偏差。</p>
+<p>因此，摄像头和边线识别可以分给两个人：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">摄像头模块：<br>    完成摄像头初始化、数据读取和图像数据格式确认<br><br>边线识别模块：<br>    调用摄像头接口读取图像<br>    识别左边线、右边线或中线位置<br>    输出边线坐标、偏差值和识别有效标志<br></code></pre></td></tr></table></figure>
+
+<p>摄像头模块比较容易独立测试，例如检查初始化是否成功、能否持续读取数据以及数据格式是否正确。边线识别模块则相对难以完全独立测试，因为它需要具体的图像数据作为输入。实际工程中，可以使用保存的图像、模拟数组或固定测试数据进行初步验证；如果没有这些数据，就很难只靠模块本身判断识别结果是否正确。</p>
+<p>所以，“模块可以分工”和“模块可以完全独立完成”不是一回事。接口清晰可以让两个人并行写代码，但在 TC264 小车这样的实际项目中，大家仍然需要共同准备测试数据、一起上车观察现象，并协作解决摄像头、边线识别和车辆运动之间的联动问题。越接近整车功能，越不能把问题简单归给某一个模块。</p>
+<p>一个合格的独立模块应当具备：</p>
+<ol>
+<li>明确的初始化函数；</li>
+<li>明确的输入和输出接口；</li>
+<li>不依赖其他成员的内部变量；</li>
+<li>可以通过单独程序、测试桩或硬件现象验证；</li>
+<li>有自己的验收标准和问题记录。</li>
+</ol>
+<p>例如，电机模块可以独立验收：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">上电后 PWM 为 0<br>只给左轮命令时只有左轮转动<br>只给右轮命令时只有右轮转动<br>正负命令对应正确方向<br>停止命令能够让两轮停止<br></code></pre></td></tr></table></figure>
+
+<p>视觉模块也可以独立验收：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">摄像头初始化成功<br>能够持续获取图像<br>图像数据格式正确<br>能够输出线位置或偏差值<br>无目标时能够返回明确的无效状态<br></code></pre></td></tr></table></figure>
+
+<p>完成单模块验收后，再进入联调。联调时只依赖公开接口，例如视觉模块输出：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>    int16 error;<br>    uint8 valid;<br>&#125; <span class="hljs-type">vision_result_t</span>;<br><br><span class="hljs-type">void</span> <span class="hljs-title function_">vision_get_result</span><span class="hljs-params">(<span class="hljs-type">vision_result_t</span> *result)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>电机模块接收统一的运动命令：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>    int16 left_target;<br>    int16 right_target;<br>    uint8 enable;<br>&#125; <span class="hljs-type">motion_command_t</span>;<br><br><span class="hljs-type">void</span> <span class="hljs-title function_">motor_set_command</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">motion_command_t</span> *command)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>这样，视觉模块可以先用固定图像或模拟数据完成初步测试，电机模块可以先用按键或固定命令完成测试。需要注意的是，初步测试不等于整车验收；当测试数据不足或模块之间存在强耦合时，应由相关成员一起进行实机调试，最后再完成联调和整车验收。</p>
+<h2 id="3-代码组织和接口规则"><a href="#3-代码组织和接口规则" class="headerlink" title="3. 代码组织和接口规则"></a>3. 代码组织和接口规则</h2><p>团队开始写代码前，应先约定目录、接口和调用层级，而不是让每个人按照自己的习惯组织代码。以 TC264 小车为例，可以采用下面的规则：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs text">code/<br>    motor.c/.h              电机驱动<br>    camera.c/.h             摄像头驱动<br>    line_detect.c/.h        边线识别<br>    encoder.c/.h             编码器<br>    pid.c/.h                 PID 算法<br>    speed_control.c/.h      速度控制<br>    key_module.c/.h          按键<br>    app.c/.h                 整车应用和状态机<br><br>user/<br>    main.c                  硬件启动和应用入口<br>    isr.c                   中断服务函数<br></code></pre></td></tr></table></figure>
+
+<p>所有成员编写的功能模块都放在 <code>code/</code> 中。每个模块至少要有一个头文件和一个源文件：头文件只公开其他模块必须使用的类型、初始化函数和业务接口，具体实现、临时变量和算法细节放在源文件中。其他成员不能直接访问模块内部变量，也不能绕过接口修改底层硬件状态。</p>
+<p>例如，摄像头模块只负责初始化和提供图像读取接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">camera_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br>uint8 <span class="hljs-title function_">camera_read_image</span><span class="hljs-params">(uint8 *buffer, uint16 length)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>边线识别模块通过摄像头接口获取数据，而不是直接操作摄像头寄存器：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">line_detect_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br>uint8 <span class="hljs-title function_">line_detect_update</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br>int16 <span class="hljs-title function_">line_detect_get_error</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>这样，摄像头成员可以修改底层初始化，边线识别成员可以修改识别算法，双方只需要保持接口不变。接口确定后，除非团队共同讨论，否则不要随意修改函数参数、返回值和数据含义。</p>
+<p>在模块单独测试阶段，可以在 <code>main.c</code> 中直接调用某个模块的初始化和测试接口。例如先只测试摄像头：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    camera_init();<br><br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)<br>    &#123;<br>        camera_read_image(image_buffer, IMAGE_SIZE);<br>        camera_test_output(image_buffer);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这时 <code>main.c</code> 只是测试入口，不应该逐渐变成所有功能的堆放位置。各模块完成单独验证后，再统一编写 <code>app.c</code>，由 <code>main.c</code> 负责启动，<code>app.c</code> 负责整车逻辑：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    board_init();<br>    app_init();<br><br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)<br>    &#123;<br>        app_update();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>app.c</code> 可以根据项目需要实现状态机，例如待机、手动控制、循迹、避障和故障停止等状态。状态机只负责决定当前模式和模块之间的数据流，不应该重新实现电机驱动、摄像头初始化或 PID 算法。</p>
+<p>这种分层方式还有利于代码复用。例如，电机模块只提供“设置左右轮目标”和“停止”等通用接口，手动驾驶、循迹和避障状态都可以调用它；边线识别模块只输出偏差值，后续更换控制算法时不需要修改摄像头驱动。可复用的模块应尽量不依赖具体比赛场景、按键编号或某一个状态机，这样才能在其他小车项目中继续使用。</p>
+<h2 id="4-Git-协作的基本规则"><a href="#4-Git-协作的基本规则" class="headerlink" title="4. Git 协作的基本规则"></a>4. Git 协作的基本规则</h2><h3 id="4-1-先理解-Git-的基本原理"><a href="#4-1-先理解-Git-的基本原理" class="headerlink" title="4.1 先理解 Git 的基本原理"></a>4.1 先理解 Git 的基本原理</h3><p>Git 不只是一个“上传代码”的工具。它会在本地保存项目的版本历史，并通过提交记录保存每次修改的快照。一次常见的修改会经过以下几个区域：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">工作区 working tree<br>    ↓ git add<br>暂存区 staging area<br>    ↓ git commit<br>本地仓库 local repository<br>    ↓ git push<br>远程仓库 remote repository<br></code></pre></td></tr></table></figure>
+
+<p>工作区是当前正在编辑的文件，暂存区用于选择本次要提交的修改，本地仓库保存已经提交的版本，远程仓库则用于团队共享。<code>git pull</code> 通常可以理解为先获取远程更新，再把更新合并到当前分支；如果双方修改了同一部分代码，就可能产生冲突，需要人工判断并测试。</p>
+<p>理解这些原理很重要。例如，修改文件后没有执行 <code>git add</code>，提交时就可能没有包含该文件；只执行了 <code>git commit</code> 而没有 <code>git push</code>，队友也无法看到本地提交；直接 <code>git pull</code> 后出现冲突时，也不能简单地认为是 Git 出错。</p>
+<h3 id="4-2-分支策略"><a href="#4-2-分支策略" class="headerlink" title="4.2 分支策略"></a>4.2 分支策略</h3><p>小组可以采用简单的分支模型：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">main<br>  ├── feature/key-module<br>  ├── feature/motor-driver<br>  ├── feature/speed-pid<br>  └── fix/encoder-direction<br></code></pre></td></tr></table></figure>
+
+<p><code>main</code> 只保留可以构建、可以回退的版本。每项功能使用独立分支，完成后通过 Pull Request 合并。</p>
+<h3 id="4-3-Git-的简单使用"><a href="#4-3-Git-的简单使用" class="headerlink" title="4.3 Git 的简单使用"></a>4.3 Git 的简单使用</h3><p>开始开发前，先查看当前状态并同步远程分支：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">git status<br>git pull origin main<br></code></pre></td></tr></table></figure>
+
+<p>开发新功能时创建自己的分支：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">git switch -c feature/motor-driver<br></code></pre></td></tr></table></figure>
+
+<p>完成一段可以编译和测试的功能后，查看差异，选择要提交的文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">git diff<br>git add code/motor.c code/motor.h<br>git status<br>git commit -m <span class="hljs-string">&quot;feat(motor): add motor control interface&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>把本地分支推送到远程仓库：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">git push -u origin feature/motor-driver<br></code></pre></td></tr></table></figure>
+
+<p>然后在 GitHub 上创建 Pull Request，由其他成员检查代码、测试结果和硬件影响，确认没有问题后再合并到 <code>main</code>。常用的查看命令还包括：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">git <span class="hljs-built_in">log</span> --oneline<br>git branch<br>git diff main...feature/motor-driver<br></code></pre></td></tr></table></figure>
+
+<p>如果提交前发现了不属于本次任务的修改，不要直接全部 <code>git add .</code>，而应当逐个选择文件或查看差异后再提交。发生合并冲突时，先保留正确的代码并删除冲突标记，再重新编译、测试，最后提交冲突解决结果。</p>
+<p>虽然 Git 可以通过 VS Code 的图形界面操作，也可以让 AI 直接执行 <code>commit</code>、<code>push</code> 和 <code>pull</code>，但团队成员仍然要知道这些操作背后的原理。只有理解工作区、暂存区、提交、本地分支和远程分支之间的关系，才能判断 AI 或图形界面执行的结果是否正确，也才能在冲突、误提交或版本回退时独立处理问题。</p>
+<h3 id="4-4-提交要小而完整"><a href="#4-4-提交要小而完整" class="headerlink" title="4.4 提交要小而完整"></a>4.4 提交要小而完整</h3><p>不推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">update<br>fix<br>改了一些东西<br></code></pre></td></tr></table></figure>
+
+<p>推荐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">feat(motor): add dual-input H-bridge output<br>fix(encoder): correct right wheel feedback polarity<br>test(pid): add zero-target integral reset<br>docs(team): add integration checklist<br></code></pre></td></tr></table></figure>
+
+<p>一次提交最好只解决一个问题，并且能够说明修改原因、影响范围和验证结果。</p>
+<h3 id="4-5-不要把生成物当源码提交"><a href="#4-5-不要把生成物当源码提交" class="headerlink" title="4.5 不要把生成物当源码提交"></a>4.5 不要把生成物当源码提交</h3><p>根据工程规则，源码和用户代码应放在约定目录，第三方库保持不变。构建生成的中间文件、临时日志和本地配置应由 <code>.gitignore</code> 管理，避免把个人环境带入团队主分支。</p>
+<h2 id="5-GitHub-协作流程"><a href="#5-GitHub-协作流程" class="headerlink" title="5. GitHub 协作流程"></a>5. GitHub 协作流程</h2><p>一个完整任务可以写成 Issue：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs text">标题：实现左右轮编码器速度 PID<br><br>背景：<br>当前电机只有开环 PWM，需要增加速度反馈。<br><br>输入：<br>左轮 TIM5，右轮 TIM6。<br><br>输出：<br>左右轮有符号 PWM。<br><br>验收：<br>1. 10 ms 更新一次；<br>2. 目标速度为 0 时清除积分；<br>3. 两轮方向一致；<br>4. 编译无错误；<br>5. 架空测试不持续加速。<br></code></pre></td></tr></table></figure>
+
+<p>Pull Request 描述至少应包含：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">修改内容：<br>测试命令：<br>测试结果：<br>未解决问题：<br>是否涉及引脚或硬件：<br></code></pre></td></tr></table></figure>
+
+<p>如果修改了硬件映射，必须明确写出旧映射、新映射和上板现象，不能只写“修复电机问题”。</p>
+<h2 id="6-代码评审看什么"><a href="#6-代码评审看什么" class="headerlink" title="6. 代码评审看什么"></a>6. 代码评审看什么</h2><p>嵌入式代码评审不只看语法，还要看：</p>
+<ol>
+<li>初始化时输出是否处于安全状态；</li>
+<li>ISR 是否过长，是否包含阻塞操作；</li>
+<li>共享变量是否可能产生竞态；</li>
+<li>计数器、数组和枚举是否有边界检查；</li>
+<li>PWM、方向和有效电平是否与原理图一致；</li>
+<li>目标为零、传感器失效和通信超时是否有处理；</li>
+<li>是否提供了可以复现的测试步骤。</li>
+</ol>
+<p>特别是电机代码，合并前应先确认：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">上电：两轮停止<br>单轮：只改变目标轮<br>方向：正反方向符合预期<br>停止：不会自动重新启动<br></code></pre></td></tr></table></figure>
+
+<h2 id="7-联调顺序"><a href="#7-联调顺序" class="headerlink" title="7. 联调顺序"></a>7. 联调顺序</h2><p>不要等所有模块都写完才第一次上板。推荐顺序是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs text">编译空工程<br>    ↓<br>单独验证按键<br>    ↓<br>单轮开环电机测试<br>    ↓<br>双轮开环测试<br>    ↓<br>编码器计数测试<br>    ↓<br>速度 PID 测试<br>    ↓<br>循迹/姿态/避障集成<br></code></pre></td></tr></table></figure>
+
+<p>每一步都要记录：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">现象 → 假设 → 验证动作 → 结论 → 下一步<br></code></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">现象：第一次按键后右轮转动，第二次按键后左轮转动。<br>假设：左右电机通道映射相反。<br>验证：分别测试 P02.4/P02.5 和 P02.6/P02.7。<br>结论：逻辑左右轮需要交换，A/B 极性也需要调整。<br></code></pre></td></tr></table></figure>
+
+<p>这种记录比“改了几次终于能转”更有复用价值。</p>
+<h2 id="8-给初学者的建议"><a href="#8-给初学者的建议" class="headerlink" title="8. 给初学者的建议"></a>8. 给初学者的建议</h2><p>团队协作的核心不是把任务平均分成几份，而是让每个人负责一个边界清晰、可以独立验收的结果。</p>
+<p>对第一次做小车的同学，最重要的习惯是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">先确认需求，再确认接口；<br>先单模块验证，再做系统联调；<br>先记录现象，再修改代码；<br>先保证能回退，再持续迭代。<br></code></pre></td></tr></table></figure>
+
+<p>当团队能够稳定完成一次“需求—实现—测试—交付”闭环时，才算真正从写代码进入了做项目。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Embedded-Systems/" class="print-no-link">#Embedded Systems</a>
+      
+        <a href="/tags/Smart-Car/" class="print-no-link">#Smart Car</a>
+      
+        <a href="/tags/Teamwork/" class="print-no-link">#Teamwork</a>
+      
+        <a href="/tags/Git/" class="print-no-link">#Git</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>从能写代码到能做项目：小车团队协作入门</div>
+      <div>https://limpidslirm.github.io/TC264-Car-Teamwork/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>LimpidSlirm</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 5, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/TC264-Car-Electrical-Control/" title="从 PWM 到 PID：小车电控入门">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">从 PWM 到 PID：小车电控入门</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/The-Ruler-And-The-Wasteland/" title="刻度尺与荒原">
+                        <span class="hidden-mobile">刻度尺与荒原</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://www.xmu.edu.cn/" target="_blank" rel="nofollow noopener"><span>Xiamen University</span></a> <span> · </span> <span>© 2026 LimpidSlirm</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

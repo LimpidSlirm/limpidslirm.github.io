@@ -1,0 +1,1126 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="LimpidSlirm">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="小车电控的学习顺序不应该是“直接复制一段 PID 代码”。更可靠的路线是： 1234567891011确认电机和驱动器    ↓输出 PWM 让电机转动    ↓完成单轮和双轮开环测试    ↓读取编码器速度    ↓加入 PID 闭环    ↓整定参数并加入安全保护  本文只介绍具有普遍适用性的电控原理、模块划分和测试方法，具体项目应根据实际硬件手册和接口定义进行调整。 1. 电机和驱动器单片机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 PWM 到 PID：小车电控入门">
+<meta property="og:url" content="https://limpidslirm.github.io/TC264-Car-Electrical-Control/index.html">
+<meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
+<meta property="og:description" content="小车电控的学习顺序不应该是“直接复制一段 PID 代码”。更可靠的路线是： 1234567891011确认电机和驱动器    ↓输出 PWM 让电机转动    ↓完成单轮和双轮开环测试    ↓读取编码器速度    ↓加入 PID 闭环    ↓整定参数并加入安全保护  本文只介绍具有普遍适用性的电控原理、模块划分和测试方法，具体项目应根据实际硬件手册和接口定义进行调整。 1. 电机和驱动器单片机">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://limpidslirm.github.io/img/20261105.png">
+<meta property="article:published_time" content="2026-11-05T02:55:00.000Z">
+<meta property="article:modified_time" content="2026-11-05T03:24:45.047Z">
+<meta property="article:author" content="LimpidSlirm">
+<meta property="article:tag" content="Embedded Systems">
+<meta property="article:tag" content="Encoder">
+<meta property="article:tag" content="PID">
+<meta property="article:tag" content="PWM">
+<meta property="article:tag" content="Smart Car">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://limpidslirm.github.io/img/20261105.png">
+  
+  
+  
+  <title>从 PWM 到 PID：小车电控入门 - LimpidSlirm&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":false,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Limpid&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>Home</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>Archives</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>About</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>Search</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="Light"
+               data-label-dark="Dark">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">Dark</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true data-random-banner='/img/random/background-01.png,/img/random/background-02.png,/img/random/background-03.png,/img/random/background-04.png,/img/random/background-05.png,/img/random/background-06.png'
+     style="background: url('/img/random/background-01.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="从 PWM 到 PID：小车电控入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-05 10:55" pubdate>
+          November 5, 2026 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.6k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          56 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    (function() {
+      var banner = document.getElementById('banner');
+      if (!banner) return;
+      var list = banner.getAttribute('data-random-banner');
+      if (!list) return;
+      list = list.split(',').filter(Boolean);
+      if (list.length === 0) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      banner.style.backgroundImage = "url('" + pick + "')";
+    })();
+  </script>
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">从 PWM 到 PID：小车电控入门</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>小车电控的学习顺序不应该是“直接复制一段 PID 代码”。更可靠的路线是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs text">确认电机和驱动器<br>    ↓<br>输出 PWM 让电机转动<br>    ↓<br>完成单轮和双轮开环测试<br>    ↓<br>读取编码器速度<br>    ↓<br>加入 PID 闭环<br>    ↓<br>整定参数并加入安全保护<br></code></pre></td></tr></table></figure>
+
+<p>本文只介绍具有普遍适用性的电控原理、模块划分和测试方法，具体项目应根据实际硬件手册和接口定义进行调整。</p>
+<h2 id="1-电机和驱动器"><a href="#1-电机和驱动器" class="headerlink" title="1. 电机和驱动器"></a>1. 电机和驱动器</h2><p>单片机 GPIO 通常不能直接驱动小车电机。电机需要较大的电流，实际结构一般是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">单片机 GPIO/PWM<br>        ↓<br>电机驱动器或 H 桥<br>        ↓<br>直流减速电机<br></code></pre></td></tr></table></figure>
+
+<p>H 桥可以通过改变电机两端的电压方向来改变转向。常见控制接口有两种：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">方向 + PWM<br>A/B 双输入<br></code></pre></td></tr></table></figure>
+
+<p>不能只看代码名字判断接口类型，必须核对驱动板标识和接线。常见接口包括方向加 PWM，以及 A&#x2F;B 双输入两种形式。具体采用哪一种，应以驱动器手册和实际接线为准。</p>
+<h3 id="1-1-GPIO-的作用与初始化"><a href="#1-1-GPIO-的作用与初始化" class="headerlink" title="1.1 GPIO 的作用与初始化"></a>1.1 GPIO 的作用与初始化</h3><p>GPIO（General Purpose Input&#x2F;Output）是单片机最基本的数字接口。它通常有两类用途：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">输出：控制 LED、驱动器使能、方向信号或其他数字器件<br>输入：读取按键、限位开关、编码器状态或故障信号<br></code></pre></td></tr></table></figure>
+
+<p>GPIO 并不只是简单地设置为“高电平”或“低电平”。一个引脚通常还需要配置方向、上下拉、输出模式、输入滤波、复用功能和初始电平。若该引脚连接到 PWM、串口、定时器或其他外设，还必须把引脚从普通 GPIO 切换到对应的复用功能。</p>
+<p>一个通用的 GPIO 初始化过程可以抽象为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">io_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    gpio_enable_clock();<br>    gpio_set_mode(MOTOR_ENABLE_PIN, GPIO_OUTPUT);<br>    gpio_write(MOTOR_ENABLE_PIN, <span class="hljs-number">0</span>);<br><br>    gpio_set_mode(BUTTON_PIN, GPIO_INPUT_PULLUP);<br>    gpio_set_mode(ENCODER_PIN, GPIO_INPUT);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>不同单片机的函数名和寄存器写法可能不同，但初始化的逻辑基本一致：先打开端口时钟，再配置引脚功能和电气属性，最后设置安全的初始状态。</p>
+<h3 id="1-2-为什么一定要初始化"><a href="#1-2-为什么一定要初始化" class="headerlink" title="1.2 为什么一定要初始化"></a>1.2 为什么一定要初始化</h3><p>上电或复位后，GPIO 可能处于输入、高阻、复用或芯片规定的默认状态，不能假设它已经符合应用需求。没有初始化就直接使用，可能导致：</p>
+<ul>
+<li>输出引脚仍是高阻，驱动器没有得到有效控制；</li>
+<li>输入引脚悬空，读取结果随机跳变；</li>
+<li>上拉或下拉方向错误，按键和故障信号逻辑相反；</li>
+<li>PWM、定时器或串口没有切换到正确的复用功能；</li>
+<li>电机使能、方向和刹车信号在启动瞬间处于危险组合；</li>
+<li>不同复位原因或不同编译配置下出现不一致现象。</li>
+</ul>
+<p>电控系统尤其需要先初始化为安全状态。例如电机控制引脚应先关闭使能或输出零占空比，再配置方向和 PWM 功能，最后才允许驱动器工作。这样可以避免单片机启动过程中短暂的随机电平让电机突然转动。</p>
+<p>初始化通常只执行一次，但初始化顺序会影响安全性。可以遵循以下顺序：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs text">关闭电机使能或输出<br>    ↓<br>打开 GPIO 和外设时钟<br>    ↓<br>配置输入、输出和上下拉<br>    ↓<br>写入安全初始电平<br>    ↓<br>配置 PWM、定时器、编码器等复用功能<br>    ↓<br>完成传感器和控制模块初始化<br>    ↓<br>最后允许系统进入运行状态<br></code></pre></td></tr></table></figure>
+
+<p>初始化完成后还应进行基本验证，例如读取输入电平、检查 PWM 输出是否为零、确认编码器计数没有异常增长。初始化不是形式上的模板代码，而是建立硬件已知状态、保证后续程序可预测运行的必要步骤。</p>
+<h3 id="1-3-H-桥的工作原理"><a href="#1-3-H-桥的工作原理" class="headerlink" title="1.3 H 桥的工作原理"></a>1.3 H 桥的工作原理</h3><p>H 桥可以抽象为四个开关和一个电机。电机位于桥臂中间，四个开关分别控制电机两端接到电源正极或地：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs text">  电源正极<br>  ┌───┴───┐<br>Q1        Q3<br> │        │<br> ├─ 电机 ─┤<br> │        │<br>Q2        Q4<br>  └───┬───┘<br>     地<br></code></pre></td></tr></table></figure>
+
+<p>四个开关不能任意组合。典型状态如下：</p>
+<table>
+<thead>
+<tr>
+<th>Q1</th>
+<th>Q2</th>
+<th>Q3</th>
+<th>Q4</th>
+<th>电机状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>正转</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>反转</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>滑行或断电停止</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>左侧桥臂直通，禁止</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>右侧桥臂直通，禁止</td>
+</tr>
+</tbody></table>
+<p>正转时，电流从电源经过 Q1、电机和 Q4 流向地；反转时，电流经过 Q3、电机和 Q2 流向地。改变电流方向，就改变了电机的转矩方向。</p>
+<p>上下桥臂同时导通会形成电源到地的低阻通路，称为直通。直通会产生很大的瞬时电流，可能损坏驱动器或电源，因此驱动器通常会加入死区时间、互锁和过流保护。软件也不能在切换方向时让两路输出短暂地同时有效，安全做法是先关闭原方向输出，再设置另一方向，并在必要时插入短暂的空档时间。</p>
+<p>PWM 通常用于控制桥臂的平均电压。电机绕组具有电感，电流不会瞬间变为零，因此关闭开关后仍可能通过驱动器的续流二极管或 MOSFET 体二极管流动。不同的续流方式会影响制动、噪声、发热和电流纹波，具体应以驱动器拓扑和手册为准。</p>
+<p>“方向+PWM”接口通常由一个方向信号选择电流方向、一个 PWM 信号调节平均功率；“A&#x2F;B 双输入”接口则通常分别控制桥的两路输入。两者的真值表和停止方式可能不同，不能把一种接口的控制逻辑直接套到另一种接口上。</p>
+<h2 id="2-PWM-的三个关键概念"><a href="#2-PWM-的三个关键概念" class="headerlink" title="2. PWM 的三个关键概念"></a>2. PWM 的三个关键概念</h2><h3 id="2-1-频率"><a href="#2-1-频率" class="headerlink" title="2.1 频率"></a>2.1 频率</h3><p>PWM 频率决定一个周期的快慢。频率过低可能产生可听噪声和明显转矩波动；频率过高则会增加开关损耗或超出驱动器适用范围。应优先采用驱动器和电机允许的频率，而不是盲目追求更高频率。</p>
+<h3 id="2-2-占空比"><a href="#2-2-占空比" class="headerlink" title="2.2 占空比"></a>2.2 占空比</h3><p>占空比定义一个周期内高电平所占的比例：</p>
+<p>$$<br>D&#x3D;\frac{t_{\mathrm{on}}}{T}\times 100%.<br>$$</p>
+<p>在理想情况下，占空比越大，电机平均端电压越高，转速越高。但实际电机有启动转矩、负载、摩擦和电池电压等因素，低占空比可能无法带动轮子。</p>
+<h3 id="2-3-有效电平和极性"><a href="#2-3-有效电平和极性" class="headerlink" title="2.3 有效电平和极性"></a>2.3 有效电平和极性</h3><p>驱动器可能是高电平有效，也可能是低电平有效。即使 PWM 数值相同，如果有效电平理解错误，也会出现：</p>
+<ul>
+<li>上电自动转；</li>
+<li>目标为零仍有输出；</li>
+<li>正反方向相反；</li>
+<li>两个轮子的动作不一致。</li>
+</ul>
+<p>因此第一次测试不要直接让小车落地，应先架空并确认：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">PWM=0 是否真的停止<br>A/B 两路是否不会同时产生错误有效电平<br>方向改变时是否只改变目标方向<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-从开环测试开始"><a href="#3-从开环测试开始" class="headerlink" title="3. 从开环测试开始"></a>3. 从开环测试开始</h2><p>开环控制不读取编码器，只根据设定值输出 PWM：</p>
+<p>$$<br>u&#x3D;u_{\mathrm{target}}.<br>$$</p>
+<p>开环的目的不是获得精确速度，而是确认硬件链路：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">单片机输出 → 驱动器输入 → 电机转动 → 方向正确<br></code></pre></td></tr></table></figure>
+
+<p>推荐测试顺序：</p>
+<ol>
+<li>上电，确认两轮停止；</li>
+<li>只测试左轮；</li>
+<li>只测试右轮；</li>
+<li>两轮同时正转；</li>
+<li>两轮同时反转；</li>
+<li>停止并等待，确认不会自动重新启动。</li>
+</ol>
+<p>如果开环就不正常，不能通过调 PID 解决。应先检查电源、GND、PWM 通道、A&#x2F;B 映射、有效电平和电机线。</p>
+<h2 id="4-编码器和速度测量"><a href="#4-编码器和速度测量" class="headerlink" title="4. 编码器和速度测量"></a>4. 编码器和速度测量</h2><p>编码器把电机轴或轮子的转动转换为脉冲。增量编码器通常有 A、B 两路：</p>
+<ul>
+<li>A 路提供脉冲；</li>
+<li>B 路用于判断方向；</li>
+<li>两路相位关系可以区分正转和反转。</li>
+</ul>
+<p>在固定采样周期内，最简单的速度反馈是读取增量计数：</p>
+<p>$$<br>v[k]&#x3D;\frac{\Delta C[k]}{T_s}.<br>$$</p>
+<p>如果暂时不换算单位，可以直接使用“一个采样周期内的脉冲数”。这种方式适合第一阶段调试，因为不需要立刻知道编码器线数、减速比和轮径。</p>
+<p>必须验证正转时反馈符号是否符合控制约定。如果电机正转而编码器反馈为负，PID 会把误差越调越大，表现为持续加速或输出饱和。</p>
+<h2 id="5-为什么要使用固定控制周期"><a href="#5-为什么要使用固定控制周期" class="headerlink" title="5. 为什么要使用固定控制周期"></a>5. 为什么要使用固定控制周期</h2><p>PID 的计算依赖采样时间。如果有时 5 ms 更新一次、有时 30 ms 更新一次，同一组参数会产生不同控制效果。</p>
+<p>控制周期应满足：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">传感器能及时提供新数据<br>控制器有足够响应速度<br>单次任务能在周期内完成<br>中断不会长时间阻塞<br></code></pre></td></tr></table></figure>
+
+<p>工程可以使用定时器或系统节拍产生基础时基，再按照传感器和控制器的需求安排速度环更新。电机刷新、编码器采样和应用层任务可以使用不同周期，但每个周期都必须稳定且可说明。</p>
+<h2 id="6-为什么以及何时在中断中运行-PID"><a href="#6-为什么以及何时在中断中运行-PID" class="headerlink" title="6. 为什么以及何时在中断中运行 PID"></a>6. 为什么以及何时在中断中运行 PID</h2><p>PID 是否放在中断中，不是由“中断一定更快”决定的，而是由控制周期、实时性要求和任务执行时间共同决定的。将 PID 放在定时器中断中，主要有三个原因：</p>
+<ol>
+<li><strong>周期稳定</strong>：中断由硬件定时器触发，不容易受到主循环中其他代码执行时间的影响；</li>
+<li><strong>采样和计算同步</strong>：可以在固定时刻读取编码器，再立即完成控制计算；</li>
+<li><strong>输出及时</strong>：计算结果能够按固定周期更新 PWM，减少控制延迟和周期抖动。</li>
+</ol>
+<p>例如，速度环需要每隔固定时间读取一次编码器增量并更新 PWM，就可以由定时器中断产生“速度环更新事件”。但这不意味着所有 PID 代码都必须直接写在中断服务函数中。更稳妥的做法是让中断只完成短小、确定的实时工作：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">timer_isr</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    encoder_sample();<br>    speed_loop_due = <span class="hljs-number">1</span>;<br>&#125;<br><br><span class="hljs-type">void</span> <span class="hljs-title function_">main_loop</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    <span class="hljs-keyword">if</span> (speed_loop_due != <span class="hljs-number">0</span>)<br>    &#123;<br>        speed_loop_due = <span class="hljs-number">0</span>;<br>        speed_control_update();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果控制计算很短、周期要求严格，并且已经确认中断执行时间小于周期，也可以直接在定时器中断中调用速度 PID。相反，图像处理、串口打印、复杂滤波、动态内存操作和阻塞等待不应放进高频中断，否则会延迟其他中断，造成丢数据、系统抖动甚至看门狗复位。</p>
+<p>把 PID 放入中断前应确认：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">控制周期由硬件定时器稳定产生<br>PID 最坏执行时间明显小于周期<br>中断中没有阻塞函数和长时间循环<br>中断与主循环共享的数据有明确的读写规则<br>输出限幅、目标为零和传感器异常都有处理<br></code></pre></td></tr></table></figure>
+
+<p>如果控制要求不高，或者 PID 计算较复杂，也可以让中断只设置标志位，由主循环或周期任务执行。关键不是追求“全部放中断”，而是保证采样周期、计算延迟和数据同步满足闭环控制要求。</p>
+<h2 id="7-PID-的基本原理"><a href="#7-PID-的基本原理" class="headerlink" title="7. PID 的基本原理"></a>7. PID 的基本原理</h2><h3 id="7-1-为什么需要-PID"><a href="#7-1-为什么需要-PID" class="headerlink" title="7.1 为什么需要 PID"></a>7.1 为什么需要 PID</h3><p>只使用固定 PWM 属于开环控制。相同的 PWM 占空比在不同电池电压、负载、地面摩擦和电机个体差异下，得到的实际速度并不相同。开环适合验证电机能否转动，但很难保证速度准确，更不能主动补偿上坡、载荷变化或左右轮差异。</p>
+<p>PID 使用传感器反馈，把目标值和实际值进行比较，再根据误差调整输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">目标速度<br>    ↓<br>误差计算 ← 编码器实际速度<br>    ↓<br>PID 控制器<br>    ↓<br>PWM 输出<br></code></pre></td></tr></table></figure>
+
+<p>PID 的价值不是让电机“自动变快”，而是让系统在扰动存在时仍尽量跟踪目标。它可以改善启动响应、减小稳态误差，并在负载变化后自动补偿。PID 也不是万能的：反馈方向错误、采样周期不稳定、输出饱和或传感器失效时，PID 可能放大问题，所以闭环前必须先验证硬件和反馈链路。</p>
+<h3 id="7-2-电机-PID-和舵机-PID-的区别"><a href="#7-2-电机-PID-和舵机-PID-的区别" class="headerlink" title="7.2 电机 PID 和舵机 PID 的区别"></a>7.2 电机 PID 和舵机 PID 的区别</h3><p>这里的“电机”通常指带编码器的直流电机或减速电机，“舵机”通常指内部已经集成控制电路的位置执行器。两者都可以使用 PID，但控制对象、反馈量和输出形式不同：</p>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>常见控制目标</th>
+<th>反馈</th>
+<th>控制器输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>直流电机速度环</td>
+<td>转速或轮速</td>
+<td>编码器脉冲、测速值</td>
+<td>驱动器 PWM 和方向</td>
+</tr>
+<tr>
+<td>直流电机位置环</td>
+<td>轴的位置</td>
+<td>编码器位置</td>
+<td>内层速度或电流控制目标</td>
+</tr>
+<tr>
+<td>舵机位置环</td>
+<td>舵盘角度</td>
+<td>内部电位器或磁编码器</td>
+<td>脉宽、总线位置命令或内部目标值</td>
+</tr>
+</tbody></table>
+<p>电机速度 PID 的输出通常直接影响电压或电流，更新周期可以较短，输出还要处理启动死区、方向切换、限幅和积分饱和。舵机接收的往往是角度或脉宽命令，位置闭环可能已经在舵机内部完成；外部再做一个位置 PID 时，必须考虑内部控制环的响应速度，否则两个控制器可能互相“抢控制权”，产生振荡。</p>
+<p>因此，不能因为都叫 PID，就直接复用同一组参数。电机控制更关注速度、转矩和负载扰动；舵机控制更关注位置误差、响应时间、机械限位和目标角度平滑。使用智能舵机时，首先应确认它是否已经自带位置控制，再决定外部是否需要增加控制环。</p>
+<p>控制目标是让实际速度接近目标速度。定义误差：</p>
+<p>$$<br>e[k]&#x3D;r[k]-v[k].<br>$$</p>
+<p>离散 PID 可以写成：</p>
+<p>$$<br>u[k]&#x3D;K_p e[k]+K_i\sum_{i&#x3D;0}^{k}e[i]+K_d(e[k]-e[k-1]).<br>$$</p>
+<h3 id="比例项"><a href="#比例项" class="headerlink" title="比例项"></a>比例项</h3><p>比例项根据当前误差立即产生输出：</p>
+<p>$$<br>u_P&#x3D;K_p e.<br>$$</p>
+<p>误差越大，输出越大。比例过小，电机跟不上目标；比例过大，可能产生抖动或超调。</p>
+<h3 id="积分项"><a href="#积分项" class="headerlink" title="积分项"></a>积分项</h3><p>积分项累计长期误差：</p>
+<p>$$<br>u_I&#x3D;K_i\sum e.<br>$$</p>
+<p>它可以消除负载造成的稳态误差，但如果输出已经饱和仍继续积分，就会产生积分饱和。因此需要积分限幅，并在目标速度为零时清除积分。</p>
+<h3 id="微分项"><a href="#微分项" class="headerlink" title="微分项"></a>微分项</h3><p>微分项关注误差变化速度：</p>
+<p>$$<br>u_D&#x3D;K_d(e[k]-e[k-1]).<br>$$</p>
+<p>它可能帮助抑制变化过快，但编码器增量反馈通常有量化噪声，微分项过大容易放大噪声。第一版速度环可以先使用 PI，再根据实际响应决定是否加入 D 项。</p>
+<h2 id="8-代码结构示例"><a href="#8-代码结构示例" class="headerlink" title="8. 代码结构示例"></a>8. 代码结构示例</h2><p>一个适合初学者理解的 PID 接口如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class">&#123;</span><br>    int32 kp;<br>    int32 ki;<br>    int32 kd;<br>    int32 integral;<br>    int32 previous_error;<br>    int32 output_min;<br>    int32 output_max;<br>&#125; <span class="hljs-type">pid_controller_t</span>;<br><br><span class="hljs-type">void</span> <span class="hljs-title function_">pid_init</span><span class="hljs-params">(<span class="hljs-type">pid_controller_t</span> *pid, ...)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">pid_reset</span><span class="hljs-params">(<span class="hljs-type">pid_controller_t</span> *pid)</span>;<br>int32 <span class="hljs-title function_">pid_update</span><span class="hljs-params">(<span class="hljs-type">pid_controller_t</span> *pid,</span><br><span class="hljs-params">                 int32 target,</span><br><span class="hljs-params">                 int32 measurement)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>速度控制模块不应该让应用层直接修改 PID 内部变量，而应该提供目标和反馈接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">speed_control_set_command</span><span class="hljs-params">(</span><br><span class="hljs-params">    <span class="hljs-type">const</span> <span class="hljs-type">motion_command_t</span> *command)</span>;<br><br><span class="hljs-type">void</span> <span class="hljs-title function_">speed_control_update</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><br><span class="hljs-type">void</span> <span class="hljs-title function_">speed_control_get_feedback</span><span class="hljs-params">(</span><br><span class="hljs-params">    <span class="hljs-type">motion_feedback_t</span> *feedback)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>应用层只产生运动命令，速度控制层负责读取编码器、运行左右轮 PID，并把结果交给电机模块。</p>
+<h2 id="9-通用的数据流"><a href="#9-通用的数据流" class="headerlink" title="9. 通用的数据流"></a>9. 通用的数据流</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs text">按键、上位机或自主算法<br>    ↓<br>目标速度和方向等运动命令<br>    ↓<br>左右轮独立 PID<br>    ↑<br>左右轮编码器反馈<br>    ↓<br>电机驱动接口<br>    ↓<br>驱动器和电机<br></code></pre></td></tr></table></figure>
+
+<p>PID 参数需要根据电机、负载、电池、编码器和采样周期重新整定。不要把其他项目的参数直接当成最终参数。</p>
+<h2 id="10-PID-调参顺序"><a href="#10-PID-调参顺序" class="headerlink" title="10. PID 调参顺序"></a>10. PID 调参顺序</h2><p>推荐按照以下顺序：</p>
+<h3 id="第一步：确认反馈方向"><a href="#第一步：确认反馈方向" class="headerlink" title="第一步：确认反馈方向"></a>第一步：确认反馈方向</h3><p>让轮子以较低开环输出转动，确认编码器反馈方向和电机正方向一致。</p>
+<h3 id="第二步：只调比例"><a href="#第二步：只调比例" class="headerlink" title="第二步：只调比例"></a>第二步：只调比例</h3><p>先设定：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">Ki = 0<br>Kd = 0<br></code></pre></td></tr></table></figure>
+
+<p>逐渐增大 Kp，观察电机能否跟随目标速度。出现明显振荡时，说明比例已经偏大。</p>
+<h3 id="第三步：加入少量积分"><a href="#第三步：加入少量积分" class="headerlink" title="第三步：加入少量积分"></a>第三步：加入少量积分</h3><p>在比例控制基本稳定后，逐渐增加 Ki，用来消除负载下的稳态误差。必须配合积分限幅和目标为零时清积分。</p>
+<h3 id="第四步：谨慎考虑微分"><a href="#第四步：谨慎考虑微分" class="headerlink" title="第四步：谨慎考虑微分"></a>第四步：谨慎考虑微分</h3><p>如果速度反馈噪声明显，不要急着加大 Kd。可以先对速度测量做合理滤波，再评估微分项是否有必要。</p>
+<h2 id="11-正常与异常现象"><a href="#11-正常与异常现象" class="headerlink" title="11. 正常与异常现象"></a>11. 正常与异常现象</h2><h3 id="正常"><a href="#正常" class="headerlink" title="正常"></a>正常</h3><ul>
+<li>上电后电机保持停止；</li>
+<li>低档目标启动平稳；</li>
+<li>左右轮方向一致；</li>
+<li>提高目标速度后，实际转速随之提高；</li>
+<li>稳态时不会持续加速；</li>
+<li>发出停止命令后不会自动重新启动。</li>
+</ul>
+<h3 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h3><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>优先检查</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上电自动转</td>
+<td>PWM 初始值、驱动器有效电平、使能脚</td>
+</tr>
+<tr>
+<td>左右轮对应反了</td>
+<td>A&#x2F;B 通道和逻辑左右映射</td>
+</tr>
+<tr>
+<td>两轮都反转</td>
+<td>A&#x2F;B 极性或方向符号</td>
+</tr>
+<tr>
+<td>持续加速</td>
+<td>编码器反馈方向、目标符号、Ki&#x2F;Kp</td>
+</tr>
+<tr>
+<td>明显抖动</td>
+<td>Kp&#x2F;Ki 过大、采样周期不稳定、反馈噪声</td>
+</tr>
+<tr>
+<td>低档不动</td>
+<td>启动转矩不足、负载过大、电池电压不足</td>
+</tr>
+<tr>
+<td>停止后又启动</td>
+<td>目标没有清零，或旧命令被重新发布</td>
+</tr>
+</tbody></table>
+<h2 id="12-安全测试流程"><a href="#12-安全测试流程" class="headerlink" title="12. 安全测试流程"></a>12. 安全测试流程</h2><p>第一次测试必须让驱动轮离地，并准备好断电或急停操作：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs text">1. 检查电源和 GND<br>2. 检查 PWM/A/B 引脚<br>3. 上电确认停止<br>4. 单轮低速测试<br>5. 双轮低速测试<br>6. 编码器反馈测试<br>7. 低档 PID 测试<br>8. 再逐步提高目标<br></code></pre></td></tr></table></figure>
+
+<p>不要在还没有验证方向和反馈符号时直接让小车落地。电机方向接反时，闭环控制可能会快速饱和，车辆也可能突然移动。</p>
+<h2 id="13-学习路线"><a href="#13-学习路线" class="headerlink" title="13. 学习路线"></a>13. 学习路线</h2><p>对于刚开始学习单片机的同学，可以按下面的顺序推进：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs text">C 语言基础<br>    ↓<br>GPIO 输入输出<br>    ↓<br>按键消抖和定时器<br>    ↓<br>PWM 控制 LED 和电机<br>    ↓<br>单轮开环<br>    ↓<br>编码器计数和测速<br>    ↓<br>PI/PID 速度环<br>    ↓<br>循迹、姿态和避障<br></code></pre></td></tr></table></figure>
+
+<p>真正重要的不是一次写出复杂控制器，而是每一步都能说明：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">输入是什么？<br>周期是多少？<br>输出是什么？<br>如何验证？<br>异常时如何停止？<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Embedded-Systems/" class="print-no-link">#Embedded Systems</a>
+      
+        <a href="/tags/Smart-Car/" class="print-no-link">#Smart Car</a>
+      
+        <a href="/tags/PID/" class="print-no-link">#PID</a>
+      
+        <a href="/tags/PWM/" class="print-no-link">#PWM</a>
+      
+        <a href="/tags/Encoder/" class="print-no-link">#Encoder</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>从 PWM 到 PID：小车电控入门</div>
+      <div>https://limpidslirm.github.io/TC264-Car-Electrical-Control/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>LimpidSlirm</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 5, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/TC264-Car-Teamwork/" title="从能写代码到能做项目：小车团队协作入门">
+                        <span class="hidden-mobile">从能写代码到能做项目：小车团队协作入门</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://www.xmu.edu.cn/" target="_blank" rel="nofollow noopener"><span>Xiamen University</span></a> <span> · </span> <span>© 2026 LimpidSlirm</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

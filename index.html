@@ -65,7 +65,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":false,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -75,6 +75,22 @@
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
   
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
 
 
   
@@ -317,6 +333,106 @@
                 
 
 <h1 style="display: none">LimpidSlirm&#39;s Blog</h1>
+
+  <div class="row mx-auto index-card index-card-right">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/TC264-Car-Electrical-Control/" target="_self">
+          <img src="/img/20261105.png" srcset="/img/loading.gif" lazyload alt="从 PWM 到 PID：小车电控入门">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/TC264-Car-Electrical-Control/" target="_self">
+          从 PWM 到 PID：小车电控入门
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/TC264-Car-Electrical-Control/" target="_self">
+        <div>
+          小车电控的学习顺序不应该是“直接复制一段 PID 代码”。更可靠的路线是： 1234567891011确认电机和驱动器    ↓输出 PWM 让电机转动    ↓完成单轮和双轮开环测试    ↓读取编码器速度    ↓加入 PID 闭环    ↓整定参数并加入安全保护  本文只介绍具有普遍适用性的电控原理、模块划分和测试方法，具体项目应根据实际硬件手册和接口定义进行调整。 1. 电机和驱动器单片机
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-05 10:55" pubdate>
+              2026-11-05
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
+            
+              <a href="/tags/Smart-Car/">#Smart Car</a>
+            
+              <a href="/tags/PID/">#PID</a>
+            
+              <a href="/tags/PWM/">#PWM</a>
+            
+              <a href="/tags/Encoder/">#Encoder</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/TC264-Car-Teamwork/" target="_self">
+          从能写代码到能做项目：小车团队协作入门
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/TC264-Car-Teamwork/" target="_self">
+        <div>
+          我有的时候在想一件事，到底该如何从零开始学习怎么做一个项目。 很多同学第一次参加项目时，最先想到的是“我负责写哪一段代码”。但一个能稳定运行的小车，通常不是某个人写出一段很长的程序，而是团队把需求、接口、测试和交付组织起来的结果。 这篇文章面向会基础 C、但缺少完整单片机项目经验的同学，以课程小车为例介绍如何协作完成一个嵌入式项目。 1. 从功能目标开始，而不是从文件开始如何跟 AI 沟通？ 先确
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-05 10:50" pubdate>
+              2026-11-05
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
+            
+              <a href="/tags/Smart-Car/">#Smart Car</a>
+            
+              <a href="/tags/Teamwork/">#Teamwork</a>
+            
+              <a href="/tags/Git/">#Git</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
 
   <div class="row mx-auto index-card">
     
@@ -712,97 +828,13 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/Multisim-Master-Database/" target="_self">
-          Multisim 打不开 Database
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/Multisim-Master-Database/" target="_self">
-        <div>
-          Multisim 神了。打开之后提示无法打开 Master Database。 1. 现象启动 Multisim 时直接弹出「无法打开 Master Database」，元件库整个不可用：  数据库文件确实存在，检查下来也没有损坏； 删除用户配置里的 config 目录，再重新注册 dao360.dll，有概率恢复正常； 换一台机器、或者重装之后再遇到，同样的操作又不一定生效。  也就是说，这不是
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-10-24 17:40" pubdate>
-              2026-10-24
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Windows/">#Windows</a>
-            
-              <a href="/tags/Multisim/">#Multisim</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/Introduction/" target="_self">
-          <img src="/img/random/background-01.png" srcset="/img/loading.gif" lazyload alt="在字节与潮汐之间">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/Introduction/" target="_self">
-          在字节与潮汐之间
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt " href="/Introduction/" target="_self">
-        <div>
-          工科生大概都有一种难以割舍的“造物癖”：想要搭一个电路、调通一段算法、写出一个能够稳定运行的状态机，或者在这个信息过载的时代，亲手为自己的所思所见砌筑一块不被打扰的自留地。 这个博客由此而来。脱胎于几行静态代码，托管于远方的服务器，没有算法推荐的绑架，也没有信息流的喧嚣。它只是一个属于我自己的坐标。 关于我我是Limpid，厦门大学自动化系在读。 穿行于算法与电路之间，在无序的世界里追求秩序感。
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-10-24 17:30" pubdate>
-              2026-10-24
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Essays/">#Essays</a>
-            
-              <a href="/tags/Prologue/">#Prologue</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
 
 
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+    </span>
+  </nav>
 
 
 
@@ -903,6 +935,8 @@
 
 
 
+
+  <script defer src="/js/openkounter.js" ></script>
 
   <script  src="/js/local-search.js" ></script>
 
