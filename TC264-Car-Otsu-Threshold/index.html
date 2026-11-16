@@ -1,0 +1,1058 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="LimpidSlirm">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。 一、固定阈值">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Otsu 大津法：自适应灰度阈值的推导与嵌入式实现">
+<meta property="og:url" content="https://limpidslirm.github.io/TC264-Car-Otsu-Threshold/index.html">
+<meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
+<meta property="og:description" content="摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。 一、固定阈值">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-11-16T07:30:00.000Z">
+<meta property="article:modified_time" content="2026-11-16T07:37:57.964Z">
+<meta property="article:author" content="LimpidSlirm">
+<meta property="article:tag" content="Camera">
+<meta property="article:tag" content="Embedded Systems">
+<meta property="article:tag" content="Image Processing">
+<meta property="article:tag" content="Smart Car">
+<meta property="article:tag" content="TC264">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Otsu 大津法：自适应灰度阈值的推导与嵌入式实现 - LimpidSlirm&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Limpid&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>Home</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>Archives</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>About</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>Search</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="Light"
+               data-label-dark="Dark">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">Dark</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true data-random-banner='/img/random/background-01.png,/img/random/background-02.png,/img/random/background-03.png,/img/random/background-04.png,/img/random/background-05.png,/img/random/background-06.png'
+     style="background: url('/img/random/background-01.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Otsu 大津法：自适应灰度阈值的推导与嵌入式实现"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-16 15:30" pubdate>
+          November 16, 2026 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.9k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          66 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    (function() {
+      var banner = document.getElementById('banner');
+      if (!banner) return;
+      var list = banner.getAttribute('data-random-banner');
+      if (!list) return;
+      list = list.split(',').filter(Boolean);
+      if (list.length === 0) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      banner.style.backgroundImage = "url('" + pick + "')";
+    })();
+  </script>
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Otsu 大津法：自适应灰度阈值的推导与嵌入式实现</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。</p>
+<p>Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。</p>
+<h2 id="一、固定阈值的失效条件"><a href="#一、固定阈值的失效条件" class="headerlink" title="一、固定阈值的失效条件"></a>一、固定阈值的失效条件</h2><p>设赛道由浅色地面与深色引导线构成，某行像素灰度分布如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">地面  185 190 188 192 186 ...<br>引导线  35  40  38  36  42 ...<br></code></pre></td></tr></table></figure>
+
+<p>取两者之间的任意值（如 120）均可完成分割。但该中间值并非恒定：</p>
+<ul>
+<li>环境照度变化导致整体灰度平移；</li>
+<li>摄像头自动曝光与自动增益调整改变成像映射；</li>
+<li>镜头污染、反光、阴影造成空间不均匀偏移。</li>
+</ul>
+<p>上述因素使固定阈值缺乏泛化性，故需由图像自身统计特性导出阈值。</p>
+<h2 id="二、灰度直方图与概率分布"><a href="#二、灰度直方图与概率分布" class="headerlink" title="二、灰度直方图与概率分布"></a>二、灰度直方图与概率分布</h2><p>设图像宽 $W$、高 $H$，像素总数为</p>
+<p>$$<br>N &#x3D; W \times H<br>$$</p>
+<p>统计各灰度级的出现次数 $n_i$（$i &#x3D; 0,1,\dots,255$），归一化后得到灰度概率分布</p>
+<p>$$<br>p(i) &#x3D; \frac{n_i}{N}, \qquad \sum_{i&#x3D;0}^{255} p(i) &#x3D; 1<br>$$</p>
+<p>该表示丢弃了全部空间信息，仅保留灰度的一阶统计特性。这一简化是 Otsu 法计算量低、对孤立噪声不敏感的原因，同时也是其无法处理空间结构相关干扰的原因。</p>
+<h2 id="三、类间方差的定义与化简"><a href="#三、类间方差的定义与化简" class="headerlink" title="三、类间方差的定义与化简"></a>三、类间方差的定义与化简</h2><p>取阈值 $t$，将像素划分为两类：</p>
+<p>$$<br>C_0 &#x3D; {i \mid 0 \le i \le t}, \qquad C_1 &#x3D; {i \mid t &lt; i \le 255}<br>$$</p>
+<p>两类的概率质量与灰度均值分别为</p>
+<p>$$<br>w_0(t) &#x3D; \sum_{i&#x3D;0}^{t} p(i), \qquad w_1(t) &#x3D; 1 - w_0(t)<br>$$</p>
+<p>$$<br>m_0(t) &#x3D; \frac{1}{w_0(t)}\sum_{i&#x3D;0}^{t} i,p(i),<br>\qquad<br>m_1(t) &#x3D; \frac{1}{w_1(t)}\sum_{i&#x3D;t+1}^{255} i,p(i)<br>$$</p>
+<p>全图均值为</p>
+<p>$$<br>m &#x3D; \sum_{i&#x3D;0}^{255} i,p(i) &#x3D; w_0 m_0 + w_1 m_1<br>$$</p>
+<p>后一等式由 $w_0 + w_1 &#x3D; 1$ 直接得到，是后续化简的依据。</p>
+<p>定义类间方差为两类均值对全图均值的加权平方偏差：</p>
+<p>$$<br>\sigma_b^2(t) &#x3D; w_0 (m_0 - m)^2 + w_1 (m_1 - m)^2<br>$$</p>
+<p>由 $m &#x3D; w_0 m_0 + w_1 m_1$ 可得</p>
+<p>$$<br>m_0 - m &#x3D; w_1 (m_0 - m_1), \qquad m_1 - m &#x3D; -w_0 (m_0 - m_1)<br>$$</p>
+<p>记 $d &#x3D; m_0 - m_1$，代入上式：</p>
+<p>$$<br>\sigma_b^2 &#x3D; w_0 w_1^2 d^2 + w_1 w_0^2 d^2 &#x3D; w_0 w_1 d^2 (w_0 + w_1)<br>$$</p>
+<p>又因 $w_0 + w_1 &#x3D; 1$，故</p>
+<p>$$<br>\sigma_b^2(t) &#x3D; w_0(t), w_1(t), \bigl(m_0(t) - m_1(t)\bigr)^2<br>$$</p>
+<p>Otsu 阈值定义为使该式取最大值的 $t$：</p>
+<p>$$<br>t^{*} &#x3D; \arg\max_{0 \le t \le 255} ; w_0(t), w_1(t), \bigl(m_0(t) - m_1(t)\bigr)^2<br>$$</p>
+<h2 id="四、判据的两项含义"><a href="#四、判据的两项含义" class="headerlink" title="四、判据的两项含义"></a>四、判据的两项含义</h2><p>$$<br>\sigma_b^2 &#x3D; \underbrace{w_0 w_1}<em>{\text{类间均衡度}} \cdot \underbrace{(m_0 - m_1)^2}</em>{\text{类间分离度}}<br>$$</p>
+<p>分离度项在阈值位于两类之间时取较大值。均衡度项 $w_0 w_1$ 在两类各占一半时达到最大 $1&#x2F;4$，当两类样本数严重失衡时迅速衰减。</p>
+<p>两项相乘使退化解自动被排除：当 $t &#x3D; 0$ 或 $t &#x3D; 255$ 时必有一类为空集，此时 $w_0 w_1 &#x3D; 0$，评分为零。因此无需额外增加边界判断，该性质由判据本身给出。</p>
+<h2 id="五、与类内方差最小化的等价性"><a href="#五、与类内方差最小化的等价性" class="headerlink" title="五、与类内方差最小化的等价性"></a>五、与类内方差最小化的等价性</h2><p>图像总方差可分解为类内方差与类间方差之和：</p>
+<p>$$<br>\sigma_T^2 &#x3D; \sigma_w^2 + \sigma_b^2, \qquad \sigma_w^2 &#x3D; w_0 \sigma_0^2 + w_1 \sigma_1^2<br>$$</p>
+<p>其中 $\sigma_0^2$ 与 $\sigma_1^2$ 分别为两类的类内方差。$\sigma_T^2$ 只与图像本身有关，与 $t$ 的取值无关，为一常数。因此</p>
+<p>$$<br>\max_t \sigma_b^2(t)<br>\iff \min_t \sigma_w^2(t)<br>\iff \max_t \frac{\sigma_b^2(t)}{\sigma_T^2}<br>$$</p>
+<p>三个优化目标等价。该等价性是 Otsu 判据具有”最优”含义的依据：最大化类间方差等价于最小化类内方差，即两类各自的灰度分布尽可能集中。</p>
+<h2 id="六、数值验证"><a href="#六、数值验证" class="headerlink" title="六、数值验证"></a>六、数值验证</h2><p>以第一节所示的两类各 5 个像素为例。取 $t &#x3D; 120$ 时，两类完全分离：</p>
+<p>$$<br>w_0 &#x3D; w_1 &#x3D; 0.5, \qquad m_0 &#x3D; 38.2, \qquad m_1 &#x3D; 188.2<br>$$</p>
+<p>$$<br>\sigma_b^2 &#x3D; 0.5 \times 0.5 \times (38.2 - 188.2)^2 &#x3D; 5625<br>$$</p>
+<p>取 $t &#x3D; 200$ 时，$w_1 &#x3D; 0$，评分为 0，被排除。取 $t &#x3D; 60$ 时两类仍各自纯净，评分同为 5625，表明类内方差为零时任何介于两类之间的阈值均等价。实际图像中两类灰度存在交叠，评分曲线呈单峰，最大值位置即为分割阈值。</p>
+<h2 id="七、对光照变化的适应性"><a href="#七、对光照变化的适应性" class="headerlink" title="七、对光照变化的适应性"></a>七、对光照变化的适应性</h2><p>判据仅依赖直方图的相对形状，不依赖灰度绝对值。当整体照度提高时，直方图的各峰向高灰度方向平移，最优阈值随之平移，因此阈值可自动跟随光照变化。</p>
+<p>需要区分的是：阈值并非某一类别的代表灰度，而是两类分布之间的分界点，通常介于深色引导线与浅色地面之间。</p>
+<h2 id="八、直接实现的两个缺陷"><a href="#八、直接实现的两个缺陷" class="headerlink" title="八、直接实现的两个缺陷"></a>八、直接实现的两个缺陷</h2><p>按定义直接实现时，对每个候选 $t$ 重新累加两段直方图：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">256</span>; i++) &#123;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">0</span>; j &lt;= i; j++)      &#123; <span class="hljs-comment">/* 累加前景 */</span> &#125;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = i + <span class="hljs-number">1</span>; j &lt; <span class="hljs-number">256</span>; j++) &#123; <span class="hljs-comment">/* 累加背景 */</span> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>其一，计算冗余。每个 $t$ 的内层循环合计固定执行 256 次，总计约 $256 \times 256 &#x3D; 6.6\times10^4$ 次累加。而相邻两个 $t$ 之间仅相差一个灰度级，可递推得到。</p>
+<p>其二，除零风险。当 $t$ 较小时前景像素数为零，<code>foreground_gray_sum / foreground_pixel_count</code> 计算为 $0.0&#x2F;0.0$，结果为 NaN。NaN 参与 <code>&gt;</code> 比较恒为假，最大值可能始终未被更新，函数返回初值 0，表现为算法异常而非编译或运行报错。</p>
+<p>此外，256 次浮点除法在 50 fps 帧率下虽可运行，但无必要。</p>
+<h2 id="九、工程实现"><a href="#九、工程实现" class="headerlink" title="九、工程实现"></a>九、工程实现</h2><p>代码位于 <code>code/otsu.c</code>，对外接口为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">uint8 <span class="hljs-title function_">otsu_calculate_threshold</span><span class="hljs-params">(<span class="hljs-type">const</span> uint8 *image, uint16 width, uint16 height)</span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="9-1-递推累加"><a href="#9-1-递推累加" class="headerlink" title="9.1 递推累加"></a>9.1 递推累加</h3><p>$w_0$ 与灰度累加和 $S_0(t) &#x3D; \sum_{i \le t} i, n_i$ 均满足</p>
+<p>$$<br>w_0(t) &#x3D; w_0(t-1) + n_t, \qquad S_0(t) &#x3D; S_0(t-1) + t, n_t<br>$$</p>
+<p>故遍历 256 个候选阈值时无需重复求和。整体复杂度由 $O(N + 256^2)$ 降为</p>
+<p>$$<br>O(N + 256)<br>$$</p>
+<p>本工程 $N &#x3D; 188 \times 120 &#x3D; 22560$，递推部分仅约 $3 \times 256$ 次运算，相对直方图统计可忽略。</p>
+<h3 id="9-2-去除归一化"><a href="#9-2-去除归一化" class="headerlink" title="9.2 去除归一化"></a>9.2 去除归一化</h3><p>直接使用计数而非概率：</p>
+<p>$$<br>w_0 &#x3D; \sum_{i&#x3D;0}^{t} n_i, \quad<br>w_1 &#x3D; N - w_0, \quad<br>m_0 &#x3D; \frac{S_0}{w_0}, \quad<br>m_1 &#x3D; \frac{S - S_0}{w_1}<br>$$</p>
+<p>评分与原始定义仅相差常数因子 $1&#x2F;N^2$，不影响 $\arg\max$，故结论一致。该处理避免了归一化引入的浮点运算。</p>
+<h3 id="9-3-评分的数据宽度"><a href="#9-3-评分的数据宽度" class="headerlink" title="9.3 评分的数据宽度"></a>9.3 评分的数据宽度</h3><p>$$<br>w_0 w_1 \le \left(\frac{N}{2}\right)^2 &#x3D; 1.27\times10^{8},<br>\qquad<br>(m_0 - m_1)^2 \le 255^2 &#x3D; 65025<br>$$</p>
+<p>二者乘积上限约 $8.3\times10^{12}$，超出 <code>uint32</code> 的 $4.29\times10^{9}$。因此评分使用 <code>uint64</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">score = (uint64)foreground_pixels * (uint64)background_pixels<br>      * (uint64)(mean_diff * mean_diff);<br></code></pre></td></tr></table></figure>
+
+<p>该路径仅含乘法，无除法，256 次循环的开销可忽略。</p>
+<h3 id="9-4-空类处理"><a href="#9-4-空类处理" class="headerlink" title="9.4 空类处理"></a>9.4 空类处理</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span>((foreground_pixels == <span class="hljs-number">0U</span>) || (background_pixels == <span class="hljs-number">0U</span>))<br>&#123;<br>    <span class="hljs-keyword">continue</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>空类的评分为零，跳过该候选与赋予零分等价，但可避免除零产生 NaN。</p>
+<h3 id="9-5-直方图存储位置"><a href="#9-5-直方图存储位置" class="headerlink" title="9.5 直方图存储位置"></a>9.5 直方图存储位置</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">static</span> uint32 otsu_histogram[<span class="hljs-number">256</span>];<br></code></pre></td></tr></table></figure>
+
+<p>若定义为函数局部数组，将占用 1 KB 栈空间。改为静态存储并置于</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> section all <span class="hljs-string">&quot;cpu0_dsram&quot;</span></span><br></code></pre></td></tr></table></figure>
+
+<p>所在的 CPU0 DSRAM 段，可减少栈压力并改善访问效率。</p>
+<h2 id="十、摄像头接口"><a href="#十、摄像头接口" class="headerlink" title="十、摄像头接口"></a>十、摄像头接口</h2><p>Otsu 算法只依赖一块连续的内存缓冲区，与硬件无关。图像采集由逐飞 MT9V03X 驱动完成，主要参数定义于 <code>zf_device_mt9v03x.h</code>：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>取值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分辨率</td>
+<td>188 × 120 灰度</td>
+</tr>
+<tr>
+<td>图像缓冲区</td>
+<td><code>mt9v03x_image[120][188]</code></td>
+</tr>
+<tr>
+<td>采集完成标志</td>
+<td><code>mt9v03x_finish_flag</code></td>
+</tr>
+<tr>
+<td>VSYNC</td>
+<td>P02.0（ERU_CH3_REQ6）</td>
+</tr>
+<tr>
+<td>PCLK</td>
+<td>P02.1（ERU_CH2_REQ14）</td>
+</tr>
+<tr>
+<td>数据总线</td>
+<td>P00.0 ~ P00.7</td>
+</tr>
+<tr>
+<td>配置总线</td>
+<td>P02.3 &#x2F; P02.2</td>
+</tr>
+<tr>
+<td>DMA 通道</td>
+<td>IfxDma_ChannelId_5</td>
+</tr>
+<tr>
+<td>默认帧率</td>
+<td>50 fps</td>
+</tr>
+<tr>
+<td>默认曝光时间</td>
+<td>512</td>
+</tr>
+<tr>
+<td>默认增益</td>
+<td>32</td>
+</tr>
+</tbody></table>
+<p>上述引脚与电机（P02.4~P02.7）、编码器（P10.x、P20.x）、按键（P20.6、P20.7、P11.2、P11.3）及舵机（P33.9）均无复用冲突。</p>
+<p>采集相关中断已在 <code>user/isr.c</code> 中转发至驱动回调，应用层无需直接处理：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">EXTI CH3 (P02.0)  -&gt; camera_vsync_handler()   帧同步<br>DMA  CH5          -&gt; camera_dma_handler()     行数据搬运<br>UART1             -&gt; camera_uart_handler()    配置通信<br></code></pre></td></tr></table></figure>
+
+<h3 id="10-1-模块封装"><a href="#10-1-模块封装" class="headerlink" title="10.1 模块封装"></a>10.1 模块封装</h3><p><code>code/camera.c</code> 提供以下接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c">uint8  <span class="hljs-title function_">camera_otsu_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;          <span class="hljs-comment">/* 成功返回 0 */</span><br><span class="hljs-type">void</span>   <span class="hljs-title function_">camera_otsu_task</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;          <span class="hljs-comment">/* 主循环调用 */</span><br>uint8  <span class="hljs-title function_">camera_otsu_get_threshold</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br>uint32 <span class="hljs-title function_">camera_otsu_get_frame_count</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>任务函数的处理逻辑为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span>((camera_ready == <span class="hljs-number">0U</span>) || (mt9v03x_finish_flag == <span class="hljs-number">0U</span>)) <span class="hljs-keyword">return</span>;<br><br>camera_threshold = otsu_calculate_threshold(&amp;mt9v03x_image[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>],<br>                                            MT9V03X_W, MT9V03X_H);<br>camera_frame_count++;<br>mt9v03x_finish_flag = <span class="hljs-number">0U</span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="10-2-命名冲突"><a href="#10-2-命名冲突" class="headerlink" title="10.2 命名冲突"></a>10.2 命名冲突</h3><p>初始版本的初始化函数命名为 <code>camera_init()</code>，编译报错：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">E288: &quot;camera_init&quot; redeclared with a different prototype<br>  previous declaration of &quot;camera_init&quot; (zf_device_camera.h:55)<br></code></pre></td></tr></table></figure>
+
+<p>原因是 <code>zf_device_camera.h</code> 已声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">uint8 <span class="hljs-title function_">camera_init</span><span class="hljs-params">(uint8 *source_addr, uint8 *destination_addr, uint32 image_size)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>该函数用于串口图传的解压初始化，与本模块同名但参数不同。因此引用第三方库时，自定义模块的公开函数不宜采用 <code>xxx_init</code> 这类通用命名。改名为 <code>camera_otsu_init()</code> 后冲突消除，语义也更明确。</p>
+<h3 id="10-3-图像数据的访问封装"><a href="#10-3-图像数据的访问封装" class="headerlink" title="10.3 图像数据的访问封装"></a>10.3 图像数据的访问封装</h3><p>应用层不应直接引用驱动导出的全局数组 <code>mt9v03x_image[H][W]</code>。摄像头模块另外导出三个访问函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">const</span> uint8 *<span class="hljs-title function_">camera_otsu_get_image</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;   <span class="hljs-comment">/* 最新一帧灰度缓冲区，行优先 */</span><br>uint16       <span class="hljs-title function_">camera_otsu_get_width</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br>uint16       <span class="hljs-title function_">camera_otsu_get_height</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>显示与后续的边线提取都只依赖这三个接口，而不依赖具体驱动的符号名。更换摄像头型号、引入 ROI 裁剪或增加双缓冲时，只需修改 <code>camera.c</code> 一处。对单一实现而言，这是一层看似多余的间接，但在需要临时替换驱动做对比实验时，可以省掉分散在各处的引用修改。</p>
+<h2 id="十一、图像预览与方向约束"><a href="#十一、图像预览与方向约束" class="headerlink" title="十一、图像预览与方向约束"></a>十一、图像预览与方向约束</h2><p>调试阶段把图像直接绘制到 TFT，比只看一个阈值数字更容易判断问题出在曝光、接线还是阈值本身。库函数 <code>tft180_show_gray_image()</code> 同时支持两种输出：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">tft180_show_gray_image</span><span class="hljs-params">(uint16 x, uint16 y, <span class="hljs-type">const</span> uint8 *image,</span><br><span class="hljs-params">                            uint16 width, uint16 height,</span><br><span class="hljs-params">                            uint16 dis_width, uint16 dis_height,</span><br><span class="hljs-params">                            uint8 threshold)</span>;<br></code></pre></td></tr></table></figure>
+
+<p><code>threshold</code> 传 0 时按原始灰度显示，传非零值时按该阈值二值化。因此二值预览不需要额外的二值缓冲区，直接复用 Otsu 的结果作为最后一个参数即可。</p>
+<h3 id="11-1-方向设置必须早于初始化"><a href="#11-1-方向设置必须早于初始化" class="headerlink" title="11.1 方向设置必须早于初始化"></a>11.1 方向设置必须早于初始化</h3><p><code>tft180_init()</code> 内部依次执行两步与方向相关的操作：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c">tft180_set_dir(tft180_display_dir);         <span class="hljs-comment">/* 依据方向刷新 width/height 上限 */</span><br><br>tft180_write_index(<span class="hljs-number">0x36</span>);                   <span class="hljs-comment">/* MADCTL，写入扫描方向 */</span><br><span class="hljs-keyword">switch</span>(tft180_display_dir)<br>&#123;<br>    <span class="hljs-keyword">case</span> TFT180_PORTAIT:        tft180_write_8bit_data(<span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">7</span> | <span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">6</span> | <span class="hljs-number">0</span>&lt;&lt;<span class="hljs-number">5</span>);  <span class="hljs-keyword">break</span>;<br>    <span class="hljs-keyword">case</span> TFT180_CROSSWISE:      tft180_write_8bit_data(<span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">7</span> | <span class="hljs-number">0</span>&lt;&lt;<span class="hljs-number">6</span> | <span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">5</span>);  <span class="hljs-keyword">break</span>;<br>    <span class="hljs-comment">/* ... */</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>即 0x36 寄存器（MADCTL）的取值是在初始化过程中、按当时的方向变量写入的。若先 <code>tft180_init()</code> 再 <code>tft180_set_dir(TFT180_CROSSWISE)</code>，全局的 <code>tft180_width_max</code> &#x2F; <code>tft180_height_max</code> 会变为 160 &#x2F; 128，但硬件扫描方向仍停留在初始化时的取值，坐标范围与实际显示不再对应。</p>
+<p>正确的调用顺序：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">tft180_set_dir(TFT180_CROSSWISE);<br>tft180_init();<br></code></pre></td></tr></table></figure>
+
+<p>默认方向为 <code>TFT180_PORTAIT</code>，可用区域 128 × 160；改为 <code>TFT180_CROSSWISE</code> 后为 160 × 128。缩放后的显示尺寸必须按调整后的上限计算，否则 <code>tft180_set_region()</code> 的坐标断言会失败。188 × 120 的原始帧在两个方向下分别可缩放到 128 × 80 与 160 × 102。</p>
+<h2 id="十二、执行位置的选择"><a href="#十二、执行位置的选择" class="headerlink" title="十二、执行位置的选择"></a>十二、执行位置的选择</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">app_task</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    ...<br>    camera_otsu_task();<br>    app_update_camera_display();<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Otsu 计算需遍历 22560 个像素。若置于 VSYNC 中断中执行，将显著延长关中断时间，可能影响 1 ms 定时器内的电机斜坡更新与编码器采样。置于主循环则仅降低处理帧率，不改变控制环的时序特性。</p>
+<p>调试阶段的显示策略见第十一节：整屏绘制灰度或二值图像，阈值本身不再单独显示文字。</p>
+<h2 id="十三、验证方法"><a href="#十三、验证方法" class="headerlink" title="十三、验证方法"></a>十三、验证方法</h2><p>烧录后首先确认串口输出 <code>CAM OK</code>（失败为 <code>CAM ERR</code>）。随后按以下条件检查阈值响应：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>预期现象</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>遮挡镜头</td>
+<td>阈值明显下降（直方图整体左移）</td>
+</tr>
+<tr>
+<td>对准白墙</td>
+<td>阈值上升</td>
+</tr>
+<tr>
+<td>对准赛道</td>
+<td>阈值稳定于某一区间，抖动超过十余个灰度级说明曝光不稳定</td>
+</tr>
+<tr>
+<td>快速改变照度</td>
+<td>阈值在一至两帧内跟随更新</td>
+</tr>
+</tbody></table>
+<p>阈值长期停留在 0，通常对应三种成因：图像接近全黑（曝光、增益或接线异常）；画面完全均匀，此时任何候选阈值都会使其中一类为空，按第 9.4 节的跳过逻辑函数返回初值 0；评分使用 32 位整数导致溢出，或除零未处理使最大值始终未被更新。在本实现下 255 不可达，因为 $t &#x3D; 255$ 时背景类必然为空。</p>
+<h2 id="十四、适用条件与局限"><a href="#十四、适用条件与局限" class="headerlink" title="十四、适用条件与局限"></a>十四、适用条件与局限</h2><p>Otsu 法包含两个隐含假设。</p>
+<p>其一，直方图近似双峰分布。当画面存在第三种主导亮度时（大面积反光、阴影、彩色干扰物），直方图呈三峰，方法会将其中两类合并，导致阈值偏移。</p>
+<p>其二，全局光照均匀。方法为整幅图像计算单一阈值。车载摄像头斜向下安装时，近端与远端成像亮度存在系统性差异，同一地面在不同图像行的灰度不同，行位置越高偏差越大。</p>
+<p>常见改进均不改变 Otsu 判据本身，而是在其外围增加约束：</p>
+<ul>
+<li><strong>分区阈值</strong>：将图像按行划分为若干区域分别计算，得到随行变化的阈值；</li>
+<li><strong>限定 ROI</strong>：仅在赛道可能出现区域内统计，排除天空与远端干扰；</li>
+<li><strong>限定搜索范围</strong>：在上一帧阈值附近（如 $\pm 40$）搜索，兼顾稳定性与计算量；</li>
+<li><strong>双峰性检验</strong>：当 $\sigma_b^2$ 低于阈值时沿用上一帧结果，避免在无区分度的画面上产生跳变。</li>
+</ul>
+<p>在实际车辆上，单一全局阈值通常不足以覆盖全部工况，需与前几行单独处理或分区策略配合使用。该部分尚未实现，完成后另行记录。</p>
+<h2 id="十五、结论"><a href="#十五、结论" class="headerlink" title="十五、结论"></a>十五、结论</h2><p>Otsu 阈值的完整表述为</p>
+<p>$$<br>t^{*} &#x3D; \arg\max_{0 \le t \le 255} ; w_0(t), w_1(t), \bigl(m_0(t) - m_1(t)\bigr)^2<br>$$</p>
+<p>该判据成立的原因是图像总方差为常数，最大化类间方差与最小化类内方差等价。其对光照变化的适应性来源于仅依赖直方图的相对形状，而不依赖灰度绝对值。</p>
+<p>工程实现中有三点需要注意：</p>
+<ol>
+<li>使用递推累加，避免对每个候选阈值重复遍历直方图；</li>
+<li>使用整数运算与 <code>uint64</code> 评分，同时规避溢出与除零；</li>
+<li>计算放在主循环，避免延长控制中断的执行时间。</li>
+</ol>
+<p>阈值本身只是中间结果，后续仍需完成二值化、边线扫描、中线拟合与偏差计算。Otsu 法的作用是使该链路在光照条件变化下保持可用。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Smart-Car/" class="print-no-link">#Smart Car</a>
+      
+        <a href="/tags/Embedded-Systems/" class="print-no-link">#Embedded Systems</a>
+      
+        <a href="/tags/TC264/" class="print-no-link">#TC264</a>
+      
+        <a href="/tags/Camera/" class="print-no-link">#Camera</a>
+      
+        <a href="/tags/Image-Processing/" class="print-no-link">#Image Processing</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Otsu 大津法：自适应灰度阈值的推导与嵌入式实现</div>
+      <div>https://limpidslirm.github.io/TC264-Car-Otsu-Threshold/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>LimpidSlirm</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 16, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/Engineering-Practice-Hardware-Basics/" title="单片机硬件入门：从引脚电流到安全用电">
+                        <span class="hidden-mobile">单片机硬件入门：从引脚电流到安全用电</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://www.xmu.edu.cn/" target="_blank" rel="nofollow noopener"><span>Xiamen University</span></a> <span> · </span> <span>© 2026 LimpidSlirm</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

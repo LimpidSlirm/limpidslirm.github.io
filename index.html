@@ -324,6 +324,54 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
+        <a href="/TC264-Car-Otsu-Threshold/" target="_self">
+          Otsu 大津法：自适应灰度阈值的推导与嵌入式实现
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/TC264-Car-Otsu-Threshold/" target="_self">
+        <div>
+          摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。 一、固定阈值
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-16 15:30" pubdate>
+              2026-11-16
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Smart-Car/">#Smart Car</a>
+            
+              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
+            
+              <a href="/tags/TC264/">#TC264</a>
+            
+              <a href="/tags/Camera/">#Camera</a>
+            
+              <a href="/tags/Image-Processing/">#Image Processing</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
         <a href="/Engineering-Practice-Hardware-Basics/" target="_self">
           单片机硬件入门：从引脚电流到安全用电
         </a>
@@ -755,58 +803,6 @@
               <a href="/tags/Desktop-App/">#Desktop App</a>
             
               <a href="/tags/Hardware/">#Hardware</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/TC264-Car-Headless-Build/" target="_self">
-          <img src="/img/20261026.png" srcset="/img/loading.gif" lazyload alt="智能车的 Headless Build">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/TC264-Car-Headless-Build/" target="_self">
-          智能车的 Headless Build
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt " href="/TC264-Car-Headless-Build/" target="_self">
-        <div>
-          2026-10-26 智能车选修课笔记。 1. 问题背景在传统的 AURIX Development Studio（简称 ADS）开发流程中，通常需要：  打开 ADS； 导入工程； 点击 Build 编译； 点击 Debug 或 Download； 通过调试器把程序下载到 TC264； 点击运行。  这种方式直观，但每次编译和烧录都依赖图形界面。对于自动化构建、批量编译，就需要把整个过程拆成两个
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-10-26 15:18" pubdate>
-              2026-10-26
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Smart-Car/">#Smart Car</a>
-            
-              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
-            
-              <a href="/tags/TC264/">#TC264</a>
-            
-              <a href="/tags/Headless-Build/">#Headless Build</a>
             
           </div>
         
