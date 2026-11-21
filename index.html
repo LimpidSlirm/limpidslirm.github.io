@@ -324,6 +324,58 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
+        <a href="/Jetson-Nano-Headless-Troubleshooting/" target="_self">
+          Jetson Nano 无外设启动排障记录
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/Jetson-Nano-Headless-Troubleshooting/" target="_self">
+        <div>
+          这台 Jetson Nano 的载板上 4 个 USB 3.0 Type-A 口全都不工作，键盘鼠标插上去没有任何反应，显示器也接不了，整台机器只能靠 SSH 操作。麻烦的地方在于系统里还没有可登录的账户，等于连 SSH 都进不去。 下面按实际处理顺序记录，并在每一步补上对应的原理，说明结论是怎么来的、以及能推到哪一步为止。
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-21 03:20" pubdate>
+              2026-11-21
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Embedded-Systems/">#Embedded Systems</a>
+            
+              <a href="/tags/Jetson-Nano/">#Jetson Nano</a>
+            
+              <a href="/tags/Robotics/">#Robotics</a>
+            
+              <a href="/tags/Linux/">#Linux</a>
+            
+              <a href="/tags/Networking/">#Networking</a>
+            
+              <a href="/tags/USB/">#USB</a>
+            
+              <a href="/tags/Power-Diagnosis/">#Power Diagnosis</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
         <a href="/TC264-Car-Otsu-Threshold/" target="_self">
           Otsu 大津法：自适应灰度阈值的推导
         </a>
@@ -332,7 +384,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/TC264-Car-Otsu-Threshold/" target="_self">
         <div>
-          摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。 一、固定阈值
+          20261116智能车选修课笔记。 摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配
         </div>
       </a>
 
@@ -751,58 +803,6 @@
               <a href="/tags/Startup/">#Startup</a>
             
               <a href="/tags/Usability/">#Usability</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/Hardware-Viewer/" target="_self">
-          Hardware-Viewer
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/Hardware-Viewer/" target="_self">
-        <div>
-          开发一个可以看硬件实时电量的 app。 仓库地址为 https://github.com/LimpidSlirm/2.4G-Hardware-Viewer 以下为 agent 输出的日志。 面向已连接的音频、键盘与鼠标设备的 Windows 硬件状态查看器。  Windows hardware status viewer for connected audio, keyboard, and mou
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-10-30 18:00" pubdate>
-              2026-10-30
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Windows/">#Windows</a>
-            
-              <a href="/tags/Hardware-Viewer/">#Hardware Viewer</a>
-            
-              <a href="/tags/Dev-Log/">#Dev Log</a>
-            
-              <a href="/tags/Python/">#Python</a>
-            
-              <a href="/tags/Reverse-Engineering/">#Reverse Engineering</a>
-            
-              <a href="/tags/Desktop-App/">#Desktop App</a>
-            
-              <a href="/tags/Hardware/">#Hardware</a>
             
           </div>
         

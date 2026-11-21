@@ -1,0 +1,953 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.png">
+  <link rel="icon" href="/img/icon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="LimpidSlirm">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="这台 Jetson Nano 的载板上 4 个 USB 3.0 Type-A 口全都不工作，键盘鼠标插上去没有任何反应，显示器也接不了，整台机器只能靠 SSH 操作。麻烦的地方在于系统里还没有可登录的账户，等于连 SSH 都进不去。 下面按实际处理顺序记录，并在每一步补上对应的原理，说明结论是怎么来的、以及能推到哪一步为止。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jetson Nano 无外设启动排障记录">
+<meta property="og:url" content="https://limpidslirm.github.io/Jetson-Nano-Headless-Troubleshooting/index.html">
+<meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
+<meta property="og:description" content="这台 Jetson Nano 的载板上 4 个 USB 3.0 Type-A 口全都不工作，键盘鼠标插上去没有任何反应，显示器也接不了，整台机器只能靠 SSH 操作。麻烦的地方在于系统里还没有可登录的账户，等于连 SSH 都进不去。 下面按实际处理顺序记录，并在每一步补上对应的原理，说明结论是怎么来的、以及能推到哪一步为止。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-11-20T19:20:00.000Z">
+<meta property="article:modified_time" content="2026-11-21T05:40:22.835Z">
+<meta property="article:author" content="LimpidSlirm">
+<meta property="article:tag" content="Embedded Systems">
+<meta property="article:tag" content="Jetson Nano">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Networking">
+<meta property="article:tag" content="Power Diagnosis">
+<meta property="article:tag" content="Robotics">
+<meta property="article:tag" content="USB">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Jetson Nano 无外设启动排障记录 - LimpidSlirm&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"limpidslirm.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Limpid&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/Study-Notes/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Study Notes</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/Introduction/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>Home</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>Archives</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/Study-Notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>Study Notes</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/Introduction/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>About</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>Search</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="Light"
+               data-label-dark="Dark">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">Dark</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true data-random-banner='/img/random/background-01.png,/img/random/background-02.png,/img/random/background-03.png,/img/random/background-04.png,/img/random/background-05.png,/img/random/background-06.png'
+     style="background: url('/img/random/background-01.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Jetson Nano 无外设启动排障记录"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-21 03:20" pubdate>
+          November 21, 2026 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          31 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    (function() {
+      var banner = document.getElementById('banner');
+      if (!banner) return;
+      var list = banner.getAttribute('data-random-banner');
+      if (!list) return;
+      list = list.split(',').filter(Boolean);
+      if (list.length === 0) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      banner.style.backgroundImage = "url('" + pick + "')";
+    })();
+  </script>
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Jetson Nano 无外设启动排障记录</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>这台 Jetson Nano 的载板上 4 个 USB 3.0 Type-A 口全都不工作，键盘鼠标插上去没有任何反应，显示器也接不了，整台机器只能靠 SSH 操作。麻烦的地方在于系统里还没有可登录的账户，等于连 SSH 都进不去。</p>
+<p>下面按实际处理顺序记录，并在每一步补上对应的原理，说明结论是怎么来的、以及能推到哪一步为止。</p>
+<span id="more"></span>
+
+<h2 id="一、故障链"><a href="#一、故障链" class="headerlink" title="一、故障链"></a>一、故障链</h2><ol>
+<li>没有可用的本地输入输出，也没有可登录账户，进不了系统；</li>
+<li>有线和无线的地址落在同一网段，无线连不上；</li>
+<li>载板上的 USB Hub 不枚举，4 个口等于不存在；</li>
+<li>拔掉 DC 适配器整机断电，电池这一路没顶上。</li>
+</ol>
+<h2 id="二、进不去系统：登录时到底在比对什么"><a href="#二、进不去系统：登录时到底在比对什么" class="headerlink" title="二、进不去系统：登录时到底在比对什么"></a>二、进不去系统：登录时到底在比对什么</h2><p>新烧的镜像第一次上电会进 <code>oem-config</code>，要求用键盘鼠标和显示器建用户、设密码。USB 口坏了，这一步就卡死。</p>
+<p>没有用户就没有密码，<code>sshd</code> 也不允许空密码或未设置密码的账户登录。本地通道和远程通道同时断掉。</p>
+<h3 id="2-1-原理：-etc-shadow-与-crypt-3"><a href="#2-1-原理：-etc-shadow-与-crypt-3" class="headerlink" title="2.1 原理：/etc/shadow 与 crypt(3)"></a>2.1 原理：<code>/etc/shadow</code> 与 <code>crypt(3)</code></h3><p><code>/etc/passwd</code> 里密码字段只是一个占位的 <code>x</code>，真正的哈希存在 <code>/etc/shadow</code>。该文件权限是 <code>0640</code>、属组为 <code>shadow</code>，普通用户读不到，目的是不让拿到口令文件的人离线爆破。</p>
+<p>登录时，无论走 <code>login</code> 还是 <code>sshd</code>，实际都由 PAM 栈处理，最终落到 <code>pam_unix</code>：</p>
+<ol>
+<li>从 <code>/etc/shadow</code> 取出该用户的密码字段；</li>
+<li>字段格式是 <code>$id$salt$hash</code>，<code>id</code> 指明算法（<code>6</code> 表示 SHA-512），<code>salt</code> 是随机盐；</li>
+<li>用存下来的盐，对刚输入的密码做同样的 <code>crypt(3)</code> 运算；</li>
+<li>运算结果与存储的 <code>hash</code> 比较，相等才放行。</li>
+</ol>
+<p>盐的作用是让相同密码得到不同哈希，使预计算表失效；哈希本身单向，只能正向计算，不能反推明文。</p>
+<p>如果把这个字段直接写成明文，<code>pam_unix</code> 拿到的不是合法的 <code>crypt(3)</code> 串，第 2 步就解析失败，认证会被拒绝。所以挂载后改文件必须写哈希，写密码本身是没用的。</p>
+<h3 id="2-2-操作"><a href="#2-2-操作" class="headerlink" title="2.2 操作"></a>2.2 操作</h3><p>Windows 读不了这个分区：内核没有 ext4 驱动，也不做日志回放，所以只能挂到 Linux 下操作。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 生成带随机盐的 $6$ 哈希</span><br>openssl passwd -6 <span class="hljs-string">&#x27;123456&#x27;</span><br><br><span class="hljs-built_in">sudo</span> mount /dev/sdb1 /mnt<br><span class="hljs-built_in">sudo</span> vim /mnt/etc/shadow     <span class="hljs-comment"># 只改目标用户那一行的第二字段</span><br><span class="hljs-built_in">sudo</span> umount /mnt<br></code></pre></td></tr></table></figure>
+
+<p><code>-6</code> 指定 SHA-512。同样密码每次输出不同，是因为盐随机，属正常现象。</p>
+<p>插回卡、上电、网线直连，SSH 可以登入了。</p>
+<p>这个办法等于绕过本地认证，前提是设备在自己手上且能物理接触存储卡。持有这张卡的人同样可以做这件事，所以进去之后要立刻改掉密码。</p>
+<h2 id="三、无线连不上：同一子网上的两条直连路由"><a href="#三、无线连不上：同一子网上的两条直连路由" class="headerlink" title="三、无线连不上：同一子网上的两条直连路由"></a>三、无线连不上：同一子网上的两条直连路由</h2><p>拿到 shell 后想摆脱网线，让 Nano 连电脑开的热点。降到 2.4 GHz 也连不上，或者反复超时。</p>
+<h3 id="3-1-原理：地址、直连路由与源地址选择"><a href="#3-1-原理：地址、直连路由与源地址选择" class="headerlink" title="3.1 原理：地址、直连路由与源地址选择"></a>3.1 原理：地址、直连路由与源地址选择</h3><p>网卡从 DHCP 拿到地址后，内核会为它所在的子网装一条 <code>scope link</code> 的直连路由：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">192.168.137.0/24 dev eth0 proto kernel scope link src 192.168.137.2<br></code></pre></td></tr></table></figure>
+
+<p>这条路由的含义是：目标在这个 &#x2F;24 里，就直接从 <code>eth0</code> 发 ARP 找对方，不需要经过网关。</p>
+<p>Windows 移动热点和网络共享（ICS）默认使用 <code>192.168.137.0/24</code>。网线插着时 <code>eth0</code> 已经占了这个网段；此时 <code>wlan0</code> 再去连同一个 <code>192.168.137.0/24</code> 的热点，内核里就会出现两条前缀长度相同的路由。</p>
+<p>选路规则是最长前缀匹配优先，前缀长度相同时比 metric，metric 也相同时按接口顺序决定。两条 &#x2F;24 完全等价，出口就变得不确定。加上源地址是跟随出口接口选的（从哪个口发就带哪个口的 IP），去程和回程可能落在不同接口上，对端看到的源地址不对，SYN-ACK 回不来。</p>
+<p>这里有个容易混淆的点：802.11 关联和 WPA 四次握手属于二层行为，不依赖 IP 路由，本身不受影响。真正出问题的是关联之后的 DHCP 获取和 IP 层通信，表现出来的现象就是“连上了但没网”，或者反复超时重连。</p>
+<p>可以这样确认出口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">ip -4 addr<br>ip route<br>ip route get 192.168.137.1<br></code></pre></td></tr></table></figure>
+
+<p>如果 <code>ip route get</code> 显示报文从 <code>eth0</code> 出去，而目标其实在热点那一侧，问题就定位了。</p>
+<h3 id="3-2-处理"><a href="#3-2-处理" class="headerlink" title="3.2 处理"></a>3.2 处理</h3><p>让无线走一个和 <code>eth0</code> 不重叠的子网。</p>
+<p><code>wlan0</code> 连上手机热点、拿到不属于 <code>192.168.137.0/24</code> 的地址后，两条路由不再冲突，再拔掉网线，链路稳定。</p>
+<p>顺带记一笔：切换网卡的过程中 OLED（挂在 <code>I2C-1</code>，地址 <code>0x3c</code>）熄灭过一次，<code>systemctl restart jetbot_stats</code> 之后恢复。这是显示守护进程的问题，和网络无关。</p>
+<h2 id="四、USB-Hub-不枚举"><a href="#四、USB-Hub-不枚举" class="headerlink" title="四、USB Hub 不枚举"></a>四、USB Hub 不枚举</h2><h3 id="4-1-原理：一次枚举做了什么"><a href="#4-1-原理：一次枚举做了什么" class="headerlink" title="4.1 原理：一次枚举做了什么"></a>4.1 原理：一次枚举做了什么</h3><p>USB 是主机主导的总线，设备不会自己“出现”，必须由主机完成枚举：</p>
+<ol>
+<li>主机给端口上电（VBUS 5 V），设备把 D+（全速&#x2F;高速）或 D-（低速）上拉，主机检测到电平变化，判定有设备接入；</li>
+<li>主机复位端口，设备在默认地址 0 上响应；</li>
+<li>主机通过默认控制端点读 8 字节设备描述符，取得端点 0 的最大包长；</li>
+<li>主机分配唯一地址（SET_ADDRESS），此后设备只响应该地址；</li>
+<li>读完整设备描述符和配置描述符，下发 SET_CONFIGURATION，设备进入可用状态。</li>
+</ol>
+<p>Hub 本身也是 USB 设备。它必须先自己枚举成功，主机才会通过它去枚举下游端口。所以 Hub 不在拓扑里，下面 4 个口对系统来说就不存在，无论接什么设备都不会有反应。</p>
+<h3 id="4-2-判读"><a href="#4-2-判读" class="headerlink" title="4.2 判读"></a>4.2 判读</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">lsusb -t<br></code></pre></td></tr></table></figure>
+
+<p><code>lsusb -t</code> 读的是内核在 <code>/sys/bus/usb/devices</code> 下维护的设备树。这里能看到 <code>tegra-xusb</code> 根集线器和 M.2 上的 <code>btusb</code> 蓝牙模块，但载板上扩展 4 个 Type-A 口的那个 Hub 没有出现。</p>
+<p>由此只能确认这个 Hub 没有枚举成功。可能的原因有三类：</p>
+<ul>
+<li>Hub 的供电缺失（VBUS 没到，或板上稳压没输出）；</li>
+<li>上行链路有问题（D+&#x2F;D- 断线、阻抗异常、连接器虚焊）；</li>
+<li>Hub 芯片本身损坏。</li>
+</ul>
+<p>仅凭 <code>lsusb -t</code> 分不出是哪一类。要区分，要么量 Hub 的 VBUS 和上游差分对，要么看 <code>dmesg</code> 里的枚举错误码（设备描述符读取失败通常指向链路或供电，完全没有出现连接事件则更可能是供电缺失），最省事的办法是换一块载板交叉验证。实际处理是换载板。</p>
+<h2 id="五、拔掉适配器就断电"><a href="#五、拔掉适配器就断电" class="headerlink" title="五、拔掉适配器就断电"></a>五、拔掉适配器就断电</h2><p>移动测试时发现，只要拔掉 DC 适配器，整机立刻断电，风扇也停。</p>
+<h3 id="5-1-原理：降压级怎么工作"><a href="#5-1-原理：降压级怎么工作" class="headerlink" title="5.1 原理：降压级怎么工作"></a>5.1 原理：降压级怎么工作</h3><p>电池包输出 12 V，板上的电池扩展板要把它变成 5 V。这类电路通常是同步 Buck：上下两个开关管按占空比 D 斩波，经电感和电容滤波后得到输出。理想情况下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Vout = D × Vin<br></code></pre></td></tr></table></figure>
+
+<p>实际还要减去导通损耗和开关损耗。输出电压通过反馈网络回到控制器，控制器据此调整 D 来稳压。</p>
+<p>所以 5 V 输出为 0 V，机理不止一种：</p>
+<ul>
+<li>输入没有真正到达功率级：接插件接触不良、保险丝、防反接 MOSFET 开路；</li>
+<li>使能条件不满足：EN 引脚电平不对，或欠压锁定（UVLO）判定输入不合格；</li>
+<li>控制器或功率管损坏，根本没有开关动作；</li>
+<li>保护电路动作（过流、过温）后关断输出。</li>
+</ul>
+<p>单点测输出只能确定这一级没工作，区分不了上面四条。</p>
+<p>另外，插着适配器时 5 V 正常，说明适配器那条路是通的。两条输入并联在同一 5 V 母线上，靠 OR-ing 电路（二极管或理想二极管）决定由谁来供。“插着正常、拔了就断”意味着电池这一路没能接管，问题被限制在电池输入到 5 V 母线之间。</p>
+<h3 id="5-2-测量"><a href="#5-2-测量" class="headerlink" title="5.2 测量"></a>5.2 测量</h3><p>先排除测量工具本身：确认万用表电池正常、量程和档位正确，然后分级量电压。</p>
+<table>
+<thead>
+<tr>
+<th>测量点</th>
+<th>插适配器</th>
+<th>拔适配器</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>电池包输出</td>
+<td>—</td>
+<td>12.0 V</td>
+</tr>
+<tr>
+<td>电池扩展板 5 V 输出</td>
+<td>5.0 V（旁路直通）</td>
+<td>0 V</td>
+</tr>
+</tbody></table>
+<p>需要说明的是，这里是空载测量。空载时若有分压支路或漏电流，读数可能偏高，结论要以带载复测为准；不过 0 V 这种结果不存在虚高的可能，判断方向是可靠的。</p>
+<h3 id="5-3-结论"><a href="#5-3-结论" class="headerlink" title="5.3 结论"></a>5.3 结论</h3><p>实测把范围压到了扩展板：12 V 输入有，5 V 输出没有，说明这块板的 12 V→5 V 变换级在电池供电时不工作。</p>
+<p>至于失效的是 Buck 主控、前级防反接 MOSFET，还是使能或保护逻辑，单看输出电压判断不出来，需要继续测功率级输入、EN 引脚电平和开关波形。</p>
+<p>换了一块同型号扩展板后，脱线状态下 5 V 输出恢复，Jetson 和外设能独立供电。换板后恢复只能说明故障位于这一级，不能反过来推定是哪个元件开路。</p>
+<h2 id="六、记录"><a href="#六、记录" class="headerlink" title="六、记录"></a>六、记录</h2><ol>
+<li>本地输入输出全断时，改 <code>/etc/shadow</code> 里的哈希是拿到 shell 最快的办法，前提是能物理接触存储卡；改成哈希之前要先想清楚，这等于给所有能碰到卡的人开了后门。</li>
+<li>多网卡连不上，先查子网是否重叠。子网重叠导致的不是“连不上 AP”，而是关联成功后拿不到可用地址、或者能拿到但回程走错接口，所以用 <code>ip route get</code> 看出口比看关联状态更有用。</li>
+<li><code>lsusb -t</code> 只反映枚举结果。设备不在树里，说明枚举失败，原因可能是供电、链路或芯片，不能直接下“芯片烧了”的结论。</li>
+<li>电源问题按节点量电压，把范围缩到某一级，再用换件验证。从“没输出”直接跳到某个元件开路，中间隔了好几种可能性。</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Embedded-Systems/" class="print-no-link">#Embedded Systems</a>
+      
+        <a href="/tags/Jetson-Nano/" class="print-no-link">#Jetson Nano</a>
+      
+        <a href="/tags/Robotics/" class="print-no-link">#Robotics</a>
+      
+        <a href="/tags/Linux/" class="print-no-link">#Linux</a>
+      
+        <a href="/tags/Networking/" class="print-no-link">#Networking</a>
+      
+        <a href="/tags/USB/" class="print-no-link">#USB</a>
+      
+        <a href="/tags/Power-Diagnosis/" class="print-no-link">#Power Diagnosis</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Jetson Nano 无外设启动排障记录</div>
+      <div>https://limpidslirm.github.io/Jetson-Nano-Headless-Troubleshooting/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>LimpidSlirm</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 21, 2026</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/TC264-Car-Otsu-Threshold/" title="Otsu 大津法：自适应灰度阈值的推导">
+                        <span class="hidden-mobile">Otsu 大津法：自适应灰度阈值的推导</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://www.xmu.edu.cn/" target="_blank" rel="nofollow noopener"><span>Xiamen University</span></a> <span> · </span> <span>© 2026 LimpidSlirm</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

@@ -19,15 +19,15 @@
   <meta name="author" content="LimpidSlirm">
   <meta name="keywords" content="">
   
-    <meta name="description" content="摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。 一、固定阈值">
+    <meta name="description" content="20261116智能车选修课笔记。 摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Otsu 大津法：自适应灰度阈值的推导">
 <meta property="og:url" content="https://limpidslirm.github.io/TC264-Car-Otsu-Threshold/index.html">
 <meta property="og:site_name" content="LimpidSlirm&#39;s Blog">
-<meta property="og:description" content="摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。 一、固定阈值">
+<meta property="og:description" content="20261116智能车选修课笔记。 摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。 Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-11-16T07:30:00.000Z">
-<meta property="article:modified_time" content="2026-11-16T07:42:57.585Z">
+<meta property="article:modified_time" content="2026-11-21T05:43:23.433Z">
 <meta property="article:author" content="LimpidSlirm">
 <meta property="article:tag" content="Camera">
 <meta property="article:tag" content="Embedded Systems">
@@ -319,7 +319,7 @@
         
         
         
-          66 mins
+          67 mins
         
       </span>
     
@@ -376,7 +376,8 @@
             
               <div class="markdown-body">
                 
-                <p>摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。</p>
+                <p>20261116智能车选修课笔记。</p>
+<p>摄像头循迹的第一步是二值化，而二值化的核心参数是分割阈值。固定阈值在光照条件改变时会失效：同一块赛道地面在日光灯与阴天下的灰度可相差数十个灰度级，自动曝光调整后差异更明显。因此阈值需要逐帧依据当前图像重新估计。</p>
 <p>Otsu 法（大津法）是这类自适应估计中最常用的方法之一。本文给出完整推导、判据性质的证明、在 TC264 上的整数实现要点，以及本工程中的接口、参数配置与显示侧的方向约束。</p>
 <h2 id="一、固定阈值的失效条件"><a href="#一、固定阈值的失效条件" class="headerlink" title="一、固定阈值的失效条件"></a>一、固定阈值的失效条件</h2><p>设赛道由浅色地面与深色引导线构成，某行像素灰度分布如下：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">地面  185 190 188 192 186 ...<br>引导线  35  40  38  36  42 ...<br></code></pre></td></tr></table></figure>
@@ -674,6 +675,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/Jetson-Nano-Headless-Troubleshooting/" title="Jetson Nano 无外设启动排障记录">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Jetson Nano 无外设启动排障记录</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
